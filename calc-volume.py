@@ -317,9 +317,9 @@ for i in range(len(df)):
   except:
     break
 
-calc-df = pd.DataFrame(data) 
+calc_df = pd.DataFrame(data)
 
-dfs = [df, calc-df]
+dfs = [df, calc_df]
 
 result = pd.concat(dfs, join='outer', axis=1)
 result.columns = ['FileName', 'X1', 'Y1', 'X2', 'Y2', 'Frame', 'FileNamecalc', 'X1calc', 'Y1calc', 'X2calc', 'Y2calc']
