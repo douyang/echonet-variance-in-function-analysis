@@ -105,13 +105,13 @@ def getTopAndBottomCoords(points):
   return (x1, y1, x2, y2)
 
 # Create the 20 equally spaced points
-def getWeightedAveragePoints(x1, y1, x2, y2):
+def getWeightedAveragePoints(x1, y1, x2, y2, number):
   weighted_avg = []
 
-  for n in range(1, 21, 1):
+  for n in range(1, (number+1), 1):
     try:
-      x_perpendicular = (((n*x1)+(21-n)*(x2))/21)
-      y_perpendicular = (((n*y1)+(21-n)*(y2))/21)
+      x_perpendicular = (((n*x1)+((number+1)-n)*(x2))/(number+1))
+      y_perpendicular = (((n*y1)+((number+1)-n)*(y2))/(number+1))
     except:
       x_perpendicular = "Can't calculate"
       y_perpendicular = "Can't calculate"
@@ -232,10 +232,10 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
     lowerInterceptAveragePoints, higherInterceptAveragePoints = "Can't calculate", "Can't calculate"
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
-def volumeCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints):
+def volumeCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints, number):
   try:
     distance = getDistance([x1, y1], [x2, y2])
-    parallelSeperationDistance = distance/21
+    parallelSeperationDistance = distance/(number+1)
 
     volume = 0
     for i in range(len(lowerInterceptAveragePoints)):
@@ -260,14 +260,14 @@ def createArrays(x, y, coordArr):
     xArr, yArr = "", ""
   return (xArr, yArr)
 
-def calculateVolume(path):
+def calculateVolume(path, number):
   points = obtainContourPoints(path)
   x1, y1, x2, y2 = getTopAndBottomCoords(points)
 
-  weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2)
+  weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
   lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, points)
   lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2)
-  volume = volumeCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+  volume = volumeCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints, number)
   x1Arr, y1Arr = createArrays(x1, y1, lowerInterceptAveragePoints)
   x2Arr, y2Arr = createArrays(x2, y2, lowerInterceptAveragePoints)
 
