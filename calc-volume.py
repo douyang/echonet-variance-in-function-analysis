@@ -2,6 +2,7 @@ import pandas as pd
 import cv2
 import numpy as np
 import math
+from functools import reduce
 import os
 
 # Gets all the contours for certain image
@@ -279,7 +280,6 @@ path = dataPath + "CSV/VolumeTracings.csv"
 df = pd.read_csv(path, low_memory=False)
 dropped_df = df.drop_duplicates(['FileName', 'Frame'], keep='first')
 
-x1Arr, y1Arr, x2Arr, y2Arr = [], [], [], []
 listOfVolumes = []
 
 #Calculate volume based on given video and frame
@@ -293,13 +293,36 @@ for i in range(len(dropped_df)):
   
   listOfVolumes.append([vidName, x1A, y1A, x2A, y2A, frameNumber, volume])
 
-  # except:
-  #   listOfVolumes.append([vidName, x1A, y1A, x2A, y2A, frameNumber, volume])
+new_df = pd.DataFrame(listOfVolumes)
 
-print(listOfVolumes[:100])
-# #Create and export dataframe to CSV
-# df['X1calc'] = x1Arr
-# df['Y1calc'] = y1Arr
-# df['X2calc'] = x2Arr
-# df['Y2calc'] = y2Arr
-# df.to_csv(dataPath + 'calc-filelist.csv')
+nameCol, x1A, y1A, x2A, y2A = [], [], [], [], []
+data = []
+for i in range(len(df)):
+  try:
+    fileN = new_df.iloc[i, 0]
+    x1s = new_df.iloc[i, 1]
+    y1s = new_df.iloc[i, 2]
+    x2s = new_df.iloc[i, 3]
+    y2s = new_df.iloc[i, 4]
+    
+
+    if type(i) is not str:
+      for k in range(len(x1s)):
+        data.append([fileN, x1s[k], y1s[k], x2s[k], y2s[k]])
+        # nameCol.append(fileN[k])
+        # x1A.append(x1s[k])
+        # y1A.append(y1s[k])
+        # x2A.append(x2s[k])
+        #y2A.append(y2s[k])
+  except:
+    break
+
+calc-df = pd.DataFrame(data) 
+
+dfs = [df, calc-df]
+
+result_1 = pd.concat(dfs, join='outer', axis=1)
+result_1.columns = ['FileName', 'X1', 'Y1', 'X2', 'Y2', 'Frame', 'FileNamecalc', 'X1calc', 'Y1calc', 'X2calc', 'Y2calc']
+
+#Create and export dataframe to CSV
+result_1.to_csv(dataPath + 'calculated-filelist.csv')
