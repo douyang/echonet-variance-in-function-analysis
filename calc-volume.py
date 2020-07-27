@@ -8,39 +8,42 @@ import os
 def obtainContourPoints(path):
 
   # read image
-  img = cv2.imread(path)
+  try:
+    img = cv2.imread(path)
 
-  # convert to hsv color space
-  hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-  kernel = np.ones((5,5),np.uint8)
+    # convert to hsv color space
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    kernel = np.ones((5,5),np.uint8)
 
-  # set lower and upper bounds on blue color
-  lower = (0,90,200)
-  upper = (150,255,255)
+    # set lower and upper bounds on blue color
+    lower = (0,90,200)
+    upper = (150,255,255)
 
-  # threshold and invert so hexagon is white on black background
-  thresh = cv2.inRange(hsv, lower, upper);
-  opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-  closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
-  erosion = cv2.erode(closing,kernel,iterations = 1)
-  dilation = cv2.dilate(erosion,kernel,iterations = 1)
-  # blur = cv2.GaussianBlur(closing,(5,5),0)
+    # threshold and invert so hexagon is white on black background
+    thresh = cv2.inRange(hsv, lower, upper);
+    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+    erosion = cv2.erode(closing,kernel,iterations = 1)
+    dilation = cv2.dilate(erosion,kernel,iterations = 1)
+    # blur = cv2.GaussianBlur(closing,(5,5),0)
 
-  # get contours
-  result = np.zeros_like(img)
-  contours = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-  contours = contours[0] if len(contours) == 2 else contours[1]
+    # get contours
+    result = np.zeros_like(img)
+    contours = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours = contours[0] if len(contours) == 2 else contours[1]
 
-  # Gets all contour points
-  points = []
-  for pt in contours:
-      for i in pt:
-        for coord in i:
-          points.append(coord)
-  
-  # Resets
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
+    # Gets all contour points
+    points = []
+    for pt in contours:
+        for i in pt:
+          for coord in i:
+            points.append(coord)
+    
+    # Resets
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+  except:
+    points = "Can't calculate"
 
   return points
 
@@ -293,7 +296,7 @@ for i in range(len(dropped_df)):
   # except:
   #   listOfVolumes.append([vidName, x1A, y1A, x2A, y2A, frameNumber, volume])
 
-listOfVolumes
+print(listOfVolumes[:100])
 # #Create and export dataframe to CSV
 # df['X1calc'] = x1Arr
 # df['Y1calc'] = y1Arr
