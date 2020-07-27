@@ -244,7 +244,7 @@ def volumeCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAvera
       diskVolume = math.pi * radius**2 * parallelSeperationDistance
       volume += diskVolume
   except:
-    volume = "Can't calculate"
+    volume = ""
   return volume
 
 def createArrays(x, y, coordArr):
@@ -257,7 +257,7 @@ def createArrays(x, y, coordArr):
       yArr.append(coordinate[1])
   
   except:
-    xArr, yArr = "Can't calculate", "Can't calculate"
+    xArr, yArr = "", ""
   return (xArr, yArr)
 
 def calculateVolume(path):
@@ -304,16 +304,12 @@ for i in range(len(df)):
     y1s = new_df.iloc[i, 2]
     x2s = new_df.iloc[i, 3]
     y2s = new_df.iloc[i, 4]
-    
+    frameN = new_df.iloc[i, 5]
 
     if type(i) is not str:
       for k in range(len(x1s)):
-        data.append([fileN, x1s[k], y1s[k], x2s[k], y2s[k]])
-        # nameCol.append(fileN[k])
-        # x1A.append(x1s[k])
-        # y1A.append(y1s[k])
-        # x2A.append(x2s[k])
-        #y2A.append(y2s[k])
+        data.append([int(frameN), fileN, int(x1s[k]), int(y1s[k]), int(x2s[k]), int(y2s[k])])
+        
   except:
     break
 
@@ -322,7 +318,7 @@ calc_df = pd.DataFrame(data)
 dfs = [df, calc_df]
 
 result = pd.concat(dfs, join='outer', axis=1)
-result.columns = ['FileName', 'X1', 'Y1', 'X2', 'Y2', 'Frame', 'FileNamecalc', 'X1calc', 'Y1calc', 'X2calc', 'Y2calc']
+result.columns = ['FileName', 'X1', 'Y1', 'X2', 'Y2', 'Frame', 'Framecalc', 'FileNamecalc', 'X1calc', 'Y1calc', 'X2calc', 'Y2calc']
 
 #Create and export dataframe to CSV
 result.to_csv(dataPath + 'calculated-filelist.csv')
