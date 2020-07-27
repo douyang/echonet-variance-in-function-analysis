@@ -321,8 +321,8 @@ calc-df = pd.DataFrame(data)
 
 dfs = [df, calc-df]
 
-result_1 = pd.concat(dfs, join='outer', axis=1)
-result_1.columns = ['FileName', 'X1', 'Y1', 'X2', 'Y2', 'Frame', 'FileNamecalc', 'X1calc', 'Y1calc', 'X2calc', 'Y2calc']
+result = pd.concat(dfs, join='outer', axis=1)
+result.columns = ['FileName', 'X1', 'Y1', 'X2', 'Y2', 'Frame', 'FileNamecalc', 'X1calc', 'Y1calc', 'X2calc', 'Y2calc']
 
 #Create and export dataframe to CSV
-result_1.to_csv(dataPath + 'calculated-filelist.csv')
+result.to_csv(dataPath + 'calculated-filelist.csv')
