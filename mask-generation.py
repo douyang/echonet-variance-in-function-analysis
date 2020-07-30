@@ -366,7 +366,6 @@ def calculateVolume(path, number):
 # Execute capture frame and crop
 contourCoords = []
 for i in range(len(frameData)):
-  try:
     vidName, frameNum = frameData[i][0], frameData[i][1] # vid name and frame number
     maskPath = dataPath + "mask/" + vidName + "/" + str(frameNum) + ".png"
 
@@ -383,5 +382,3 @@ for i in range(len(frameData)):
       cv2.line(image, tuple(startPoint),  tuple(endPoint), (255, 255, 255), 1)
     fileName = dataPath + "line/" + vidName + "/" + str(frameNum) + ".png"
     cv2.imwrite(fileName, image)
-  except:
-    break
