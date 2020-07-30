@@ -71,20 +71,21 @@ def getSpecificFrame(dataPath, vidName, frameNumber, outputPath):
     
 
 def makeMask(imagePath, outputPath, coordinatePairs):
-  image = cv2.imread(imagePath, -1)
+    if os.path.exists(imagePath):
+        image = cv2.imread(imagePath, -1)
 
-  mask = np.zeros(image.shape, dtype=np.uint8)
-  roi_corners = np.array([coordinatePairs], dtype=np.int32)
-  
-  channel_count = image.shape[2]  # i.e. 3 or 4 depending on your image
-  ignore_mask_color = (255,)*channel_count
-  cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+        mask = np.zeros(image.shape, dtype=np.uint8)
+        roi_corners = np.array([coordinatePairs], dtype=np.int32)
+        
+        channel_count = image.shape[2]  # i.e. 3 or 4 depending on your image
+        ignore_mask_color = (255,)*channel_count
+        cv2.fillPoly(mask, roi_corners, ignore_mask_color)
 
-  # apply the mask
-  masked_image = cv2.bitwise_and(image, mask)
-  
-  # save the result
-  cv2.imwrite(outputPath, masked_image)
+        # apply the mask
+        masked_image = cv2.bitwise_and(image, mask)
+        
+        # save the result
+        cv2.imwrite(outputPath, masked_image)
 
 # Execute capture frame and crop
 for i in range(len(frameData)):
