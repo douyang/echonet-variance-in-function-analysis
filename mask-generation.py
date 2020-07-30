@@ -16,53 +16,56 @@ df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index() #
 
 frameData, pts, rows = [], [], 0
 for i in range(len(df)):
-  pts.append([])
+    pts.append([])
 
-  fileName = df.iloc[rows, 0]
-  frameNumber = df.iloc[rows, 1]
-  coordx1 = literal_eval(df.iloc[i, 2])
-  coordy1 = literal_eval(df.iloc[i, 3])
-  coordx2 = literal_eval(df.iloc[i, 4])
-  coordy2 = literal_eval(df.iloc[i, 5])
+    fileName = df.iloc[rows, 0]
+    frameNumber = df.iloc[rows, 1]
+    coordx1 = literal_eval(df.iloc[i, 2])
+    coordy1 = literal_eval(df.iloc[i, 3])
+    coordx2 = literal_eval(df.iloc[i, 4])
+    coordy2 = literal_eval(df.iloc[i, 5])
 
-  frameData.append([fileName, int(frameNumber)])
-
-  for j in range(len(coordx1)):
-    pts[i].append([coordx1[j], coordy1[j]]) #appends coords 1
-    pts[i].append([coordx2[j], coordy2[j]]) #appends coords 2
+    frameData.append([fileName, int(frameNumber)])
     
-  rows = rows + 1
+    for j in range(len(coordx1)):
+        pts[i].append([coordx1[j], coordy1[j]]) #appends coords 1
+        pts[i].append([coordx2[j], coordy2[j]]) #appends coords 2
+    
+    rows = rows + 1
 
 arranged_pts = []
 
 for i in range(len(pts)):
-  center = tuple(map(operator.truediv, reduce(lambda x, y: map(operator.add, x, y), pts[i]), [len(pts[i])] * 2))
+    center = tuple(map(operator.truediv, reduce(lambda x, y: map(operator.add, x, y), pts[i]), [len(pts[i])] * 2))
   
-  arranged_pts.append(sorted(pts[i], key=lambda coord: (-135 - math.degrees(math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360))
+    arranged_pts.append(sorted(pts[i], key=lambda coord: (-135 - math.degrees(math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360))
 
 def makeDirectories(dataPath, vidName):
-  if os.path.isdir(dataPath + "frames/") is False:
-      os.mkdir(dataPath + "frames/")
-      os.mkdir(dataPath + "frames/" + vidName)
+    if os.path.isdir(dataPath + "frames/") is False:
+        os.mkdir(dataPath + "frames/")
+        os.mkdir(dataPath + "frames/" + vidName)
 
-  if os.path.isdir(dataPath + "mask/") is False:
-    os.mkdir(dataPath + "mask/")
-    os.mkdir(dataPath + "mask/" + vidName)
-    
-  if os.path.isdir(dataPath + "line/") is False:
-    os.mkdir(dataPath + "line/")
-    os.mkdir(dataPath + "line/" + vidName)
-
+    if os.path.isdir(dataPath + "mask/") is False:
+        os.mkdir(dataPath + "mask/")
+        os.mkdir(dataPath + "mask/" + vidName)
+        
+    if os.path.isdir(dataPath + "line/") is False:
+        os.mkdir(dataPath + "line/")
+        os.mkdir(dataPath + "line/" + vidName)
+        
+        
 def getSpecificFrame(dataPath, vidName, frameNumber, outputPath):
-    cap = cv2.VideoCapture(dataPath + "videos/" + vidName)
-    total_frames = cap.get(frameNumber)
+    try:
+        cap = cv2.VideoCapture(dataPath + "videos/" + vidName)
+        total_frames = cap.get(frameNumber)
 
-    cap.set(1, 100)
-    ret, frame = cap.read()
+        cap.set(1, 100)
+        ret, frame = cap.read()
 
-    makeDirectories(dataPath, vidName)
+        makeDirectories(dataPath, vidName)
 
-    cv2.imwrite(outputPath, frame)
+        cv2.imwrite(outputPath, frame)
+
 
 def makeMask(imagePath, outputPath, coordinatePairs):
   image = cv2.imread(imagePath, -1)
