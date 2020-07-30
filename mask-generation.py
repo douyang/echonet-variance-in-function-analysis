@@ -373,7 +373,7 @@ for i in range(len(frameData)):
     contourPoints = calculateVolume(maskPath, number)
     contourCoords.append([])
 
-    image = cv2.imread(path)
+    image = cv2.imread(maskPath)
 
     for j in range(len(contourPoints[1])):
       contourCoords[i].append([vidName, frameNum, [contourPoints[1][j], contourPoints[2][j]], [contourPoints[3][j], contourPoints[4][j]]])
