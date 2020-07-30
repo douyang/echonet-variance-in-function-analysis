@@ -351,34 +351,40 @@ def createArrays(x, y, coordArr):
   return (xArr, yArr)
 
 def calculateVolume(path, number):
-  points = obtainContourPoints(path)
-  x1, y1, x2, y2 = getTopAndBottomCoords(points)
+    points = obtainContourPoints(path)
+    x1, y1, x2, y2 = getTopAndBottomCoords(points)
 
-  weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
-  lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, points)
-  lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2)
-  volume = volumeCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints, number)
-  x1Arr, y1Arr = createArrays(x1, y1, lowerInterceptAveragePoints)
-  x2Arr, y2Arr = createArrays(x2, y2, higherInterceptAveragePoints)
-
-  return (volume, x1Arr, y1Arr, x2Arr, y2Arr)
+    weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
+    lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, points)
+    lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2)
+    volume = volumeCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints, number)
+    x1Arr, y1Arr = createArrays(x1, y1, lowerInterceptAveragePoints)
+    x2Arr, y2Arr = createArrays(x2, y2, higherInterceptAveragePoints)
+    
+    return (volume, x1Arr, y1Arr, x2Arr, y2Arr)
 
 # Execute capture frame and crop
 contourCoords = []
 for i in range(len(frameData)):
-    vidName, frameNum = frameData[i][0], frameData[i][1] # vid name and frame number
-    maskPath = dataPath + "mask/" + vidName + "/" + str(frameNum) + ".png"
+    try:
+        vidName, frameNum = frameData[i][0], frameData[i][1] # vid name and frame number
+        maskPath = dataPath + "mask/" + vidName + "/" + str(frameNum) + ".png"
 
-    number = round((len(arranged_pts[i])/2) - 1)
-    contourPoints = calculateVolume(maskPath, number)
-    contourCoords.append([])
+        number = round((len(arranged_pts[i])/2) - 1)
+        contourPoints = calculateVolume(maskPath, number)
 
-    image = cv2.imread(maskPath)
+        image = cv2.imread(maskPath)
 
-    for j in range(len(contourPoints[1])):
-      contourCoords[i].append([vidName, frameNum, [contourPoints[1][j], contourPoints[2][j]], [contourPoints[3][j], contourPoints[4][j]]])
-      startPoint, endPoint = (contourPoints[1][j], contourPoints[2][j]), (contourPoints[3][j], contourPoints[4][j])
-      
-      cv2.line(image, tuple(startPoint),  tuple(endPoint), (255, 255, 255), 1)
-    fileName = dataPath + "line/" + vidName + "/" + str(frameNum) + ".png"
-    cv2.imwrite(fileName, image)
+        for j in range(len(contourPoints[1])):
+            contourCoords.append([vidName, frameNum, contourPoints[1][j], contourPoints[2][j], contourPoints[3][j], contourPoints[4][j]])
+            startPoint, endPoint = (contourPoints[1][j], contourPoints[2][j]), (contourPoints[3][j], contourPoints[4][j])
+            
+            cv2.line(image, tuple(startPoint),  tuple(endPoint), (255, 255, 255), 1)
+            fileName = dataPath + "line/" + vidName + "/" + str(frameNum) + ".png"
+            cv2.imwrite(fileName, image)
+    except:
+        break
+
+df = pd.DataFrame(contourCoords)
+df.columns = ["FileName", "Frame", "X1", "Y1", "X2", "Y2"]
+df.to_csv("FileList (mask).csv")
