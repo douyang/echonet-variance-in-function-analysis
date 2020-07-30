@@ -21,7 +21,7 @@ def obtainContourPoints(path):
     upper = (150,255,255)
 
     # threshold and invert so hexagon is white on black background
-    thresh = cv2.inRange(hsv, lower, upper);
+    thresh = cv2.inRange(hsv, lower, upper)
     opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
     closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
     erosion = cv2.erode(closing,kernel,iterations = 1)
@@ -277,7 +277,26 @@ def calculateVolume(path, number):
 dataPath = "/Users/ishan/Documents/Stanford/ouyang-data/"
 path = dataPath + "CSV/VolumeTracings.csv"
 
+countVolume = []
+
 df = pd.read_csv(path, low_memory=False)
+
+counts_df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
+for i in range(len(counts_df)):
+  countVolume.append(counts_df.iloc[i, 2])
+  
+
+def iterateThroughRows(inputList):
+  outputList = []
+  for i in inputList:
+    j = i.split(',')
+    g1 = [float(x) for x in j]
+    outputList.append(g1)
+
+  return outputList
+
+countFormatted = iterateThroughRows(countVolume)
+
 dropped_df = df.drop_duplicates(['FileName', 'Frame'], keep='first')
 
 listOfVolumes = []
@@ -289,7 +308,7 @@ for i in range(len(dropped_df)):
 
   inputFramePath = dataPath + "frames/crop/" + vidName + "/frame" + str(frameNumber) + ".png"
 
-  volume, x1A, y1A, x2A, y2A = calculateVolume(inputFramePath)
+  volume, x1A, y1A, x2A, y2A = calculateVolume(inputFramePath, len(countFormatted[i]) - 1)
   
   listOfVolumes.append([vidName, x1A, y1A, x2A, y2A, frameNumber, volume])
 
