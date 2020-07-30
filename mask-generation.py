@@ -60,14 +60,14 @@ def makeDirectories(dataPath, vidName):
         
         
 def getSpecificFrame(dataPath, vidName, frameNumber, outputPath):
-    cap = cv2.VideoCapture(dataPath + "videos/" + vidName)
+    if (os.path.exists(dataPath + "videos/" + vidName)):
+        cap = cv2.VideoCapture(dataPath + "videos/" + vidName)
 
-    cap.set(1, frameNumber)
-    ret, frame = cap.read()
+        cap.set(1, frameNumber)
+        ret, frame = cap.read()
 
-    makeDirectories(dataPath, vidName)
-
-    cv2.imwrite(outputPath, frame)
+        makeDirectories(dataPath, vidName)
+        cv2.imwrite(outputPath, frame)
     
 
 def makeMask(imagePath, outputPath, coordinatePairs):
