@@ -57,6 +57,12 @@ def makeDirectories(dataPath, vidName):
     
     if os.path.isdir(dataPath + "line/" + vidName) is False:
         os.mkdir(dataPath + "line/" + vidName)
+
+    if os.path.isdir(dataPath + "lines/") is False:
+        os.mkdir(dataPath + "lines/")
+    
+    if os.path.isdir(dataPath + "lines/" + vidName) is False:
+        os.mkdir(dataPath + "lines/" + vidName)
         
         
 def getSpecificFrame(dataPath, vidName, frameNumber, outputPath):
@@ -373,18 +379,21 @@ for i in range(len(frameData)):
         number = round((len(arranged_pts[i])/2) - 1)
         contourPoints = calculateVolume(maskPath, number)
 
-        image = cv2.imread(maskPath)
+        blank_image = np.zeroes((height, width), np.uint8)
+        blank_image[:,:] = (0, 0, 0)
 
+        #image = cv2.imread(maskPath)
+        image = cv2.imread(blank_image)
         for j in range(len(contourPoints[1])):
             contourCoords.append([vidName, frameNum, contourPoints[1][j], contourPoints[2][j], contourPoints[3][j], contourPoints[4][j]])
             startPoint, endPoint = (contourPoints[1][j], contourPoints[2][j]), (contourPoints[3][j], contourPoints[4][j])
             
             cv2.line(image, tuple(startPoint),  tuple(endPoint), (255, 255, 255), 1)
-            fileName = dataPath + "line/" + vidName + "/" + str(frameNum) + ".png"
+            fileName = dataPath + "lines/" + vidName + "/" + str(frameNum) + ".png"
             cv2.imwrite(fileName, image)
     except:
         break
 
 df = pd.DataFrame(contourCoords)
 df.columns = ["FileName", "Frame", "X1", "Y1", "X2", "Y2"]
-df.to_csv("FileList (mask).csv")
+df.to_csv(dataPath + "FileList (mask).csv")
