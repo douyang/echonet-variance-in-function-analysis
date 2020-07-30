@@ -7,6 +7,7 @@ import operator
 import matplotlib.pyplot as plt
 from PIL import Image
 from functools import reduce
+import math
 
 dataPath = "/Users/ishan/Documents/Stanford/ouyang-data/"
 
