@@ -6,10 +6,11 @@ import numpy as np
 import operator
 import matplotlib.pyplot as plt
 from PIL import Image
+from functools import reduce
 
 dataPath = "/Users/ishan/Documents/Stanford/ouyang-data/"
 
-df = pd.read_csv(dataPath + "VolumeTracings.csv")
+df = pd.read_csv(dataPath + "CSV/VolumeTracings.csv")
 df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index() #group filenames and frames
 
 frameData, pts, rows = [], [], 0
