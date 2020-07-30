@@ -54,7 +54,6 @@ def makeDirectories(dataPath, vidName):
     os.mkdir(dataPath + "line/" + vidName)
 
 def getSpecificFrame(dataPath, vidName, frameNumber, outputPath):
-    print(outputPath)
     cap = cv2.VideoCapture(dataPath + "videos/" + vidName)
     total_frames = cap.get(frameNumber)
 
