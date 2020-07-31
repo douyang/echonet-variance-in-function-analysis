@@ -379,6 +379,9 @@ for i in range(len(frameData)):
         number = round((len(arranged_pts[i])/2) - 1)
         contourPoints = calculateVolume(maskPath, number)
 
+        image = PIL.Image.open(maskPath)
+        width, height = image.size
+        
         blank_image = np.zeroes((height, width), np.uint8)
         blank_image[:,:] = (0, 0, 0)
 
@@ -394,6 +397,6 @@ for i in range(len(frameData)):
     except:
         break
 
-df = pd.DataFrame(contourCoords)
-df.columns = ["FileName", "Frame", "X1", "Y1", "X2", "Y2"]
-df.to_csv(dataPath + "FileList (mask).csv")
+# df = pd.DataFrame(contourCoords)
+# df.columns = ["FileName", "Frame", "X1", "Y1", "X2", "Y2"]
+# df.to_csv(dataPath + "FileList (mask).csv")
