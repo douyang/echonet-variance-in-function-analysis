@@ -365,7 +365,7 @@ for i in range(len(df)):
   if os.path.exists(frameCapturePath):
     getSpecificFrameAndCrop(dataPath, frameCapturePath, int(frame))
 
-  path = dataPath + "mask/" + vid + "/" + df.iloc[i, 1] + ".png"
+  path = dataPath + "frames/" + vid + "/" + df.iloc[i, 1] + ".png"
   number = len(literal_eval(df.iloc[i, 2]))
 
   paths.append([path, vid])
@@ -428,7 +428,6 @@ x = np.array(xList)
 y = np.array(yList)
 m, b = np.polyfit(x, y, 1)
 
-print(m*x + b)
 # Plot the x and y calculations
 plt.plot(x, y, 'o')
 
@@ -442,4 +441,4 @@ def rsquared(x, y):
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
     return r_value**2
 
-print(rsquared(x, y))
+print("R2 is " + rsquared(x, y))
