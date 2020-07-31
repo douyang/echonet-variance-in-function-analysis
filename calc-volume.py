@@ -428,6 +428,7 @@ x = np.array(xList)
 y = np.array(yList)
 m, b = np.polyfit(x, y, 1)
 
+print(m*x + b)
 # Plot the x and y calculations
 plt.plot(x, y, 'o')
 
