@@ -342,20 +342,21 @@ df = pd.read_csv(path, low_memory=False)
 
 df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
 for i in range(len(df)):
-  path = dataPath + "mask/" + df.iloc[i, 0] + "/" + df.iloc[i, 1] + ".png"
+  vid = df.iloc[i, 0]
+  path = dataPath + "mask/" + vid + "/" + df.iloc[i, 1] + ".png"
   number = len(literal_eval(df.iloc[i, 2]))
 
-  paths.append(path)
+  paths.append([path, vid])
   numbers.append(number)
 
 volumes, calculated_EF = [], []
 
 #Calculate volume based on given video and frame
 for i in range(len(paths)):
-  pathName = paths[i]
+  pathName = paths[i][0]
+  vidName = paths[i][1]
   if os.path.exists(pathName):
     numberValue = numbers[i] - 1
-    vidName = os.path.dirname(pathName)
     frameNumber = os.path.basename(pathName)
     volume, x1, y1, x2, y2 = calculateVolume(pathName, numberValue)
     
@@ -389,7 +390,6 @@ for j in range(len(calculated_EF)):
   if fileN not in EF:
     EF[fileN] = ['', '']
   EF[fileN][1] = EFcalc
-print(EF)
 
 x = []
 y = []
