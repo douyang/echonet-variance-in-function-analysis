@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import math
 import cv2
+import scipy.stats
 
 # Distance Between 2 Points
 def getDistance(point1, point2):
@@ -30,23 +31,38 @@ def calculateVolume(point1, point2, x1, y1, x2, y2, lineNumber):
    
   return volume
 
-def getSpecificFrameAndCrop(vidName, frameNumber):
-  if (os.path.exists(vidName)):
-    cap = cv2.VideoCapture(vidName)
+def makeDirectories(dataPath, vidName):
+  if os.path.isdir(dataPath + "frames/") is False:
+    os.mkdir(dataPath + "frames/")
+    
+  if os.path.isdir(dataPath + "frames/" + vidName) is False:
+    os.mkdir(dataPath + "frames/" + vidName)
+
+  if os.path.isdir(dataPath + "mask/") is False:
+    os.mkdir(dataPath + "mask/")
+
+  if os.path.isdir(dataPath + "mask/" + vidName) is False:
+    os.mkdir(dataPath + "frames/" + vidName)
+
+def getSpecificFrameAndCrop(dataPath, vidPath, frameNumber):
+  vidName = os.path.basename(vidPath)
+  if (os.path.exists(vidPath)):
+    cap = cv2.VideoCapture(vidPath)
 
     cap.set(1, frameNumber)
     ret, frame = cap.read()
 
-    outputPath = "frames/" + str(frameNumber) + ".png"
+    outputPath = dataPath + "frames/" + vidName + "/" + str(frameNumber) + ".png"
     h, w, c = frame.shape
 
+    makeDirectories(dataPath, vidName)
     # Starting Coords
     x1 = 0
     y1 = 0
 
     # Ending Coords
     x2 = 112
-    y2 = 224
+    y2 = 112
 
     # Crop
     crop = frame[x1:x2, y1:y2]
@@ -343,6 +359,12 @@ df = pd.read_csv(path, low_memory=False)
 df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
 for i in range(len(df)):
   vid = df.iloc[i, 0]
+  frame = df.iloc[i, 1]
+
+  frameCapturePath = dataPath + "videos/" + vid
+  if os.path.exists(frameCapturePath):
+    getSpecificFrameAndCrop(dataPath, frameCapturePath, int(frame))
+
   path = dataPath + "mask/" + vid + "/" + df.iloc[i, 1] + ".png"
   number = len(literal_eval(df.iloc[i, 2]))
 
@@ -403,3 +425,11 @@ for i in EF:
   
 plt.scatter(x, y)
 plt.show()
+
+def rsquared(x, y):
+    """ Return R^2 where x and y are array-like."""
+
+    slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
+    return r_value**2
+
+print(rsquared(x, y))
