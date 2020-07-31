@@ -1,50 +1,109 @@
-import pandas as pd
-import cv2
-import numpy as np
-import math
-from functools import reduce
 import os
+import operator
+from PIL import Image
+from functools import reduce
+import numpy as np
+import pylab
+from csv import reader
+import pandas as pd
+from ast import literal_eval
+import matplotlib.pyplot as plt
+from PIL import Image
+import math
+import cv2
+
+# Distance Between 2 Points
+def getDistance(point1, point2):
+  return math.sqrt((point1[0]-point2[0])**2 + (point1[1]-point2[1])**2)
+
+def calculateVolume(point1, point2, x1, y1, x2, y2, lineNumber):
+  distance = getDistance(point1, point2)
+  parallelSeperationDistance = distance/(lineNumber+1)
+
+  volume = 0
+
+  for i in range(len(x1)):
+    diameter = getDistance([x1[i], y1[i]], [x2[i], y2[i]])
+    radius = diameter/2
+    diskVolume = math.pi * radius**2 * parallelSeperationDistance
+    volume += diskVolume
+   
+  return volume
+
+def getSpecificFrameAndCrop(vidName, frameNumber):
+  if (os.path.exists(vidName)):
+    cap = cv2.VideoCapture(vidName)
+
+    cap.set(1, frameNumber)
+    ret, frame = cap.read()
+
+    outputPath = "frames/" + str(frameNumber) + ".png"
+    h, w, c = frame.shape
+
+    # Starting Coords
+    x1 = 0
+    y1 = 0
+
+    # Ending Coords
+    x2 = 112
+    y2 = 224
+
+    # Crop
+    crop = frame[x1:x2, y1:y2]
+    cv2.imwrite(outputPath, crop)
+
+def makeMask(imagePath, outputPath, coordinatePairs):
+  image = cv2.imread(imagePath, -1)
+
+  mask = np.zeros(image.shape, dtype=np.uint8)
+  roi_corners = np.array([coordinatePairs], dtype=np.int32)
+  
+  channel_count = image.shape[2]
+  ignore_mask_color = (255,)*channel_count
+  cv2.fillPoly(mask, roi_corners, ignore_mask_color)
+
+  # apply the mask
+  masked_image = cv2.bitwise_and(image, mask)
+  
+  # save the result
+  cv2.imwrite(outputPath, masked_image)
 
 # Gets all the contours for certain image
 def obtainContourPoints(path):
+  img = cv2.imread(path)
 
-  # read image
-  try:
-    img = cv2.imread(path)
+  # convert to hsv color space
+  hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+  kernel = np.ones((5,5),np.uint8)
 
-    # convert to hsv color space
-    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    kernel = np.ones((5,5),np.uint8)
+  # set lower and upper bounds on blue color
+  lower = (0,90,200)
+  upper = (150,255,255)
 
-    # set lower and upper bounds on blue color
-    lower = (0,90,200)
-    upper = (150,255,255)
+  # threshold and invert so hexagon is white on black background
+  thresh = cv2.inRange(hsv, lower, upper)
+  opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
+  closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+  erosion = cv2.erode(closing,kernel,iterations = 1)
+  dilation = cv2.dilate(erosion,kernel,iterations = 1)
+  # blur = cv2.GaussianBlur(closing,(5,5),0)
 
-    # threshold and invert so hexagon is white on black background
-    thresh = cv2.inRange(hsv, lower, upper)
-    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
-    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
-    erosion = cv2.erode(closing,kernel,iterations = 1)
-    dilation = cv2.dilate(erosion,kernel,iterations = 1)
-    # blur = cv2.GaussianBlur(closing,(5,5),0)
+  # get contours
+  result = np.zeros_like(img)
+  contours = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+  contours = contours[0] if len(contours) == 2 else contours[1]
 
-    # get contours
-    result = np.zeros_like(img)
-    contours = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    contours = contours[0] if len(contours) == 2 else contours[1]
-
-    # Gets all contour points
-    points = []
-    for pt in contours:
-        for i in pt:
-          for coord in i:
-            points.append(coord)
-    
-    # Resets
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-  except:
-    points = "Can't calculate"
+  # Gets all contour points
+  points = []
+  for pt in contours:
+      for i in pt:
+        for coord in i:
+          points.append(coord)
+  
+  # Resets
+  cv2.waitKey(0)
+  cv2.destroyAllWindows()
+  
 
   return points
 
@@ -277,67 +336,70 @@ def calculateVolume(path, number):
 dataPath = "/Users/ishan/Documents/Stanford/ouyang-data/"
 path = dataPath + "CSV/VolumeTracings.csv"
 
-countVolume = []
+paths, numbers = [], []
 
 df = pd.read_csv(path, low_memory=False)
 
-counts_df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
-for i in range(len(counts_df)):
-  countVolume.append(counts_df.iloc[i, 2])
-  
+df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
+for i in range(len(df)):
+  path = dataPath + "mask/" + df.iloc[i, 0] + "/" + df.iloc[i, 1] + ".png"
+  number = len(literal_eval(df.iloc[i, 2]))
 
-def iterateThroughRows(inputList):
-  outputList = []
-  for i in inputList:
-    j = i.split(',')
-    g1 = [float(x) for x in j]
-    outputList.append(g1)
+  paths.append(path)
+  numbers.append(number)
 
-  return outputList
-
-countFormatted = iterateThroughRows(countVolume)
-
-dropped_df = df.drop_duplicates(['FileName', 'Frame'], keep='first')
-
-listOfVolumes = []
+volumes, calculated_EF = [], []
 
 #Calculate volume based on given video and frame
-for i in range(len(dropped_df)):
-  vidName = dropped_df.iloc[i, 0]
-  frameNumber = dropped_df.iloc[i, 5]
+for i in range(len(paths)):
+  pathName = paths[i]
+  if os.path.exists(pathName):
+    numberValue = numbers[i] - 1
+    vidName = os.path.dirname(pathName)
+    frameNumber = os.path.basename(pathName)
+    volume, x1, y1, x2, y2 = calculateVolume(pathName, numberValue)
+    
+    volumes.append([vidName, x1, y1, x2, y2, frameNumber, volume])
 
-  inputFramePath = dataPath + "frames/crop/" + vidName + "/frame" + str(frameNumber) + ".png"
+#new_df = pd.DataFrame(listOfVolumes)
 
-  volume, x1A, y1A, x2A, y2A = calculateVolume(inputFramePath, len(countFormatted[i]) - 1)
+# Calculate the EF
+for i,k in zip(volumes[0::2], volumes[1::2]):
+  if (i[6] != '') and (k[6] != ''):
+    EDV = max(i[6], k[6])
+    ESV = min(i[6], k[6])
+
+    ef_calc = ((EDV-ESV)/EDV) * 100
+    calculated_EF.append([i[0], ef_calc])
+
+EF = {}
+
+file_df = pd.read_csv(dataPath + "CSV/FileList.csv")
+for i in range(len(file_df)):
+  fileName = file_df.iloc[i, 0]
+  EForig = file_df.iloc[i, 1]
+  if fileName not in EF:
+    EF[fileName] = ['', '']
+  EF[fileName][0] = EForig
+
+for j in range(len(calculated_EF)):
+  fileN = calculated_EF[j][0]
+  EFcalc = calculated_EF[j][1]
+
+  if fileN not in EF:
+    EF[fileN] = ['', '']
+  EF[fileN][1] = EFcalc
+print(EF)
+
+x = []
+y = []
+fileNames = []
+
+for i in EF:
+  if (EF[i][0] != '') and (EF[i][1] != ''):
+    x.append(EF[i][0])
+    y.append(EF[i][1])
+    fileNames.append(i)
   
-  listOfVolumes.append([vidName, x1A, y1A, x2A, y2A, frameNumber, volume])
-
-new_df = pd.DataFrame(listOfVolumes)
-
-nameCol, x1A, y1A, x2A, y2A = [], [], [], [], []
-data = []
-for i in range(len(df)):
-  try:
-    fileN = new_df.iloc[i, 0]
-    x1s = new_df.iloc[i, 1]
-    y1s = new_df.iloc[i, 2]
-    x2s = new_df.iloc[i, 3]
-    y2s = new_df.iloc[i, 4]
-    frameN = new_df.iloc[i, 5]
-
-    if type(i) is not str:
-      for k in range(len(x1s)):
-        data.append([int(frameN), fileN, int(x1s[k]), int(y1s[k]), int(x2s[k]), int(y2s[k])])
-        
-  except:
-    break
-
-calc_df = pd.DataFrame(data)
-
-dfs = [df, calc_df]
-
-result = pd.concat(dfs, join='outer', axis=1)
-result.columns = ['FileName', 'X1', 'Y1', 'X2', 'Y2', 'Frame', 'Framecalc', 'FileNamecalc', 'X1calc', 'Y1calc', 'X2calc', 'Y2calc']
-
-#Create and export dataframe to CSV
-result.to_csv(dataPath + 'calculated-filelist.csv')
+plt.scatter(x, y)
+plt.show()
