@@ -413,17 +413,26 @@ for j in range(len(calculated_EF)):
     EF[fileN] = ['', '']
   EF[fileN][1] = EFcalc
 
-x = []
-y = []
+xList = []
+yList = []
 fileNames = []
 
 for i in EF:
   if (EF[i][0] != '') and (EF[i][1] != ''):
-    x.append(EF[i][0])
-    y.append(EF[i][1])
+    xList.append(EF[i][0])
+    yList.append(EF[i][1])
     fileNames.append(i)
-  
-plt.scatter(x, y)
+
+# Get the line of best fit
+x = np.array(xList)
+y = np.array(yList)
+m, b = np.polyfit(x, y, 1)
+
+# Plot the x and y calculations
+plt.plot(x, y, 'o')
+
+plt.plot(x, m*x + b)
+#plt.scatter(x, y)
 plt.show()
 
 def rsquared(x, y):
