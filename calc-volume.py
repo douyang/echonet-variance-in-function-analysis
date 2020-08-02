@@ -441,4 +441,5 @@ def rsquared(x, y):
     slope, intercept, r_value, p_value, std_err = scipy.stats.linregress(x, y)
     return r_value**2
 
-print("R2 is " + rsquared(x, y))
+print("r2: ")
+print(rsquared(x, y))
