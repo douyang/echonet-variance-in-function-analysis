@@ -35,6 +35,7 @@ def captureAndMakeCroppedFrames(dataframe):
     if (os.path.exists(frameCapturePath)):
       pipeline_functions.getSpecificFrameAndCrop(dataPath, frameCapturePath, int(frameNumber))
 
+# Gather all paths, frames, and vision data for evaluating functions
 def gatherPathsAndFrameData(dataPath, dataframe):
   paths, numbers = [], []
 
@@ -52,7 +53,7 @@ def gatherPathsAndFrameData(dataPath, dataframe):
   
   return paths, numbers
 
-#Calculate volume based on given video and frame
+# Evaluate functions based on gatherPathsAndFrameData() function's returned data
 def calculateVolumeFromData(dataPath, dataframe, methodToUse):
   volumes = []
 
@@ -77,6 +78,7 @@ def calculateVolumeFromData(dataPath, dataframe, methodToUse):
 
   return volumes
 
+# Draw lines on frames with given coordinates and frames
 def drawLinesOnFrames(dataPath, dataframe, method):
   volumes = calculateVolumeFromData(dataPath, dataframe, method)
   
