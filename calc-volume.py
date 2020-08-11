@@ -22,8 +22,6 @@ file_df = pd.read_csv(dataPath + "CSV/FileList.csv")
 
 df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
 
-volumes, calculated_EF = [], []
-
 EF = {}
 
 # Capture and Make Frames + Crop
@@ -42,45 +40,59 @@ def gatherPathsAndFrameData(dataPath, dataframe):
 
   for i in range(len(dataframe)):
     vid = dataframe.iloc[i, 0]
+    frame = dataframe.iloc[i, 1]
 
     frameOutputPath = dataPath + "frames/" + vid
 
-    path = frameOutputPath + "/" + dataframe.iloc[i, 1] + ".png"
+    path = frameOutputPath + "/" + frame + ".png"
     numberOfParallelLines = len(literal_eval(dataframe.iloc[i, 2])) - 1
 
-    paths.append([path, vid])
+    paths.append([path, vid, frame])
     numbers.append(numberOfParallelLines)
   
   return paths, numbers
 
 #Calculate volume based on given video and frame
 def calculateVolumeFromData(dataPath, dataframe, methodToUse):
+  volumes = []
+
   framePaths, parallelLinesCount = gatherPathsAndFrameData(dataPath, dataframe)
 
   for i in range(len(framePaths)):
     pathName = framePaths[i][0]
     vidName = framePaths[i][1]
+    frame = framePaths[i][2]
 
     if os.path.exists(pathName):
       numberValue = parallelLinesCount[i]
-      frameNumber = os.path.basename(pathName)
-      outputPath = dataPath + "line-orig/" + vidName + "/" + str(frameNumber)
 
       volume, x1, y1, x2, y2 = pipeline_functions.calculateVolume(pathName, numberValue, methodToUse)
       
       try:
-        image = cv2.imread(pathName)
-        for k in range(len(x1)):
-          cv2.line(image, (x1[0][k], y1[0][k]), (x2[0][k], y2[0][k]), (255, 255, 255), 1)
-          
-        cv2.imwrite(outputPath, image)
+        volumes.append([pathName, vidName, frame, x1[0], y1[0], x2[0], y2[0], volume[0]])
         
       except:
         continue
-      # volumes.append([vidName, x1, y1, x2, y2, frameNumber, volume])
-  
+      
 
-calculateVolumeFromData(dataPath, df, "Biplane Area")
+  return volumes
+
+def drawLinesOnFrames(dataPath, dataframe, method):
+  volumes = calculateVolumeFromData(dataPath, dataframe, method)
+  
+  for i in volumes:
+    vidName = i[1]
+    frameNumber = i[2]
+
+    outputPath = dataPath + "line-orig/" + vidName + "/" + str(frameNumber) + ".png"
+    image = cv2.imread(i[0])
+    
+    for k in range(len(i[3])):
+      cv2.line(image, (i[3][k], i[4][k]), (i[5][k], i[6][k]), (255, 255, 255), 1)
+      
+    cv2.imwrite(outputPath, image)
+
+drawLinesOnFrames(dataPath, df, "Biplane Area")
 
 # # Calculate the EF
 # for i,k in zip(volumes[0::2], volumes[1::2]):
