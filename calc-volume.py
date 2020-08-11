@@ -17,50 +17,70 @@ import scipy.stats
 dataPath = "/Users/ishan/Documents/Stanford/ouyang-data/"
 path = dataPath + "CSV/VolumeTracings.csv"
 
-paths, numbers = [], []
-
 df = pd.read_csv(path, low_memory=False)
 file_df = pd.read_csv(dataPath + "CSV/FileList.csv")
 
 df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
 
-# Capture and Make Frames + Crop
-for i in range(len(df)):
-  vid = df.iloc[i, 0]
-  frame = df.iloc[i, 1]
-
-  frameCapturePath = dataPath + "videos/" + vid
-  frameOutputPath = dataPath + "frames/" + vid
-
-  if os.path.exists(frameCapturePath):
-    pipeline_functions.getSpecificFrameAndCrop(dataPath, frameCapturePath, int(frame))
-
-  path = frameOutputPath + "/" + df.iloc[i, 1] + ".png"
-  number = len(literal_eval(df.iloc[i, 2]))
-
-  paths.append([path, vid])
-  numbers.append(number)
-
 volumes, calculated_EF = [], []
 
 EF = {}
 
+# Capture and Make Frames + Crop
+def captureAndMakeCroppedFrames(dataframe):
+  for i in len(dataframe):
+    vid = dataframe.iloc[i, 0]
+    frameNumber = dataframe.iloc[i, 1]
+
+    frameCapturePath = dataPath + "videos/" + vid
+    
+    if (os.path.exists(frameCapturePath)):
+      pipeline_functions.getSpecificFrameAndCrop(dataPath, frameCapturePath, int(frameNumber))
+
+def gatherPathsAndFrameData(dataPath, dataframe):
+  paths, numbers = [], []
+
+  for i in range(len(dataframe)):
+    vid = dataframe.iloc[i, 0]
+
+    frameOutputPath = dataPath + "frames/" + vid
+
+    path = frameOutputPath + "/" + dataframe.iloc[i, 1] + ".png"
+    numberOfParallelLines = len(literal_eval(dataframe.iloc[i, 2])) - 1
+
+    paths.append([path, vid])
+    numbers.append(numberOfParallelLines)
+  
+  return paths, numbers
+
 #Calculate volume based on given video and frame
-methodToUse = "Simpson"
-for i in range(len(paths)):
-  pathName = paths[i][0]
-  vidName = paths[i][1]
-  if os.path.exists(pathName):
-    numberValue = numbers[i] - 1
-    frameNumber = os.path.basename(pathName)
-    outputPath = dataPath + "line-orig/" + vidName + "/" + str(frameNumber)
+def calculateVolumeFromData(dataPath, dataframe, methodToUse):
+  framePaths, parallelLinesCount = gatherPathsAndFrameData(dataPath, dataframe)
 
-    volume, x1, y1, x2, y2 = pipeline_functions.calculateVolume(pathName, methodToUse)
+  for i in range(len(framePaths)):
+    pathName = framePaths[i][0]
+    vidName = framePaths[i][1]
 
-    print(x1["0"])
+    if os.path.exists(pathName):
+      numberValue = parallelLinesCount[i]
+      frameNumber = os.path.basename(pathName)
+      outputPath = dataPath + "line-orig/" + vidName + "/" + str(frameNumber)
 
-    volumes.append([vidName, x1, y1, x2, y2, frameNumber, volume])
+      volume, x1, y1, x2, y2 = pipeline_functions.calculateVolume(pathName, numberValue, methodToUse)
+      
+      try:
+        image = cv2.imread(pathName)
+        for k in range(len(x1)):
+          cv2.line(image, (x1[0][k], y1[0][k]), (x2[0][k], y2[0][k]), (255, 255, 255), 1)
+          
+        cv2.imwrite(outputPath, image)
+        
+      except:
+        continue
+      # volumes.append([vidName, x1, y1, x2, y2, frameNumber, volume])
+  
 
+calculateVolumeFromData(dataPath, df, "Biplane Area")
 
 # # Calculate the EF
 # for i,k in zip(volumes[0::2], volumes[1::2]):

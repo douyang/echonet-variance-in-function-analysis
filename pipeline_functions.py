@@ -62,10 +62,6 @@ def makeMask(imagePath, outputPath, coordinatePairs):
   # save the result
   cv2.imwrite(outputPath, masked_image)
 
-import cv2
-import numpy as np
-import math
-
 # Gets all the contours for certain image
 def obtainContourPoints(path):
   # read image
@@ -159,12 +155,12 @@ def getXsAndYsWithSlope(higherInterceptPoints, lowerIntercept, slope):
   print(higherInterceptPoints)
 
 # Create the 20 equally spaced points
-def getWeightedAveragePoints(x1, y1, x2, y2):
+def getWeightedAveragePoints(x1, y1, x2, y2, number):
   weighted_avg = []
 
-  for n in range(1, 21, 1):
-    x_perpendicular = (((n*x1)+(21-n)*(x2))/21)
-    y_perpendicular = (((n*y1)+(21-n)*(y2))/21)
+  for n in range(1, number+1, 1):
+    x_perpendicular = (((n*x1)+(number+1-n)*(x2))/(number+1))
+    y_perpendicular = (((n*y1)+(number+1-n)*(y2))/(number+1))
     weighted_avg.append([x_perpendicular, y_perpendicular])
 
   return weighted_avg
@@ -273,10 +269,10 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
-def volumeSimpsonMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints):
+def volumeSimpsonMethodCalc(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints):
   # Long axis length and perp initialzation
   distance = getDistance([x1, y1], [x2, y2])
-  parallelSeperationDistance = distance/21
+  parallelSeperationDistance = distance/(number + 1)
 
   # Simpson Volume Methods
   volume = 0
@@ -289,10 +285,10 @@ def volumeSimpsonMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherI
 
   return volume
 
-def volumeSingleEllipsoidMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints):
+def volumeSingleEllipsoidMethodCalc(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints):
   # Long axis length
   long_axis_length = getDistance([x1, y1], [x2, y2])
-  parallelSeperationDistance = distance/21
+  parallelSeperationDistance = distance/(number + 1)
 
   # Simpson Area Method
   area = 0
@@ -341,16 +337,7 @@ def volumeBulletMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherIn
 
   return volume
 
-def drawLines(path, x1, y1, x2, y2lowerInterceptAveragePoints, higherInterceptAveragePoints):
-  image = cv2.imread(path)
-
-  for i in range(len(lowerInterceptAveragePoints)):
-    cv2.line(image, tuple(lowerInterceptAveragePoints[i]),  tuple(higherInterceptAveragePoints[i]), (255, 255, 255), 1)
-  
-  #cv2.line(image, tuple(x1, y1),  tuple(x2, y2), (23, 23, 225), 1)
-  cv2.imwrite(outputPath, image)
-
-def calculateVolume(path, method):
+def calculateVolume(path, number, method = "Simpson"):
   try:
     points = obtainContourPoints(path)
     x1, y1, x2, y2 = getTopAndBottomCoords(points)
@@ -371,34 +358,35 @@ def calculateVolume(path, method):
 
       lowerInterceptPoints, higherInterceptPoints = splitPoints(x1, y1, x2, y2, slope, points)
 
-      weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2)
+      weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
       lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope)
-
+      
       x1s[i] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
       y1s[i] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
 
       x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
       y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
-      if method == "Simpson":
-        volumes[i] = volumeSimpsonMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
+      if  method == "Simpson":
+        volumes[i] = volumeSimpsonMethodCalc(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       elif method == "Single Ellipsoid":
-        volumes[i] = volumeSingleEllipsoidMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        volumes[i] = volumeSingleEllipsoidMethodCalc(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       elif method == "Biplane Area":
         volumes[i] = volumeBiplaneAreaMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       elif method == "Bullet":
         volumes[i] = volumeBulletMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       else:
         return "Incorrect Method"
-
+  
   except:
     volumes, x1s, y1s, x2s, y2s = "", "", "", "", ""
-    
+  
   return (volumes, x1s, y1s, x2s, y2s)
 
 
-#print(calculateVolume("/content/output/image.png", method = "Simpson"))
+# print(calculateVolume("/content/output/image.png", 20, method = "Simpson"))
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))
+ 
