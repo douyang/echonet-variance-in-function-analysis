@@ -22,13 +22,11 @@ file_df = pd.read_csv(dataPath + "CSV/FileList.csv")
 
 df = df.astype(str).groupby(['FileName', 'Frame']).agg(','.join).reset_index()
 
-EF = {}
-
 # Capture and Make Frames + Crop
-def captureAndMakeCroppedFrames(dataframe):
-  for i in len(dataframe):
-    vid = dataframe.iloc[i, 0]
-    frameNumber = dataframe.iloc[i, 1]
+def captureAndMakeCroppedFrames():
+  for i in range(len(df)):
+    vid = df.iloc[i, 0]
+    frameNumber = df.iloc[i, 1]
 
     frameCapturePath = dataPath + "videos/" + vid
     
@@ -36,66 +34,117 @@ def captureAndMakeCroppedFrames(dataframe):
       pipeline_functions.getSpecificFrameAndCrop(dataPath, frameCapturePath, int(frameNumber))
 
 # Gather all paths, frames, and vision data for evaluating functions
-def gatherPathsAndFrameData(dataPath, dataframe):
+def gatherPathsAndFrameData():
+  #captureAndMakeCroppedFrames(dataframe)
   paths, numbers = [], []
 
-  for i in range(len(dataframe)):
-    vid = dataframe.iloc[i, 0]
-    frame = dataframe.iloc[i, 1]
+  for i in range(len(df)):
+    vid = df.iloc[i, 0]
+    frame = df.iloc[i, 1]
 
     frameOutputPath = dataPath + "frames/" + vid
 
     path = frameOutputPath + "/" + frame + ".png"
-    numberOfParallelLines = len(literal_eval(dataframe.iloc[i, 2])) - 1
+    numberOfParallelLines = len(literal_eval(df.iloc[i, 2])) - 1
 
-    paths.append([path, vid, frame])
-    numbers.append(numberOfParallelLines)
+    if os.path.exists(path):
+      paths.append([path, vid, frame])
+      numbers.append(numberOfParallelLines)
   
   return paths, numbers
 
 # Evaluate functions based on gatherPathsAndFrameData() function's returned data
-def calculateVolumeFromData(dataPath, dataframe, methodToUse):
-  volumes = []
+def calculateVolumeAndDrawLines(methodToUse, drawLines = False):
+  volumes, flagged_volumes = [], []
+  EF = {}
 
-  framePaths, parallelLinesCount = gatherPathsAndFrameData(dataPath, dataframe)
+  framePaths, parallelLinesCount = gatherPathsAndFrameData()
 
   for i in range(len(framePaths)):
     pathName = framePaths[i][0]
     vidName = framePaths[i][1]
     frame = framePaths[i][2]
 
-    if os.path.exists(pathName):
-      numberValue = parallelLinesCount[i]
+    numberValue = parallelLinesCount[i]
 
-      volume, x1, y1, x2, y2 = pipeline_functions.calculateVolume(pathName, numberValue, methodToUse)
+    volume, x1, y1, x2, y2 = pipeline_functions.calculateVolume(pathName, numberValue, method = methodToUse)
+    if len(x1) is not 0:
+      volumes.append([pathName, vidName, frame, volume[0]])
+
+      if vidName not in EF:
+        EF[vidName] = {-5: [], -4: [], -3: [], -2: [], -1: [], 0: [], 1: [], 2: [], 3: [], 4: [], 5: []}
       
-      try:
-        volumes.append([pathName, vidName, frame, x1[0], y1[0], x2[0], y2[0], volume[0]])
-        
-      except:
-        continue
-      
+      for r in range(-5, 6, 1):
+        EF[vidName][r].append(volume[r])
 
-  return volumes
+      if drawLines == True:
+        outputPath = dataPath + "line-orig/" + vidName + "/" + frame + ".png"
 
-# Draw lines on frames with given coordinates and frames
-def drawLinesOnFrames(dataPath, dataframe, method):
-  volumes = calculateVolumeFromData(dataPath, dataframe, method)
+        image = cv2.imread(pathName)
+
+        for k in range(len(x1[0])):
+          cv2.line(image, (x1[0][k], y1[0][k]), (x2[0][k], y2[0][k]), (255, 255, 255), 1)
+          
+        cv2.imwrite(outputPath, image)
+    else:
+      flagged_volumes.append([pathName, vidName, frame])
+
+  return volumes, flagged_volumes, EF
+
+def compareWithGroundTruth(method, shouldDrawLines=False):
+
+  # Gather volumes
+  calc, flagged, EF = calculateVolumeAndDrawLines(method, shouldDrawLines)
   
-  for i in volumes:
-    vidName = i[1]
-    frameNumber = i[2]
+  differences = {}
+  negative5, negative4, negative3, negative2, negative1, zero, positive1, positive2, positive3, positive4, positive5 = 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  
+  counts = 0
 
-    outputPath = dataPath + "line-orig/" + vidName + "/" + str(frameNumber) + ".png"
-    image = cv2.imread(i[0])
-    
-    for k in range(len(i[3])):
-      cv2.line(image, (i[3][k], i[4][k]), (i[5][k], i[6][k]), (255, 255, 255), 1)
-      
-    cv2.imwrite(outputPath, image)
+  # Append the calculated EF to the dictionary
+  for k in EF:
+    if k not in differences:
+      differences[k] = {-5: [], -4: [], -3: [], -2: [], -1: [], 0: [], 1: [], 2: [], 3: [], 4: [], 5: []}
 
-drawLinesOnFrames(dataPath, df, "Biplane Area")
+    for angleChange in EF[k]:
+      EDV = max(EF[k][angleChange])
+      ESV = min(EF[k][angleChange])
 
+      ef = ((EDV-ESV)/EDV) * 100
+
+      differences[k][angleChange] = ef
+  
+  # Append the ground truth EF to the dictionary
+  for i in range(len(file_df)):
+    if file_df.iloc[i, 0] in differences:
+      negative5 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][-5])
+      negative4 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][-4])
+      negative3 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][-3])
+      negative2 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][-2])
+      negative1 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][-1])
+      zero = abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][0])
+      positive1 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][1])
+      positive2 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][2])
+      positive3 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][3])
+      positive4 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][4])
+      positive5 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][5])
+      counts += 1
+
+
+  return [negative5/counts, negative4/counts, negative3/counts, negative2/counts, negative1/counts, zero/counts, positive1/counts, positive2/counts, positive3/counts, positive4/counts, positive5/counts]
+
+def makeHistogram(method):
+  x=['-5', '-4','-3','-2','-1','0','1','2','3','4', '5']
+  y = compareWithGroundTruth(method)
+
+  print(y)
+  plt.bar(x,y)
+  plt.xlabel('Angle Shifts')
+  plt.ylabel("Average Differences")
+  plt.title(method)
+  plt.show()
+
+makeHistogram("Simpson")
 # # Calculate the EF
 # for i,k in zip(volumes[0::2], volumes[1::2]):
 #   if (i[6] != '') and (k[6] != ''):

@@ -1,66 +1,6 @@
-import os
 import cv2
 import numpy as np
 import math
-
-def makeDirectories(dataPath, vidName):
-  if os.path.isdir(dataPath + "frames/") is False:
-    os.mkdir(dataPath + "frames/")
-    
-  if os.path.isdir(dataPath + "frames/" + vidName) is False:
-    os.mkdir(dataPath + "frames/" + vidName)
-
-  if os.path.isdir(dataPath + "mask/") is False:
-    os.mkdir(dataPath + "mask/")
-
-  if os.path.isdir(dataPath + "mask/" + vidName) is False:
-    os.mkdir(dataPath + "frames/" + vidName)
-
-  if os.path.isdir(dataPath + "line-orig/") is False:
-    os.mkdir(dataPath + "line-orig/")
-
-  if os.path.isdir(dataPath + "line-orig/" + vidName) is False:
-    os.mkdir(dataPath + "line-orig/" + vidName)
-
-def getSpecificFrameAndCrop(dataPath, vidPath, frameNumber):
-  vidName = os.path.basename(vidPath)
-  if (os.path.exists(vidPath)):
-    cap = cv2.VideoCapture(vidPath)
-
-    cap.set(1, frameNumber)
-    ret, frame = cap.read()
-
-    outputPath = dataPath + "frames/" + vidName + "/" + str(frameNumber) + ".png"
-    h, w, c = frame.shape
-
-    makeDirectories(dataPath, vidName)
-    # Starting Coords
-    x1 = 0
-    y1 = 0
-
-    # Ending Coords
-    x2 = 112
-    y2 = 112
-
-    # Crop
-    crop = frame[x1:x2, y1:y2]
-    cv2.imwrite(outputPath, crop)
-
-def makeMask(imagePath, outputPath, coordinatePairs):
-  image = cv2.imread(imagePath, -1)
-
-  mask = np.zeros(image.shape, dtype=np.uint8)
-  roi_corners = np.array([coordinatePairs], dtype=np.int32)
-  
-  channel_count = image.shape[2]
-  ignore_mask_color = (255,)*channel_count
-  cv2.fillPoly(mask, roi_corners, ignore_mask_color)
-
-  # apply the mask
-  masked_image = cv2.bitwise_and(image, mask)
-  
-  # save the result
-  cv2.imwrite(outputPath, masked_image)
 
 # Gets all the contours for certain image
 def obtainContourPoints(path):
@@ -93,7 +33,7 @@ def obtainContourPoints(path):
   for pt in contours:
       for i in pt:
         for coord in i:
-          points.append(coord)
+          points.append(coord.tolist())
   
   # Resets
   cv2.waitKey(0)
@@ -151,8 +91,6 @@ def getTopAndBottomCoords(points):
 
   return (x1, y1, x2, y2)
 
-def getXsAndYsWithSlope(higherInterceptPoints, lowerIntercept, slope):
-  print(higherInterceptPoints)
 
 # Create the 20 equally spaced points
 def getWeightedAveragePoints(x1, y1, x2, y2, number):
@@ -172,10 +110,11 @@ def calcExpectedIntercept(x, y, slope):
 def splitPoints(x1, y1, x2, y2, slope, points):
   # Calculate perpendicular slope
   perp_slope = -1/slope
-  
+  val = 0
+
   # Partitions grid to two halvess
   val = min(calcExpectedIntercept(x1, y1, slope), calcExpectedIntercept(x2, y2, slope))
-
+  
   # Points on lower half
   lowerIntercept = []
   # Points on higher half
@@ -192,8 +131,7 @@ def splitPoints(x1, y1, x2, y2, slope, points):
       higherIntercept.append([x, y])
     else:
       lowerIntercept.append([x, y])
-
-  
+    
   # Gets rid of initial points
   if [x1, y1] in lowerIntercept:
     index = lowerIntercept.index([x1, y1])
@@ -206,7 +144,7 @@ def splitPoints(x1, y1, x2, y2, slope, points):
 
   lowerIntercept = [[x1, y1]] + lowerIntercept
   higherIntercept = [[x2, y2]] + higherIntercept
-  
+
   return (lowerIntercept, higherIntercept)
 
 # Distance Between 2 Pointss
@@ -239,11 +177,9 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   if getDistance(weighted_avg[0], lowerIntercept[0]) > getDistance(weighted_avg[0], lowerIntercept[-1]):
       lowerIntercept = lowerIntercept[::-1]
 
-  # Important Mask Points
   higherInterceptAveragePoints = []
   lowerInterceptAveragePoints = []
 
-  # Goes through mask for high side
   for averagePoint in weighted_avg:
     condition = True
     while condition:
@@ -251,11 +187,11 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
       new_slope = getSlope(point, averagePoint)
       higherIndex += 1
 
+
       if new_slope>perp_slope:
         higherInterceptAveragePoints.append(point)
         condition = False
 
-  # Goes through mask for low side
   for averagePoint in weighted_avg:
     condition = True
     while condition:
@@ -340,23 +276,39 @@ def volumeBulletMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherIn
 def calculateVolume(path, number, method = "Simpson"):
   try:
     points = obtainContourPoints(path)
+
     x1, y1, x2, y2 = getTopAndBottomCoords(points)
     mainLineSlope = getSlope([x1, y1], [x2, y2])
     lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
+
     volumes = {}
     x1s = {}
     y1s = {}
     x2s = {}
     y2s = {}
-
-    # Volumes for all 11 cases
-    for i in range(-5, 5, 1):
+  
+    # Volumes for all 0 to 5 cases
+    for i in range(-5, 6, 1):
       x1, y1 = lowerIntercept[i]
       x2, y2 = higherIntercept[i]
 
       slope = getSlope([x1, y1], [x2, y2])
+      # print([x1, y1], [x2, y2])
 
-      lowerInterceptPoints, higherInterceptPoints = splitPoints(x1, y1, x2, y2, slope, points)
+      p1Index = points.index([x1, y1])
+      p2Index = points.index([x2, y2])
+
+      lowerIndex = min(p1Index, p2Index)
+      higherIndex = max(p1Index, p2Index)
+
+      higherInterceptPoints = points[lowerIndex:higherIndex]
+      lowerInterceptPoints = points[higherIndex:] + points[:lowerIndex]
+
+      # if (i<0):
+      #   lowerInterceptPoints, higherInterceptPoints = higherInterceptPoints, lowerInterceptPoints
+
+      # if lowerInterceptPoints[0][]
+      # lowerInterceptPoints, higherInterceptPoints = splitPoints(x1, y1, x2, y2, slope, points)
 
       weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
       lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope)
@@ -378,14 +330,12 @@ def calculateVolume(path, number, method = "Simpson"):
         volumes[i] = volumeBulletMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       else:
         return "Incorrect Method"
-  
+    return (volumes, x1s, y1s, x2s, y2s)
   except:
-    volumes, x1s, y1s, x2s, y2s = "", "", "", "", ""
-  
-  return (volumes, x1s, y1s, x2s, y2s)
+    return ("", "", "", "", "")  
 
 
-# print(calculateVolume("/content/output/image.png", 20, method = "Simpson"))
+#print(calculateVolume("/content/output/image.png", 20, method = "Simpson"))
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))
