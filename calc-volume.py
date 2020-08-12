@@ -54,7 +54,7 @@ def gatherPathsAndFrameData():
   return paths, numbers
 
 # Evaluate functions based on gatherPathsAndFrameData() function's returned data
-def calculateVolumeAndDrawLines(methodToUse, drawLines = False):
+def calculateVolumeAndDrawLines(methodToUse, drawLines = True):
   volumes, flagged_volumes = [], []
   EF = {}
 
@@ -83,7 +83,10 @@ def calculateVolumeAndDrawLines(methodToUse, drawLines = False):
         image = cv2.imread(pathName)
 
         for k in range(len(x1[0])):
-          cv2.line(image, (x1[0][k], y1[0][k]), (x2[0][k], y2[0][k]), (255, 255, 255), 1)
+          if k is 0:
+            cv2.line(image, (x1[0][k], y1[0][k]), (x2[0][k], y2[0][k]), (31, 55, 145), 5)
+          else:
+            cv2.line(image, (x1[0][k], y1[0][k]), (x2[0][k], y2[0][k]), (255, 255, 255), 1)
           
         cv2.imwrite(outputPath, image)
     else:
@@ -91,7 +94,7 @@ def calculateVolumeAndDrawLines(methodToUse, drawLines = False):
 
   return volumes, flagged_volumes, EF
 
-def compareWithGroundTruth(method, shouldDrawLines=False):
+def compareWithGroundTruth(method, shouldDrawLines=True):
 
   # Gather volumes
   calc, flagged, EF = calculateVolumeAndDrawLines(method, shouldDrawLines)
@@ -130,8 +133,10 @@ def compareWithGroundTruth(method, shouldDrawLines=False):
       positive5 += abs(file_df.iloc[i, 1] - differences[file_df.iloc[i, 0]][5])
       counts += 1
 
-
-  return [negative5/counts, negative4/counts, negative3/counts, negative2/counts, negative1/counts, zero/counts, positive1/counts, positive2/counts, positive3/counts, positive4/counts, positive5/counts]
+  try:
+    return [negative5/counts, negative4/counts, negative3/counts, negative2/counts, negative1/counts, zero/counts, positive1/counts, positive2/counts, positive3/counts, positive4/counts, positive5/counts]
+  except:
+    return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 def makeHistogram(method):
   x=['-5', '-4','-3','-2','-1','0','1','2','3','4', '5']
@@ -145,6 +150,9 @@ def makeHistogram(method):
   plt.show()
 
 makeHistogram("Simpson")
+makeHistogram("Single Ellipsoid")
+makeHistogram("Biplane Area")
+makeHistogram("Bullet")
 # # Calculate the EF
 # for i,k in zip(volumes[0::2], volumes[1::2]):
 #   if (i[6] != '') and (k[6] != ''):
