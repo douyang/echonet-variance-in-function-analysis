@@ -14,7 +14,8 @@ import math
 import cv2
 import scipy.stats
 
-makeFrames, compareEF = False, True
+makeFrames = False # generate frames and lines
+compareEF = True # comparing EF or timings plots
 
 dataPath = "/Users/ishan/Documents/Stanford/ouyang-data/"
 path = os.path.join(dataPath, "CSV/", "VolumeTracings.csv")
@@ -159,7 +160,7 @@ def compareTimingsWithGroundTruth(method):
     if counts > 0:
       return [[negative5ESV/counts, negative5EDV/counts], [negative4ESV/counts, negative4EDV/counts], [negative3ESV/counts, negative3EDV/counts], [negative2ESV/counts, negative2EDV/counts], [negative1ESV/counts, negative1EDV/counts], [zeroESV/counts, zeroEDV/counts], [positive1ESV/counts, positive1EDV/counts], [positive2ESV/counts, positive2EDV], [positive3ESV/counts, positive3EDV], [positive4ESV/counts, positive4EDV], [positive5ESV/counts, positive5EDV]], "Box"
     else:
-      return 0
+      return [0, 0], "Box"
 
   else:
     # Append the ground truth EF to the dictionary
@@ -181,7 +182,7 @@ def compareTimingsWithGroundTruth(method):
     if counts > 0:
       return [negative5/counts, negative4/counts, negative3/counts, negative2/counts, negative1/counts, zero/counts, positive1/counts, positive2/counts, positive3/counts, positive4/counts, positive5/counts], "Bar"
     else:
-      return 0
+      return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "Bar"
 
 def makePlot(method):
   data_to_plot, dataType = compareTimingsWithGroundTruth(method)
@@ -215,6 +216,6 @@ def makePlot(method):
     plt.show()
 
 #makePlot("Simpson")
-#makePlot("Single Ellipsoid")
+makePlot("Single Ellipsoid")
 #makePlot("Biplane Area")
 #makePlot("Bullet")
