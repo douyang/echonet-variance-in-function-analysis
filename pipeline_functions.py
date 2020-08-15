@@ -1,6 +1,48 @@
 import cv2
 import numpy as np
 import math
+import os
+
+def makeDirectories(dataPath, vidName):
+  framesPath = os.path.join(dataPath, "frames/")
+  maskPath = os.path.join(dataPath, "mask/")
+  lines = os.path.join(dataPath, "line-orig/")
+  stats = os.path.join(dataPath, "stats/")
+
+  if os.path.isdir(framesPath) is False:
+    os.mkdir(framesPath)
+
+  if os.path.isdir(maskPath) is False:
+    os.mkdir(maskPath)
+
+  if os.path.isdir(lines) is False:
+    os.mkdir(lines)
+
+  if os.path.isdir(stats) is False:
+    os.mkdir(stats)
+
+def getSpecificFrameAndCrop(dataPath, vidPath, outputPath, frameNumber):
+  vidName = os.path.basename(vidPath)
+  if (os.path.exists(vidPath)):
+    cap = cv2.VideoCapture(vidPath)
+
+    cap.set(1, frameNumber)
+    ret, frame = cap.read()
+
+    h, w, c = frame.shape
+
+    makeDirectories(dataPath, vidName)
+    # Starting Coords
+    x1 = 0
+    y1 = 0
+
+    # Ending Coords
+    x2 = 112
+    y2 = 112
+
+    # Crop
+    crop = frame[x1:x2, y1:y2]
+    cv2.imwrite(outputPath, crop)
 
 # Gets all the contours for certain image
 def obtainContourPoints(path):
@@ -16,7 +58,7 @@ def obtainContourPoints(path):
   upper = (150,255,255)
 
   # threshold and invert so hexagon is white on black background
-  thresh = cv2.inRange(hsv, lower, upper);
+  thresh = cv2.inRange(hsv, lower, upper)
   opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
   closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
   erosion = cv2.erode(closing,kernel,iterations = 1)
@@ -279,6 +321,9 @@ def calculateVolume(path, number, method = "Simpson"):
 
     x1, y1, x2, y2 = getTopAndBottomCoords(points)
     mainLineSlope = getSlope([x1, y1], [x2, y2])
+    baseAngle = math.atan(mainLineSlope)
+    if baseAngle>0:
+        baseAngle -= math.pi
     lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
 
     volumes = {}
@@ -286,6 +331,7 @@ def calculateVolume(path, number, method = "Simpson"):
     y1s = {}
     x2s = {}
     y2s = {}
+    slopes = {}
   
     # Volumes for all 0 to 5 cases
     for i in range(-5, 6, 1):
@@ -293,7 +339,12 @@ def calculateVolume(path, number, method = "Simpson"):
       x2, y2 = higherIntercept[i]
 
       slope = getSlope([x1, y1], [x2, y2])
-      # print([x1, y1], [x2, y2])
+      angle = math.atan(slope)
+
+      if angle>0:
+        angle -= math.pi
+        
+      slopes[i] = (baseAngle - angle) * 180/math.pi
 
       p1Index = points.index([x1, y1])
       p2Index = points.index([x2, y2])
@@ -330,13 +381,11 @@ def calculateVolume(path, number, method = "Simpson"):
         volumes[i] = volumeBulletMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       else:
         return "Incorrect Method"
-    return (volumes, x1s, y1s, x2s, y2s)
+    return (volumes, x1s, y1s, x2s, y2s, slopes)
   except:
-    return ("", "", "", "", "")  
+    return ("", "", "", "", "", "")
 
-
-#print(calculateVolume("/content/output/image.png", 20, method = "Simpson"))
+#print(calculateVolume("/content/output/image.png", 20, method = "Simpson")[5])
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))
- 
