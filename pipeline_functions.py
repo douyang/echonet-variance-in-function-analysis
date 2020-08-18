@@ -58,7 +58,7 @@ def obtainContourPoints(path):
   upper = (150,255,255)
 
   # threshold and invert so hexagon is white on black background
-  thresh = cv2.inRange(hsv, lower, upper)
+  thresh = cv2.inRange(hsv, lower, upper);
   opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
   closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
   erosion = cv2.erode(closing,kernel,iterations = 1)
@@ -133,6 +133,8 @@ def getTopAndBottomCoords(points):
 
   return (x1, y1, x2, y2)
 
+def getXsAndYsWithSlope(higherInterceptPoints, lowerIntercept, slope):
+  print(higherInterceptPoints)
 
 # Create the 20 equally spaced points
 def getWeightedAveragePoints(x1, y1, x2, y2, number):
@@ -331,7 +333,7 @@ def calculateVolume(path, number, method = "Simpson"):
     y1s = {}
     x2s = {}
     y2s = {}
-    slopes = {}
+    degrees = {}
   
     # Volumes for all 0 to 5 cases
     for i in range(-5, 6, 1):
@@ -344,7 +346,8 @@ def calculateVolume(path, number, method = "Simpson"):
       if angle>0:
         angle -= math.pi
         
-      slopes[i] = (baseAngle - angle) * 180/math.pi
+      degrees[i] = (baseAngle - angle) * 180/math.pi
+      # print([x1, y1], [x2, y2])
 
       p1Index = points.index([x1, y1])
       p2Index = points.index([x2, y2])
@@ -354,12 +357,6 @@ def calculateVolume(path, number, method = "Simpson"):
 
       higherInterceptPoints = points[lowerIndex:higherIndex]
       lowerInterceptPoints = points[higherIndex:] + points[:lowerIndex]
-
-      # if (i<0):
-      #   lowerInterceptPoints, higherInterceptPoints = higherInterceptPoints, lowerInterceptPoints
-
-      # if lowerInterceptPoints[0][]
-      # lowerInterceptPoints, higherInterceptPoints = splitPoints(x1, y1, x2, y2, slope, points)
 
       weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
       lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope)
@@ -381,7 +378,7 @@ def calculateVolume(path, number, method = "Simpson"):
         volumes[i] = volumeBulletMethodCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       else:
         return "Incorrect Method"
-    return (volumes, x1s, y1s, x2s, y2s, slopes)
+    return (volumes, x1s, y1s, x2s, y2s, degrees)
   except:
     return ("", "", "", "", "", "")
 

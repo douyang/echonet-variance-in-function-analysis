@@ -62,6 +62,7 @@ def calculateVolumeAndDrawLines(methodToUse):
     numberValue = parallelLinesCount[i]
 
     volume, x1, y1, x2, y2, slopes = pipeline_functions.calculateVolume(pathName, numberValue, method = methodToUse)
+    print(x1)
     if len(x1) is not 0:
       volumes.append([pathName, vidName, frame, volume[0]])
 
@@ -199,7 +200,7 @@ def makePlot(method):
     bp = ax.boxplot(data_to_plot[:-3])
 
     # Save the figure
-    exportPath = dataPath + "stats/" + method + "-EF.png"
+    exportPath = dataPath + "stats/" + method + " - EF.png"
     fig.savefig(dataPath + method + '.png', bbox_inches='tight')
   
   elif dataType is "Bar":
@@ -209,13 +210,13 @@ def makePlot(method):
     plt.bar(x,y)
     plt.xlabel('Angle Shifts')
     plt.ylabel("Average Differences")
-    plt.title(method)
+    plt.title("EF vs Ground Truth (" + method + ")")
 
-    exportPath = dataPath + "stats/" + method + "-timing.png"
+    exportPath = dataPath + "stats/" + method + " - timing.png"
     plt.savefig(exportPath)
     plt.show()
 
-#makePlot("Simpson")
-makePlot("Single Ellipsoid")
+makePlot("Simpson")
+#makePlot("Single Ellipsoid")
 #makePlot("Biplane Area")
 #makePlot("Bullet")
