@@ -2,7 +2,8 @@
 
 ### Installation
 First, clone this repository and enter the directory by running:
-```git clone https://github.com/douyang/echonet-function-evaluation
+```
+git clone https://github.com/douyang/echonet-function-evaluation
 cd echonet-function-evaluation
 ```
 
