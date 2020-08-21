@@ -16,5 +16,7 @@ EchoNet-Function-Evaluation is implemented for Python 3, and depends on the foll
 * SciPy
 
 The dependencies can be installed by navigating to the cloned directory and running:
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
