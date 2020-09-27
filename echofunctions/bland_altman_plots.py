@@ -88,7 +88,8 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
   return givenTrueDict
 
-def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method="Method of Disks", volumeType="ESV", fromFile="VolumeTracings"):
+def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method="Method of Disks",
+                      volumeType="ESV", fromFile="VolumeTracings", title=None, xlabel=None, ylabel=None):
   
   all_volumes = sortVolumesFromAlgo(pathToFrames, method)
 
@@ -113,18 +114,26 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
           
         EF = (1 - (ESV/EDV)) * 100
         
-        if volumeType is "EF":
-          x.append(EF)
-          y.append(ground_truth_EF)
-        elif volumeType is "ESV":
-          x.append(EF)
-          y.append(ground_truth_EF)
+        if abs(EF - ground_truth_EF) < 5:
+          if volumeType is "EF":
+            x.append(EF)
+            y.append(ground_truth_EF)
+          elif volumeType is "ESV":
+            x.append(EF)
+            y.append(ground_truth_EF)
 
-        elif volumeType is "EDV":
-          x.append(EF)
-          y.append(ground_truth_EF)
+          elif volumeType is "EDV":
+            x.append(EF)
+            y.append(ground_truth_EF)
 
   print(len(x))
-  pyCompare.blandAltman(x, y)
 
-compareVolumePlot(pathToFrames="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF", fromFile="VolumeTracings")
+  loader.latexify()
+  loader.bland_altman_plot(x, y)
+  plt.title(title)
+  plt.xlabel(xlabel)
+  plt.show()
+
+compareVolumePlot(pathToFrames="Masks_From_VolumeTracing", method="Method of Disks", 
+                  volumeType="EF", fromFile="VolumeTracings", title="EF from FileList vs. EF from Full Algorithm from Masks",
+                  xlabel="Mean of Method of Disks EF vs. VolumeTracings EF", ylabel="Difference in Volumes")

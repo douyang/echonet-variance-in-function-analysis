@@ -154,22 +154,21 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):  
         yield l[i:i + n]
 
-def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF", fromFile="FileList", normalized=True):
+def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF", fromFile="FileList", normalized=True, numberOfBuckets=30):
   changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized)
+  changesInVolumesDict = {k:v for k,v in changesInVolumesDict.items() if len(k) > 200}
+
   lists = list(sorted(changesInVolumesDict.keys()))
 
   differenceInVolumes = {}
-  #changesInVolumesDict = {k:v for k,v in changesInVolumesDict.items() if k  > -30 and k < 30}
 
-  #differenceInVolumes = collections.OrderedDict(sorted(changesInVolumesDict.items()))
-
-  buckets = list(divide_chunks(lists, 30)) 
-  print(buckets)
-  print(len(buckets))
+  buckets = list(divide_chunks(lists, int(len(lists)/numberOfBuckets)))
   for bucket in buckets:
     for key in changesInVolumesDict:
       if key in range(bucket[0], bucket[-1]):
-        differenceInVolumes[str(bucket[0]) + "-" + str(bucket[-1])]+= changesInVolumesDict[key]
+        if key not in differenceInVolumes:
+          differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
+        differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
 
   # setting x-tick labels
   labels = []
@@ -203,4 +202,5 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # show plot
   plt.show()
 
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", fromFile="VolumeTracings", normalized=True)
+createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+              fromFile="VolumeTracings", normalized=True, numberOfBuckets=30)

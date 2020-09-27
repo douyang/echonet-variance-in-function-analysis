@@ -28,14 +28,11 @@ def obtainContourPoints(path):
         for coord in i:
           points.append(coord.tolist())
   
-  # Resets
-  cv2.waitKey(0)
-  cv2.destroyAllWindows()
-
   return points
 
 def getIdealPointGroup(points):
   pointGroups = []
+  index = 0
   subgroup = [points[0]]
 
   for i in range(len(points) - 1):
@@ -50,6 +47,7 @@ def getIdealPointGroup(points):
 
   pointGroups.append(subgroup)
 
+  mainPointGroup = []
   maxPointGroupSize = 0
 
   for group in pointGroups:
@@ -239,7 +237,6 @@ def volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterc
   return volume
 
 
-
 def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2, slope, i):
   # Calculate perpendicular slope
   try:
@@ -258,6 +255,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   # Make sure its from top to bottom direction
   if getDistance(weighted_avg[0], higherIntercept[0]) > getDistance(weighted_avg[0], higherIntercept[-1]):
       higherIntercept = higherIntercept[::-1]
+  
 
   # Make sure its from top to bottom direction
   if getDistance(weighted_avg[0], lowerIntercept[0]) > getDistance(weighted_avg[0], lowerIntercept[-1]):
@@ -271,6 +269,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
       condition = True
       count = 0
       while condition:
+        higherIndex = max(higherIndex, 1)
         point = higherIntercept[higherIndex]
         if higherIndex == 0:
           prev_point =  [x1, y1] if getDistance(point, [x1, y1]) < getDistance(point, [x2, y2]) else [x2, y2]
@@ -283,61 +282,88 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
         betweenCond = ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])) and abs(new_slope) > abs(slope) and abs(prev_slope) > abs(slope)
         slopeCond = (new_slope >= perp_slope and prev_slope<=perp_slope) or  (new_slope <= perp_slope and prev_slope>=perp_slope)
 
-        if slopeCond and not betweenCond:
-          higherInterceptAveragePoints.append(point)
-          condition = False
-        elif abs(perp_slope) >= 10 and ((new_slope > 0 and prev_slope < 0) or (new_slope < 0 and prev_slope > 0)):
-          higherInterceptAveragePoints.append(point)
-          condition = False
-        elif count > len(higherIntercept)/2:
-          higherIndex -= count
-          if higherIndex == 0:
-            higherInterceptAveragePoints.append(start_point)
-          else:
-            higherInterceptAveragePoints.append(higherIntercept[higherIndex])
-          condition = False
-        
         count += 1
         higherIndex += 1
-    except:
-      higherInterceptAveragePoints.append(higherIntercept[higherIndex - 1])
 
+        if perp_slope == 10000:
+          if (point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0]):
+            higherInterceptAveragePoints.append(point)
+            condition = False
+            higherIndex -= 1
+        elif not (len(higherInterceptAveragePoints)>0 and higherInterceptAveragePoints[0] == point and point == start_point):
+          if slopeCond and not betweenCond:
+            higherInterceptAveragePoints.append(point)
+            condition = False
+            higherIndex -= 1
+          elif abs(perp_slope) >= 10 and ((new_slope > 0 and prev_slope < 0) or (new_slope < 0 and prev_slope > 0)):
+            higherInterceptAveragePoints.append(point)
+            condition = False
+            higherIndex -= 1
+          elif count >= len(higherIntercept)-1:
+            higherIndex -= count
+            if higherIndex == 0:
+              higherInterceptAveragePoints.append(start_point)
+            else:
+              higherInterceptAveragePoints.append(higherIntercept[higherIndex])
+            condition = False
+            higherIndex -= 1
+
+    except:
+      higherInterceptAveragePoints.append(higherIntercept[-1])
+  
   for averagePoint in weighted_avg:
     try:
       condition = True
       count = 0
       while condition:
+        lowerIndex = max(lowerIndex, 1)
         point = lowerIntercept[lowerIndex]
+
         if lowerIndex == 0:
-          prev_point = [x1, y1] if getDistance(point, [x1, y1]) < getDistance(point, [x2, y2]) else [x2, y2]
+          prev_point =  [x1, y1] if getDistance(point, [x1, y1]) < getDistance(point, [x2, y2]) else [x2, y2]
           start_point = prev_point[:]
+
         else:
           prev_point = lowerIntercept[lowerIndex-1]
+
 
         new_slope = getSlope(point, averagePoint)
         prev_slope =  getSlope(prev_point, averagePoint)
         betweenCond = ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])) and abs(new_slope) > abs(slope) and abs(prev_slope) > abs(slope)
         slopeCond = (new_slope >= perp_slope and prev_slope<=perp_slope) or  (new_slope <= perp_slope and prev_slope>=perp_slope)
+        # print(slopeCond and not betweenCond, count, point, prev_point, averagePoint, prev_slope, new_slope, perp_slope
 
-        if slopeCond and not betweenCond:
-          lowerInterceptAveragePoints.append(point)
-          condition = False
-        elif abs(perp_slope) > 10 and ((new_slope > 0 and prev_slope < 0) or (new_slope < 0 and prev_slope > 0)):
-          lowerInterceptAveragePoints.append(point)
-          condition = False
-        elif count > len(lowerIntercept)/2:
-          lowerIndex -= count
-          if lowerIndex == 0:
-            lowerInterceptAveragePoints.append(start_point)
-          else:
-            lowerInterceptAveragePoints.append(lowerIntercept[lowerIndex])
-          condition = False
-        
+
         count += 1
         lowerIndex += 1
+
+        if perp_slope == 10000:
+          if ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])):
+            lowerInterceptAveragePoints.append(point)
+            condition = False
+            lowerIndex -= 1
+        elif not (len(lowerInterceptAveragePoints)>0 and lowerInterceptAveragePoints[0] == point and point == start_point):
+          if slopeCond and not betweenCond:
+            lowerInterceptAveragePoints.append(point)
+            condition = False
+            lowerIndex -= 1
+          elif abs(perp_slope) > 10 and ((new_slope > 0 and prev_slope < 0) or (new_slope < 0 and prev_slope > 0)):
+            lowerInterceptAveragePoints.append(point)
+            condition = False
+            lowerIndex -= 1
+          elif count >= len(lowerIntercept)-1:
+            lowerIndex -= count
+            if lowerIndex == 0:
+              lowerInterceptAveragePoints.append(start_point)
+            else:
+              lowerInterceptAveragePoints.append(lowerIntercept[lowerIndex])
+            condition = False
+            lowerIndex -= 1
     except:
-      lowerInterceptAveragePoints.append(lowerIntercept[lowerIndex - 1])
+      lowerInterceptAveragePoints.append(lowerIntercept[-1])
+
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
+
 
 
 def calculateVolume(path, number, method = "Method of Disks"):
@@ -364,7 +390,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
   y2s = {}
   degrees = {}
 
-  # Volumes for all -n to n cases
+  # Volumes for all 0 to 5 cases
   for i in range(-30, 31, 1):
     x1, y1 = lowerIntercept[i]
     x2, y2 = higherIntercept[i]
@@ -400,6 +426,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
     x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
     y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
+
     if  method == "Method of Disks":
       volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
@@ -409,7 +436,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
     
   return (volumes, x1s, y1s, x2s, y2s, degrees)
 
-# print(calculateVolume(path, 20, method = "Method of Disks"))
+#print(calculateVolume(path, 20, method = "Method of Disks"))
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))
