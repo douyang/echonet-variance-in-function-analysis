@@ -163,13 +163,27 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   differenceInVolumes = {}
 
-  buckets = list(divide_chunks(lists, int(len(lists)/numberOfBuckets)))
-  for bucket in buckets:
-    for key in changesInVolumesDict:
-      if key in range(bucket[0], bucket[-1]):
-        if key not in differenceInVolumes:
-          differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
-        differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
+  # buckets = list(divide_chunks(lists, int(len(lists)/numberOfBuckets)))
+  # for bucket in buckets:
+  #   for key in changesInVolumesDict:
+  #     if key in range(bucket[0], bucket[-1]):
+  #       if key not in differenceInVolumes:
+  #         differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
+  #       differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
+
+  # buckets
+  for key in changesInVolumesDict:
+    if key == 0:
+      bucket = [0, 0]
+    else:
+      residue = key % 5
+      lowerBucketValue = key - residue
+      upperBucketValue = lowerBucketValue + 5
+      bucket = [int(lowerBucketValue), int(upperBucketValue)]
+            
+    if bucket not in differenceInVolumes:
+      differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
+    differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
 
   # setting x-tick labels
   labels = []
