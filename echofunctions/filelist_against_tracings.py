@@ -9,7 +9,8 @@ import os
 import math
 import config
 import loader
-import algorithms
+from algorithms import funcs as funcs
+from algorithms import volume_tracings_calculations as tracings
 
 def sortFrameVolumes(method):
   _, df = loader.dataModules()
@@ -25,15 +26,15 @@ def sortFrameVolumes(method):
     
     number = len(x1) - 1
 
-    maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = algorithms.volume_tracings_calculations.calcParallelAndMaxPoints(x1, y1, x2, y2)
+    maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = tracings.calcParallelAndMaxPoints(x1, y1, x2, y2)
 
     if number < 22:
       if method == "Method of Disks":
-        ground_truth_volume = algorithms.funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       elif method == "Prolate Ellipsoid":
-        ground_truth_volume = algorithms.funcs.volumeProlateEllipsoidMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        ground_truth_volume = funcs.volumeProlateEllipsoidMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       elif method == "Bullet Method":
-        ground_truth_volume = algorithms.funcs.volumeBulletMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        ground_truth_volume = funcs.volumeBulletMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
       if videoName not in calculatedVolumeFromGroundTruth:
         calculatedVolumeFromGroundTruth[videoName] = []
@@ -84,4 +85,4 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, method="Method of Disks", tim
   ylabel = 'Ground Truth' + timing + ' From FileList'
   loader.scatterPlot(title=title, xlabel=xlabel, ylabel=ylabel, x1=x, y1=y, lineOfBestFit=True)
 
-compareVolumePlot(timing="EF")
+compareVolumePlot(timing="EF", method="Bullet Method")

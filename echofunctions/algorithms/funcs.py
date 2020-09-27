@@ -357,6 +357,9 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             lowerIndex -= 1
     except:
       lowerInterceptAveragePoints.append(lowerIntercept[-1])
+  
+  lowerInterceptAveragePoints.sort(key=lambda point: point[0]+point[1])
+  higherInterceptAveragePoints.sort(key=lambda point: point[0]+point[1])
 
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
@@ -420,7 +423,6 @@ def calculateVolume(path, number, method = "Method of Disks"):
     x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
     y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
-
     if  method == "Method of Disks":
       volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
@@ -430,7 +432,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
     
   return (volumes, x1s, y1s, x2s, y2s, degrees)
 
-#print(calculateVolume(path, 20, method = "Method of Disks"))
+# print(calculateVolume(path, 20, method = "Method of Disks"))
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))
