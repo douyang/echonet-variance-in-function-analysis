@@ -154,7 +154,8 @@ def divide_chunks(l, n):
     for i in range(0, len(l), n):  
         yield l[i:i + n]
 
-def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF", fromFile="FileList", normalized=True, numberOfBuckets=30):
+def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",
+                  fromFile="FileList", normalized=True, numberOfBuckets=30):
   changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized)
   changesInVolumesDict = {k:v for k,v in changesInVolumesDict.items() if len(k) > 200}
 

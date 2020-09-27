@@ -8,7 +8,8 @@ from ast import literal_eval
 import os
 import config
 import loader
-import algorithms
+from algorithms import funcs as funcs
+from algorithms import volume_tracings_calculations as tracings
 
 def sortVolumesFromAlgo(frames_path, method):
 
@@ -27,7 +28,7 @@ def sortVolumesFromAlgo(frames_path, method):
 
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = algorithms.funcs.calculateVolume(FRAMES_PATH, 20, method)
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, method)
 
         if videoName not in all_volumes and volumes is not "":
           all_volumes[videoName] = []
@@ -52,15 +53,15 @@ def sortFrameVolumeTracings(method):
     
     number = len(x1) - 1
 
-    maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = algorithms.volume_tracings_calculations.calcParallelAndMaxPoints(x1, y1, x2, y2)
+    maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = tracings.calcParallelAndMaxPoints(x1, y1, x2, y2)
 
     if number < 22:
       if method == "Method of Disks":
-        ground_truth_volume = algorithms.funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       elif method == "Prolate Ellipsoid":
-        ground_truth_volume = algorithms.funcs.volumeProlateEllipsoidMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        ground_truth_volume = funcs.volumeProlateEllipsoidMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       elif method == "Bullet Method":
-        ground_truth_volume = algorithms.funcs.volumeBulletMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        ground_truth_volume = funcs.volumeBulletMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
       if videoName not in calculatedVolumeFromGroundTruth:
         calculatedVolumeFromGroundTruth[videoName] = []
@@ -85,7 +86,7 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
   return givenTrueDict
 
-def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method="Method of Disks", volumeType="ESV", fromFile="VolumeTracings"):
+def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method="Method of Disks", volumeType="ESV", fromFile=None):
   
   all_volumes = sortVolumesFromAlgo(pathToFrames, method)
 

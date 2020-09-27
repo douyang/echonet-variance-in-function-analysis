@@ -236,7 +236,6 @@ def volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterc
 
   return volume
 
-
 def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2, slope, i):
   # Calculate perpendicular slope
   try:
@@ -295,7 +294,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
-          elif abs(perp_slope) >= 10 and ((new_slope > 0 and prev_slope < 0) or (new_slope < 0 and prev_slope > 0)):
+          elif abs(perp_slope) >= 6 and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
@@ -322,7 +321,6 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
         if lowerIndex == 0:
           prev_point =  [x1, y1] if getDistance(point, [x1, y1]) < getDistance(point, [x2, y2]) else [x2, y2]
           start_point = prev_point[:]
-
         else:
           prev_point = lowerIntercept[lowerIndex-1]
 
@@ -331,14 +329,12 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
         prev_slope =  getSlope(prev_point, averagePoint)
         betweenCond = ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])) and abs(new_slope) > abs(slope) and abs(prev_slope) > abs(slope)
         slopeCond = (new_slope >= perp_slope and prev_slope<=perp_slope) or  (new_slope <= perp_slope and prev_slope>=perp_slope)
-        # print(slopeCond and not betweenCond, count, point, prev_point, averagePoint, prev_slope, new_slope, perp_slope
-
 
         count += 1
         lowerIndex += 1
 
         if perp_slope == 10000:
-          if ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])):
+          if ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])):            
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
@@ -347,7 +343,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
-          elif abs(perp_slope) > 10 and ((new_slope > 0 and prev_slope < 0) or (new_slope < 0 and prev_slope > 0)):
+          elif (abs(perp_slope) > 6) and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
@@ -363,8 +359,6 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
       lowerInterceptAveragePoints.append(lowerIntercept[-1])
 
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
-
-
 
 def calculateVolume(path, number, method = "Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))
