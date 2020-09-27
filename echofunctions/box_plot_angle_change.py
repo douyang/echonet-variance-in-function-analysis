@@ -177,6 +177,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       labels.append(i)
 
   # figure related code
+  loader.latexify()
   fig = plt.figure()
   fig.suptitle('Comparison', fontsize=14, fontweight='bold')
   

@@ -124,6 +124,7 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
       else:
         print("Less than 2 volumes calculated: " + videoName + " " + str(volumes))
 
+  loader.latexify()
   title = "Masks from VolumeTracings and Lines from " + method + " " + volumeType + " vs. " + fromFile + " " + volumeType
   xlabel = method + " Calculated " + volumeType
   ylabel = 'Ground Truth ' + volumeType + " From " + fromFile
