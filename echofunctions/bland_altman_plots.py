@@ -114,17 +114,16 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
           
         EF = (1 - (ESV/EDV)) * 100
         
-        if abs(EF - ground_truth_EF) < 5:
-          if volumeType is "EF":
-            x.append(EF)
-            y.append(ground_truth_EF)
-          elif volumeType is "ESV":
-            x.append(EF)
-            y.append(ground_truth_EF)
+        if volumeType is "EF":
+          x.append(EF)
+          y.append(ground_truth_EF)
+        elif volumeType is "ESV":
+          x.append(EF)
+          y.append(ground_truth_EF)
 
-          elif volumeType is "EDV":
-            x.append(EF)
-            y.append(ground_truth_EF)
+        elif volumeType is "EDV":
+          x.append(EF)
+          y.append(ground_truth_EF)
 
   print(len(x))
 
