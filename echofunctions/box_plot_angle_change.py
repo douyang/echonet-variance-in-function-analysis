@@ -157,11 +157,6 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
   
   return changesInVolumesDict
 
-def divide_chunks(l, n): 
-    # looping till length l 
-    for i in range(0, len(l), n):  
-        yield l[i:i + n]
-
 def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",
                   fromFile="FileList", normalized=True, sweeps=30):
   changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps)
@@ -203,7 +198,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
     ax.set_title('Difference in Calculated ' + volumeType + ' against ' + fromFile)
   else:
     ax.set_title('Normalized (from mean) Difference in Calculated ' + volumeType + ' against ' + fromFile)
-
+yth
   ax.set_xlabel('Angle Changes (Degrees)')
 
   if volumeType is "ESV" or volumeType is "EDV":
@@ -216,18 +211,6 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # show plot
   plt.show()
 
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="FileList", normalized=True, sweeps=30)
-
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="FileList", normalized=False, sweeps=30)
-
-# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=30)
-
-# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=False, sweeps=30)
-
 # createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=True, sweeps=30)
 
@@ -239,5 +222,3 @@ createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From
 
 # createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=False, sweeps=30)
-
-# python -c "from box_plot_angle_change import *; createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", fromFile="VolumeTracings", normalized=False, sweeps=30)"
