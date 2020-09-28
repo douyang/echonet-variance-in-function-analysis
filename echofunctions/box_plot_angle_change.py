@@ -216,12 +216,20 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   
   # show plot
   plt.show()
+  includeNormalized = "Normalized - " if normalized else ""
+  plt.savefig("figures/" + includeNormalized + inputFolder + " EF vs " + fromFile + " EF.png")
 
 createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
               fromFile="FileList", normalized=True, sweeps=30)
 
 createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
               fromFile="FileList", normalized=False, sweeps=30)
+
+# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+#               fromFile="VolumeTracings", normalized=True, sweeps=30)
+
+# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+#               fromFile="VolumeTracings", normalized=False, sweeps=30)
 
 # createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=True, sweeps=30)
