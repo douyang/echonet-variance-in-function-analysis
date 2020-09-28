@@ -113,50 +113,48 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
         if len(angleChanges) > 1:
           volumes = all_volumes[videoName][angleShift][0]
           
-          ZerothEDV = ((max(all_volumes[videoName][0][0]) - ground_truth_EDV)/ground_truth_EDV) * 100
-          ZerothESV = ((min(all_volumes[videoName][0][0]) - ground_truth_ESV)/ground_truth_ESV) * 100
-          ZerothEF = (1 - (min(all_volumes[videoName][0][0])/max(all_volumes[videoName][0][0]))) * 100
-          ZerothEFPercentChange = ((ZerothEF - ground_truth_EF)/ground_truth_EF) * 100
+          ZerothEDV = max(all_volumes[videoName][0][0])
+          ZerothESV = max(all_volumes[videoName][0][0])
+          ZerothEF = ((1 - (ZerothESV/ZerothEDV)) * 100)
 
-          angleChangeAverage = (angleChanges[0] + angleChanges[1])/2
+          ZerothEDVPercentChange = ((ZerothEDV - ground_truth_EDV)/ground_truth_EDV) * 100
+          ZerothESVPercentChange = ((ZerothESV - ground_truth_ESV)/ground_truth_ESV) * 100
+          ZerothEFPercentChange = ((ZerothEF - ground_truth_EF)/ground_truth_EF) * 100
 
           EDV = max(volumes)
           ESV = min(volumes)
+          EF = (1 - (ESV/EDV)) * 100
 
           EDV_anglechange = angleChanges[volumes.index(max(volumes))]
           ESV_anglechange = angleChanges[volumes.index(min(volumes))]
-          
-          EF = (1 - (ESV/EDV)) * 100
-          diff_EF = ((EF-ground_truth_EF)/ground_truth_EF) * 100
+          EF_anglechange = (angleChanges[0] + angleChanges[1])/2
 
           if normalized:
-            diff_EDV = (((EDV-ground_truth_EDV)/ground_truth_EDV) * 100) - ZerothEDV
-            diff_ESV = (((ESV-ground_truth_ESV)/ground_truth_ESV) * 100) - ZerothESV
+            diff_EDV = (((EDV-ground_truth_EDV)/ground_truth_EDV) * 100) - ZerothEDVPercentChange
+            diff_ESV = (((ESV-ground_truth_ESV)/ground_truth_ESV) * 100) - ZerothESVPercentChange
             diff_EF = (((EF - ground_truth_EF)/ground_truth_EF) * 100) - ZerothEFPercentChange
           else:
             diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
             diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
+            diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100
 
           if volumeType is "EF":
-            if int(angleChangeAverage) not in changesInVolumesDict:
-              changesInVolumesDict[int(angleChangeAverage)] = []
+            if int(EF_anglechange) not in changesInVolumesDict:
+              changesInVolumesDict[int(EF_anglechange)] = []
             
-            changesInVolumesDict[int(angleChangeAverage)].append(diff_EF)
+            changesInVolumesDict[int(EF_anglechange)].append(diff_EF)
+            
           elif volumeType is "ESV":
             if int(ESV_anglechange) not in changesInVolumesDict:
               changesInVolumesDict[int(ESV_anglechange)] = []
             
             changesInVolumesDict[int(ESV_anglechange)].append(diff_ESV)
 
-            if diff_ESV > 20 and abs(ESV_anglechange) < 10:
-              print(diff_ESV)
           elif volumeType is "EDV":
             if int(EDV_anglechange) not in changesInVolumesDict:
               changesInVolumesDict[int(EDV_anglechange)] = []
             
             changesInVolumesDict[int(EDV_anglechange)].append(diff_EDV)
-            if diff_EDV > 20 and abs(EDV_anglechange) < 10:
-              print(diff_EDV)
   
   return changesInVolumesDict
 
