@@ -170,7 +170,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   for key in changesInVolumesDict:
     if key == 0:
-      bucket = [0, 0]
+      bucket = (0, 0)
     else:
       residue = key % 5
       lowerBucketValue = key - residue
@@ -192,7 +192,6 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   loader.latexify()
   fig = plt.figure()
   fig.suptitle('Comparison', fontsize=14, fontweight='bold')
-  
 
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
