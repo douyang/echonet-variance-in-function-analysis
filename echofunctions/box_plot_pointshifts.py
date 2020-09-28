@@ -11,7 +11,7 @@ from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
 from ast import literal_eval
 
-def sortFrameVolumes(method, inputFolder):
+def sortFrameVolumes(method, inputFolder, sweeps):
   root, df = loader.dataModules()
   all_volumes={}
 
@@ -27,16 +27,16 @@ def sortFrameVolumes(method, inputFolder):
     
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, method)
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, sweeps, method)
         if videoName not in all_volumes and volumes is not "":
           all_volumes[videoName] = {}
-          for r in range(-30, 31, 1):
+          for r in range(-sweeps, sweeps+1, 1):
             all_volumes[videoName][r] = []
         
-        for r in range(-30, 31, 1):
+        for r in range(-sweeps, sweeps+1, 1):
           all_volumes[videoName][r].append(volumes[r])
       except:
-        print(videoName + "_" + str(frameNumber))
+        print(OUTPUT_FRAME_NAME)
 
   return all_volumes
 
@@ -87,8 +87,8 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
   return givenTrueDict
 
-def compareVolumePlot(inputFolder, method, volumeType, fromFile, root=config.CONFIG.DATA_DIR):
-  all_volumes = sortFrameVolumes(method, inputFolder)
+def compareVolumePlot(inputFolder, method, volumeType, fromFile, sweeps, root=config.CONFIG.DATA_DIR):
+  all_volumes = sortFrameVolumes(method, inputFolder, sweeps)
 
   if fromFile is "VolumeTracings":
     tracings_volumes = sortFrameVolumesFromTracings(method)
@@ -96,7 +96,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, root=config.CON
     tracings_volumes = sortVolumesFromFileList()
 
   changesInVolumesDict = {}
-  for r in range(-30, 31, 1):
+  for r in range(-sweeps, sweeps+1, 1):
     changesInVolumesDict[r] = []
 
   for videoName in tracings_volumes:
@@ -108,7 +108,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, root=config.CON
     ground_truth_EF = (1 - (ground_truth_ESV/ground_truth_EDV)) * 100
 
     if videoName in all_volumes:
-      for r in range(-30, 31, 1):
+      for r in range(-sweeps, sweeps+1, 1):
         volumes = all_volumes[videoName][r]
 
         EDV = max(volumes)
@@ -130,8 +130,9 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, root=config.CON
 
   return changesInVolumesDict
 
-def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF", fromFile="FileList"):
-  differenceInVolumes = compareVolumePlot(inputFolder, method, volumeType, fromFile)
+def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",
+                  fromFile="FileList", sweeps=30):
+  differenceInVolumes = compareVolumePlot(inputFolder, method, volumeType, fromFile, sweeps)
   labels = []
 
   for i in differenceInVolumes.keys():
@@ -160,4 +161,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # show plot
   plt.show()
 
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", fromFile="FileList")
+#createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", fromFile="FileList")
+#createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", fromFile="VolumeTracings")
+#createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", fromFile="VolumeTracings")
+#createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", fromFile="VolumeTracings")
