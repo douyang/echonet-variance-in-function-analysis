@@ -28,7 +28,7 @@ def sortVolumesFromAlgo(frames_path, method):
 
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, method)
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 1, method)
 
         if videoName not in all_volumes and volumes is not "":
           all_volumes[videoName] = []
@@ -131,4 +131,4 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
   ylabel = 'Ground Truth ' + volumeType + " From " + fromFile
   loader.scatterPlot(title=title, xlabel=xlabel, ylabel=ylabel, x1=x, y1=y, lineOfBestFit=True)
 
-compareVolumePlot(method="Method of Disks", volumeType="EF", fromFile="VolumeTracings", pathToFrames="Masks_From_VolumeTracing")
+compareVolumePlot(method="Bullet Method", volumeType="EF", fromFile="VolumeTracings", pathToFrames="Masks_From_VolumeTracing")

@@ -85,4 +85,4 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, method="Method of Disks", tim
   ylabel = 'Ground Truth' + timing + ' From FileList'
   loader.scatterPlot(title=title, xlabel=xlabel, ylabel=ylabel, x1=x, y1=y, lineOfBestFit=True)
 
-compareVolumePlot(timing="EF", method="Bullet Method")
+compareVolumePlot(timing="EF", method="Prolate Ellipsoid")

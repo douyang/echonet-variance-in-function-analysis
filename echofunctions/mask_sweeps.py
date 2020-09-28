@@ -62,9 +62,9 @@ def generateMasks(method="Method of Disks", testImages="all",
   PATH_DATA = capture(method, inputFramesFolder, outputFramesFolder, masksWithMoreThan21Lines, sweepsOfMoreThan21Lines)
   if testImages is not "all":
     PATH_DATA = PATH_DATA[0 : testImages]
-  
+
   for frame in PATH_DATA:
-    volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(frame[0], 20, method)
+    volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(frame[0], 20, 30, method)
     os.makedirs(frame[1], exist_ok=True) # creates mask directory
     for angleShift in x1:
       MASK_OUTPUT_PATH = os.path.join(frame[1], str(angleShift) + ".png") # join parent path (root) with mask output name

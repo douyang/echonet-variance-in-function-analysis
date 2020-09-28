@@ -30,7 +30,7 @@ def sortVolumesFromAlgo(frames_path, method):
 
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, method)
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 1, method)
 
         if videoName not in all_volumes and volumes is not "":
           all_volumes[videoName] = []
@@ -89,7 +89,7 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
   return givenTrueDict
 
 def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method="Method of Disks",
-                      volumeType="ESV", fromFile="VolumeTracings", title=None, xlabel=None, ylabel=None):
+                      volumeType="ESV", fromFile="VolumeTracings"):
   
   all_volumes = sortVolumesFromAlgo(pathToFrames, method)
 
@@ -130,10 +130,14 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
 
   loader.latexify()
   loader.bland_altman_plot(x, y)
-  plt.title(title)
-  plt.xlabel(xlabel)
+  
+  if fromFile is "VolumeTracings":
+    plt.title("EF from " + method + " Volumes of VolumeTracings vs. EF from Full Algorithm from Masks")
+    plt.xlabel("Mean of " + method + " EF vs. VolumeTracings EF")
+  else:
+    plt.title("EF from FileList vs. EF from Full Algorithm from Masks")
+    plt.xlabel("Mean of " + method + " EF vs. FileList EF")
   plt.show()
 
 compareVolumePlot(pathToFrames="Masks_From_VolumeTracing", method="Method of Disks", 
-                  volumeType="EF", fromFile="FileList", title="EF from FileList vs. EF from Full Algorithm from Masks",
-                  xlabel="Mean of Method of Disks EF vs. FileList EF", ylabel="Difference in Volumes")
+                  volumeType="EF", fromFile="VolumeTracings")

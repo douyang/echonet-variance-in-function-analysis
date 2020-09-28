@@ -255,6 +255,8 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   if getDistance(weighted_avg[0], higherIntercept[0]) > getDistance(weighted_avg[0], higherIntercept[-1]):
       higherIntercept = higherIntercept[::-1]
   
+  # print(higherIntercept)
+
   # Make sure its from top to bottom direction
   if getDistance(weighted_avg[0], lowerIntercept[0]) > getDistance(weighted_avg[0], lowerIntercept[-1]):
       lowerIntercept = lowerIntercept[::-1]
@@ -301,7 +303,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
-          elif count >= len(higherIntercept)-higherIndex-1:
+          elif higherIndex + 1 >= len(higherIntercept):
             higherIndex -= count
             if higherIndex == 0:
               higherInterceptAveragePoints.append(start_point)
@@ -309,6 +311,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
               higherInterceptAveragePoints.append(higherIntercept[higherIndex])
             condition = False
             higherIndex -= 1
+        # print(slopeCond and not betweenCond, len(higherIntercept), higherIndex, count, point, prev_point, averagePoint, slope, prev_slope, new_slope, perp_slope, point[0]-perp_slope*point[1])
     except:
       higherInterceptAveragePoints.append(higherIntercept[-1])
   
@@ -356,11 +359,10 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             condition = False
             lowerIndex -= 1
           elif (abs(slope) > 6) and ((point[1] < averagePoint[1] and prev_point[1] > averagePoint[1]) or (point[1] > averagePoint[1] and prev_point[1] < averagePoint[1])):
-
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
-          elif count >= len(lowerIntercept)-lowerIndex-1:
+          elif lowerIndex + 1 >= len(lowerIntercept):
             lowerIndex -= count
             if lowerIndex == 0:
               lowerInterceptAveragePoints.append(start_point)
@@ -368,6 +370,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
               lowerInterceptAveragePoints.append(lowerIntercept[lowerIndex])
             condition = False
             lowerIndex -= 1
+        # print(slopeCond and not betweenCond, len(lowerInterceptAveragePoints), count, point, prev_point, averagePoint, slope, prev_slope, new_slope, perp_slope, point[0]-perp_slope*point[1])
     except:
       lowerInterceptAveragePoints.append(lowerIntercept[-1])
 
@@ -378,7 +381,8 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
 
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
-def calculateVolume(path, number, method = "Method of Disks"):
+
+def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))
 
   x1, y1, x2, y2 = getTopAndBottomCoords(points)
@@ -403,7 +407,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
   degrees = {}
 
   # Volumes for all 0 to 5 cases
-  for i in range(-30, 31, 1):
+  for i in range(-sweeps, sweeps+1, 1):
     x1, y1 = lowerIntercept[i]
     x2, y2 = higherIntercept[i]
 
@@ -445,7 +449,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
     
   return (volumes, x1s, y1s, x2s, y2s, degrees)
 
-#print(calculateVolume(path, 20, method = "Method of Disks"))
+#print(calculateVolume(path, 20, 30, method = "Method of Disks"))
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))

@@ -13,7 +13,7 @@ from algorithms import volume_tracings_calculations as tracings
 import collections
 from ast import literal_eval
 
-def sortFrameVolumes(method, inputFolder):
+def sortFrameVolumes(method, inputFolder, sweeps):
   root, df = loader.dataModules()
   all_volumes={}
 
@@ -29,18 +29,17 @@ def sortFrameVolumes(method, inputFolder):
     
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(FRAMES_PATH, 20, method)
+        volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(FRAMES_PATH, 20, sweeps, method)
         if videoName not in all_volumes and volumes is not "":
           all_volumes[videoName] = {}
-        for r in range(-30, 31, 1):
+        for r in range(-(sweeps), sweeps+1, 1):
           if r not in all_volumes[videoName]:
             all_volumes[videoName][r] = [], []
           
           all_volumes[videoName][r][0].append(volumes[r])
           all_volumes[videoName][r][1].append(degrees[r])
-
       except:
-        print(videoName + "_" + str(frameNumber))
+        print(OUTPUT_FRAME_NAME)
 
   return all_volumes
 
@@ -91,8 +90,8 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
   return givenTrueDict
 
-def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, root=config.CONFIG.DATA_DIR):
-  all_volumes = sortFrameVolumes(method, inputFolder)
+def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps, root=config.CONFIG.DATA_DIR):
+  all_volumes = sortFrameVolumes(method, inputFolder, sweeps)
 
   if fromFile is "VolumeTracings":
     tracings_volumes = sortFrameVolumesFromTracings(method)
@@ -122,8 +121,8 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, roo
           EDV = max(volumes)
           ESV = min(volumes)
 
-          EDV_anglechange = angleChanges[max(volumes)]
-          ESV_anglechange = angleChanges[min(volumes)]
+          EDV_anglechange = angleChanges[volumes.index(max(volumes))]
+          ESV_anglechange = angleChanges[volumes.index(min(volumes))]
           
           EF = (1 - (ESV/EDV)) * 100
           diff_EF = (EF-ground_truth_EF)
@@ -155,6 +154,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, roo
             changesInVolumesDict[int(EDV_anglechange)].append(diff_EDV)
             if diff_EDV > 20 and abs(EDV_anglechange) < 10:
               print(diff_EDV)
+  
   return changesInVolumesDict
 
 def divide_chunks(l, n): 
@@ -163,9 +163,8 @@ def divide_chunks(l, n):
         yield l[i:i + n]
 
 def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",
-                  fromFile="FileList", normalized=True, numberOfBuckets=30):
-  changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized)
-  changesInVolumesDict = {k:v for k,v in changesInVolumesDict.items() if len(k) > 200}
+                  fromFile="FileList", normalized=True, sweeps=30):
+  changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps)
 
   differenceInVolumes = {}
 
@@ -178,15 +177,14 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       upperBucketValue = lowerBucketValue + 5
       bucket = [int(lowerBucketValue), int(upperBucketValue)]
 
-    if bucket not in differenceInVolumes:
+    if (str(bucket[0]) + ", " + str(bucket[-1])) not in differenceInVolumes:
       differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
     differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
 
   # setting x-tick labels
   labels = []
-  for i in differenceInVolumes.keys():
-    if differenceInVolumes[i] is not 0:
-      labels.append(i)
+  for i in differenceInVolumes:
+    labels.append(i)
 
   # figure related code
   loader.latexify()
@@ -215,5 +213,5 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # show plot
   plt.show()
 
-createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="VolumeTracings", normalized=True, numberOfBuckets=30)
+createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+              fromFile="FileList", normalized=False, sweeps=1)
