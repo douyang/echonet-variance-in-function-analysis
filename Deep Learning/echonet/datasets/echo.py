@@ -204,13 +204,13 @@ class Echo(torch.utils.data.Dataset):
 
             if t == "Filename":
                 target.append(self.fnames[index])
-#             elif t == "LargeIndex":
-#                 # Traces are sorted by cross-sectional area
-#                 # Largest (diastolic) frame is last
-#                 target.append(np.int(self.frames[key][-1]))
-#             elif t == "SmallIndex":
-#                 # Smallest (systolic) frame is first
-#                 target.append(np.int(self.frames[key][0]))
+            elif t == "LargeIndex":
+                # Traces are sorted by cross-sectional area
+                # Largest (diastolic) frame is last
+                target.append(np.int(self.frames[key][-1]))
+            elif t == "SmallIndex":
+                # Smallest (systolic) frame is first
+                target.append(np.int(self.frames[key][0]))
             elif t == "NormalizedLargeIndex":
                 # Normalized large (diastolic) frame is last
                 large_index = np.int(self.frames[key][-1])

@@ -196,7 +196,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
 
-  if not normalized and volumeType is "EF":
+  if not normalized:
     ax.set_title('Difference in Calculated ' + volumeType + ' against ' + fromFile)
   else:
     ax.set_title('Normalized (from mean) Difference in Calculated ' + volumeType + ' against ' + fromFile)
