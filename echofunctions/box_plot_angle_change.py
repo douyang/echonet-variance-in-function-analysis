@@ -181,7 +181,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       differenceInVolumes[bucket] = []
     differenceInVolumes[bucket] += changesInVolumesDict[key]
   
-  differenceInVolumes = differenceInVolumes.items()
+  differenceInVolumes = list(differenceInVolumes.items())
   differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0])
 
   # setting x-tick labels
