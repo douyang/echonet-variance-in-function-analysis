@@ -41,13 +41,34 @@ def sortCoords(method, inputFolderPath):
         print(FRAME_FILENAME)
   return calculatedData
 
+def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
+  givenTrueDict={}
+
+  df = pd.read_csv(os.path.join(root, "FileList.csv"), ) # reading in FileList.csv
+
+  for i in range(len(df)):
+    videoName = df.iloc[i, 0]
+    ground_truth_ESV = df.iloc[i, 2]
+    ground_truth_EDV = df.iloc[i, 3]
+
+    if videoName not in givenTrueDict:
+      givenTrueDict[videoName] = []
+    
+    givenTrueDict[videoName] = [ground_truth_ESV, ground_truth_EDV]
+
+  return givenTrueDict
+
 def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
     calculatedData = sortCoords(method, inputFolderPath) # dictionary of all different coords
-    
-    video, ef, esv, edv = [], [], [], []
+    fileListData = sortVolumesFromFileList()
+
+    video, angleshift, ef, esv, edv, true_EF, true_EDV, true_ESV = [], [], [], [], [], [], [], []
     for videoName in calculatedData:
       volumes = calculatedData[videoName]
-
+      groundtrue_ESV = min(fileListData[videoName])
+      groundtrue_EDV = max(fileListData[videoName])
+      groundtrue_EF = (1 - (groundtrue_ESV/groundtrue_EDV) * 100)
+      
       for angleShift in volumes:
         EDV = max(volumes[angleShift])
         ESV = min(volumes[angleShift])
@@ -57,9 +78,11 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
         ef.append(EF)
         esv.append(esv)
         edv.append(edv)
-        
-    
-    d = {'Video Name': video,'EF': ef, "ESV": esv, "EDV": edv}
+        true_EF.append(groundtrue_EF)
+        true_ESV.append(groundtrue_ESV)
+        true_EDV.append(groundtrue_EDV)
+
+    d = {'Video Name': video, "Angle Shift": angleshift, 'EF': ef, "ESV": esv, "EDV": edv, "True EF": true_EF, "True ESV": true_ESV, "True EDV": true_EDV}
     df = pd.DataFrame(d)
     #df.set_index('Video Name', inplace=True)
     
