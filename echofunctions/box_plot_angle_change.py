@@ -115,7 +115,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           
           ZerothEDV = ((max(all_volumes[videoName][0][0]) - ground_truth_EDV)/ground_truth_EDV) * 100
           ZerothESV = ((min(all_volumes[videoName][0][0]) - ground_truth_ESV)/ground_truth_ESV) * 100
-          ZerothEF = 1 - (min(all_volumes[videoName][0][0])/max(all_volumes[videoName][0][0])) * 100
+          ZerothEF = (1 - (min(all_volumes[videoName][0][0])/max(all_volumes[videoName][0][0]))) * 100
           ZerothEFPercentChange = ((ZerothEF - ground_truth_EF)/ground_truth_EF) * 100
 
           angleChangeAverage = (angleChanges[0] + angleChanges[1])/2
@@ -127,7 +127,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           ESV_anglechange = angleChanges[volumes.index(min(volumes))]
           
           EF = (1 - (ESV/EDV)) * 100
-          diff_EF = (EF-ground_truth_EF)
+          diff_EF = ((EF-ground_truth_EF)/ground_truth_EF) * 100
 
           if normalized:
             diff_EDV = (((EDV-ground_truth_EDV)/ground_truth_EDV) * 100) - ZerothEDV
