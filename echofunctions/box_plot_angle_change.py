@@ -175,23 +175,24 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       residue = key % 5
       lowerBucketValue = key - residue
       upperBucketValue = lowerBucketValue + 5
-      bucket = [int(lowerBucketValue), int(upperBucketValue)]
+      bucket = (int(lowerBucketValue), int(upperBucketValue))
 
-    if (str(bucket[0]) + ", " + str(bucket[-1])) not in differenceInVolumes:
-      differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
-    differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
+    if bucket not in differenceInVolumes:
+      differenceInVolumes[bucket] = []
+    differenceInVolumes[bucket] += changesInVolumesDict[key]
+  
+  differenceInVolumes = differenceInVolumes.items()
+  differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0])
 
   # setting x-tick labels
-  labels = []
-  for i in differenceInVolumes:
-    labels.append(i)
+  labels = [str(volumeShift[0]) for volumeShift in differenceInVolumes]
+  data = [volumeShift[1] for volumeShift in differenceInVolumes]
 
   # figure related code
   loader.latexify()
   fig = plt.figure()
   fig.suptitle('Comparison', fontsize=14, fontweight='bold')
   
-  data = differenceInVolumes.values()
 
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
