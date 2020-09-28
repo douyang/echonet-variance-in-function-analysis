@@ -6,46 +6,65 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import loader
-from algorithms import funcs
+from algorithms import funcs as funcs
 import config
 
 # Capture and Make Frames + Crop
-def sortCoords(method="Method of Disks"):
+def sortCoords(method, inputFolderPath):
 
-  root, _, df = loader.dataModules()
-  x1_coords, y1_coords, x2_coords, y2_coords, vidName, frameNum=[], [], [], [], [], []
+  root, df = loader.dataModules()
+  calculatedData = {}
 
-  PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, "frames") # frames path
+  PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolderPath) # frames path
   
   for i in range(len(df)): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
-    OUTPUT_FRAME_NAME = videoName + "_" + str(frameNumber) + ".png" # concatenate video name with frame number as file name
+    FRAME_FILENAME = videoName + "_" + str(frameNumber) + ".png" # concatenate video name with frame number as file name
 
-    FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, OUTPUT_FRAME_NAME) # path to each video
+    FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, FRAME_FILENAME) # path to each video
 
     if os.path.exists(FRAMES_PATH):
-      volumes, x1s, y1s, x2s, y2s, degrees = algorithms.funcs.calculateVolume(FRAMES_PATH, 20, method)
+      try:
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, method)
+        
+        for angleShift in volumes:
+          if videoName not in calculatedData:
+            calculatedData[videoName] = {}
 
-      for coord in range(len(x1s[0])):
-        vidName.append(videoName)
-        frameNum.append(frameNumber)
-        x1_coords.append(x1s[0][coord])
-        y1_coords.append(y1s[0][coord])
-        x2_coords.append(x2s[0][coord])
-        y2_coords.append(y2s[0][coord])
-      
-  return vidName, x1_coords, y1_coords, x2_coords, y2_coords, frameNum
+          if angleShift not in calculatedData[videoName]:
+            calculatedData[videoName][angleShift] = []
+        
+          calculatedData[videoName][angleShift].append(volumes[angleShift])
+      except:
+        print(FRAME_FILENAME)
+  return calculatedData
 
-def compareVolumePlot(method="Method of Disks"):
-    videoName, x1coords, y1coords, x2coords, y2coords, frameNum = sortCoords(method=method) # dictionary of all different coords
+def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
+    calculatedData = sortCoords(method, inputFolderPath) # dictionary of all different coords
     
-    df = pd.DataFrame(list(zip(videoName, x1coords, y1coords, x2coords, y2coords, frameNum)), columns=['Video Name', "X1", "Y1", "X2", "Y2", "Frame"])
-    df.set_index('Video Name', inplace=True)
+    video, ef, esv, edv = [], [], [], []
+    for videoName in calculatedData:
+      volumes = calculatedData[videoName]
+
+      for angleShift in volumes:
+        EDV = max(volumes[angleShift])
+        ESV = min(volumes[angleShift])
+        EF = (1 - (ESV/EDV)) * 100
+
+        video.append(video)
+        ef.append(EF)
+        esv.append(esv)
+        edv.append(edv)
+        
     
-    export_path = os.path.join(config.CONFIG.DATA_DIR, "Coords.csv")
+    d = {'Video Name': video,'EF': ef, "ESV": esv, "EDV": edv}
+    df = pd.DataFrame(d)
+    #df.set_index('Video Name', inplace=True)
+    
+    export_path = os.path.join(config.CONFIG.DATA_DIR, method + "-Volume.csv")
 
     df.to_csv(export_path)
-        
-compareVolumePlot()
+
+compareVolumePlot(method="Method of Disks", inputFolderPath="Masks_From_VolumeTracing")

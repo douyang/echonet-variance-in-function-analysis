@@ -121,6 +121,9 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, roo
 
           EDV = max(volumes)
           ESV = min(volumes)
+
+          EDV_anglechange = angleChanges[volumes[EDV]]
+          ESV_anglechange = angleChanges[volumes[ESV]]
             
           EF = (1 - (ESV/EDV)) * 100
           diff_EF = (EF-ground_truth_EF)
@@ -138,15 +141,20 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, roo
             
             changesInVolumesDict[int(angleChangeAverage)].append(diff_EF)
           elif volumeType is "ESV":
-            if int(angleChangeAverage) not in changesInVolumesDict:
-              changesInVolumesDict[int(angleChangeAverage)] = []
+            if int(ESV_anglechange) not in changesInVolumesDict:
+              changesInVolumesDict[int(ESV_anglechange)] = []
             
-            changesInVolumesDict[int(angleChangeAverage)].append(diff_ESV)
+            changesInVolumesDict[int(ESV_anglechange)].append(diff_ESV)
+
+            if diff_ESV > 20 and abs(ESV_anglechange) < 10:
+              print(diff_ESV)
           elif volumeType is "EDV":
-            if int(angleChangeAverage) not in changesInVolumesDict:
-              changesInVolumesDict[int(angleChangeAverage)] = []
+            if int(EDV_anglechange) not in changesInVolumesDict:
+              changesInVolumesDict[int(EDV_anglechange)] = []
             
-            changesInVolumesDict[int(angleChangeAverage)].append(diff_EDV)
+            changesInVolumesDict[int(EDV_anglechange)].append(diff_EDV)
+            if diff_EDV > 20 and abs(EDV_anglechange) < 10:
+              print(diff_EDV)
   return changesInVolumesDict
 
 def divide_chunks(l, n): 
@@ -163,15 +171,6 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   differenceInVolumes = {}
 
-  # buckets = list(divide_chunks(lists, int(len(lists)/numberOfBuckets)))
-  # for bucket in buckets:
-  #   for key in changesInVolumesDict:
-  #     if key in range(bucket[0], bucket[-1]):
-  #       if key not in differenceInVolumes:
-  #         differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
-  #       differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
-
-  # buckets
   for key in changesInVolumesDict:
     if key == 0:
       bucket = [0, 0]
@@ -180,7 +179,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       lowerBucketValue = key - residue
       upperBucketValue = lowerBucketValue + 5
       bucket = [int(lowerBucketValue), int(upperBucketValue)]
-            
+
     if bucket not in differenceInVolumes:
       differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] = []
     differenceInVolumes[str(bucket[0]) + ", " + str(bucket[-1])] += changesInVolumesDict[key]
@@ -218,5 +217,5 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # show plot
   plt.show()
 
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
               fromFile="VolumeTracings", normalized=True, numberOfBuckets=30)

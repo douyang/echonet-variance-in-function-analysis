@@ -112,6 +112,8 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
         ESV = min(volumes)
         EF = (1 - (ESV/EDV)) * 100
         
+        if abs(EF - ground_truth_EF) > 10:
+          print([videoName])
         if volumeType is "EF":
           x.append(EF)
           y.append(ground_truth_EF)
@@ -122,8 +124,6 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
         elif volumeType is "EDV":
           x.append(EF)
           y.append(ground_truth_EF)
-      else:
-        print("Less than 2 volumes calculated: " + videoName + " " + str(volumes))
 
   loader.latexify()
   title = "Masks from VolumeTracings and Lines from " + method + " " + volumeType + " vs. " + fromFile + " " + volumeType
@@ -131,4 +131,4 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
   ylabel = 'Ground Truth ' + volumeType + " From " + fromFile
   loader.scatterPlot(title=title, xlabel=xlabel, ylabel=ylabel, x1=x, y1=y, lineOfBestFit=True)
 
-compareVolumePlot(method="Method of Disks", volumeType="EF", fromFile="VolumeTracings", pathToFrames="Masks_From_VolumeTracing")
+compareVolumePlot(method="Method of Disks", volumeType="EF", fromFile="FileList", pathToFrames="Masks_From_VolumeTracing")

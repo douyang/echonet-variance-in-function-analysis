@@ -134,5 +134,5 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
   plt.show()
 
 compareVolumePlot(pathToFrames="Masks_From_VolumeTracing", method="Method of Disks", 
-                  volumeType="EF", fromFile="VolumeTracings", title="EF from FileList vs. EF from Full Algorithm from Masks",
+                  volumeType="EF", fromFile="VolumeTracings", title="EF from MOD Volumes of VolumeTracings vs. EF from Full Algorithm from Masks",
                   xlabel="Mean of Method of Disks EF vs. VolumeTracings EF", ylabel="Difference in Volumes")

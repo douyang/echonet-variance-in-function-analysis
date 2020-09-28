@@ -255,7 +255,6 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   if getDistance(weighted_avg[0], higherIntercept[0]) > getDistance(weighted_avg[0], higherIntercept[-1]):
       higherIntercept = higherIntercept[::-1]
   
-
   # Make sure its from top to bottom direction
   if getDistance(weighted_avg[0], lowerIntercept[0]) > getDistance(weighted_avg[0], lowerIntercept[-1]):
       lowerIntercept = lowerIntercept[::-1]
@@ -268,7 +267,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
       condition = True
       count = 0
       while condition:
-        higherIndex = max(higherIndex, 1)
+        higherIndex = max(higherIndex, len(higherInterceptAveragePoints))
         point = higherIntercept[higherIndex]
         if higherIndex == 0:
           prev_point =  [x1, y1] if getDistance(point, [x1, y1]) < getDistance(point, [x2, y2]) else [x2, y2]
@@ -294,11 +293,15 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
-          elif abs(perp_slope) >= 6 and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
+          elif (abs(perp_slope) > 6) and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
-          elif count >= len(higherIntercept)-1:
+          elif (abs(slope) > 6) and ((point[1] < averagePoint[1] and prev_point[1] > averagePoint[1]) or (point[1] > averagePoint[1] and prev_point[1] < averagePoint[1])):
+            higherInterceptAveragePoints.append(point)
+            condition = False
+            higherIndex -= 1
+          elif count >= len(higherIntercept)-higherIndex-1:
             higherIndex -= count
             if higherIndex == 0:
               higherInterceptAveragePoints.append(start_point)
@@ -306,7 +309,6 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
               higherInterceptAveragePoints.append(higherIntercept[higherIndex])
             condition = False
             higherIndex -= 1
-
     except:
       higherInterceptAveragePoints.append(higherIntercept[-1])
   
@@ -315,7 +317,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
       condition = True
       count = 0
       while condition:
-        lowerIndex = max(lowerIndex, 1)
+        lowerIndex = max(lowerIndex, len(lowerInterceptAveragePoints))
         point = lowerIntercept[lowerIndex]
 
         if lowerIndex == 0:
@@ -329,6 +331,12 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
         prev_slope =  getSlope(prev_point, averagePoint)
         betweenCond = ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])) and abs(new_slope) > abs(slope) and abs(prev_slope) > abs(slope)
         slopeCond = (new_slope >= perp_slope and prev_slope<=perp_slope) or  (new_slope <= perp_slope and prev_slope>=perp_slope)
+        # print(slopeCond and not betweenCond, len(lowerInterceptAveragePoints), count, point, prev_point, averagePoint, prev_slope, new_slope, perp_slope)
+
+# False 0 1 [62, 20] [62, 19] [62.0001, 20.285714285714285] 12857.142856716035 2857.1428570479998 0.003003003003003003 61.93993993993994
+# False 0 2 [63, 21] [62, 20] [62.0001, 20.285714285714285] 2857.1428570479998 0.7143571500007178 0.003003003003003003 62.93693693693694
+# False 0 3 [64, 22] [63, 21] [62.0001, 20.285714285714285] 0.7143571500007178 0.8571857164286805 0.003003003003003003 63.933933933933936
+# False 0 4 [65, 23] [64, 22] [62.0001, 20.285714285714285] 0.8571857164286805 0.9047920644973894 0.003003003003003003 64.93093093093093
 
         count += 1
         lowerIndex += 1
@@ -339,7 +347,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             condition = False
             lowerIndex -= 1
         elif not (len(lowerInterceptAveragePoints)>0 and lowerInterceptAveragePoints[0] == point and point == start_point):
-          if slopeCond and not betweenCond:
+          if slopeCond and not betweenCond:            
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
@@ -347,7 +355,12 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
-          elif count >= len(lowerIntercept)-1:
+          elif (abs(slope) > 6) and ((point[1] < averagePoint[1] and prev_point[1] > averagePoint[1]) or (point[1] > averagePoint[1] and prev_point[1] < averagePoint[1])):
+
+            lowerInterceptAveragePoints.append(point)
+            condition = False
+            lowerIndex -= 1
+          elif count >= len(lowerIntercept)-lowerIndex-1:
             lowerIndex -= count
             if lowerIndex == 0:
               lowerInterceptAveragePoints.append(start_point)
@@ -357,9 +370,11 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             lowerIndex -= 1
     except:
       lowerInterceptAveragePoints.append(lowerIntercept[-1])
-  
-  lowerInterceptAveragePoints.sort(key=lambda point: point[0]+point[1])
-  higherInterceptAveragePoints.sort(key=lambda point: point[0]+point[1])
+
+  matchedAveragePoints = [lowerInterceptAveragePoints[i] + higherInterceptAveragePoints[i] for i in range(len(lowerInterceptAveragePoints))]
+  matchedAveragePoints.sort(key=lambda coord: (coord[0] + coord[2]) - perp_slope*(coord[1] + coord[3]))
+  lowerInterceptAveragePoints = [[matchedAveragePoints[i][0], matchedAveragePoints[i][1]] for i in range(len(matchedAveragePoints))]
+  higherInterceptAveragePoints = [[matchedAveragePoints[i][2], matchedAveragePoints[i][3]] for i in range(len(matchedAveragePoints))]
 
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
@@ -388,7 +403,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
   degrees = {}
 
   # Volumes for all 0 to 5 cases
-  for i in range(-30, 31, 1):
+  for i in range(-1, 1, 1):
     x1, y1 = lowerIntercept[i]
     x2, y2 = higherIntercept[i]
 
@@ -400,7 +415,6 @@ def calculateVolume(path, number, method = "Method of Disks"):
       angle -= math.pi
 
     degrees[i] = (baseAngle - angle) * 180/math.pi
-
 
     p1Index = points.index([x1, y1])
     p2Index = points.index([x2, y2])
@@ -432,7 +446,7 @@ def calculateVolume(path, number, method = "Method of Disks"):
     
   return (volumes, x1s, y1s, x2s, y2s, degrees)
 
-# print(calculateVolume(path, 20, method = "Method of Disks"))
+#print(calculateVolume(path, 20, method = "Method of Disks"))
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))
