@@ -131,4 +131,4 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
   ylabel = 'Ground Truth ' + volumeType + " From " + fromFile
   loader.scatterPlot(title=title, xlabel=xlabel, ylabel=ylabel, x1=x, y1=y, lineOfBestFit=True)
 
-compareVolumePlot(method="Method of Disks", volumeType="EF", fromFile="FileList", pathToFrames="Masks_From_VolumeTracing")
+compareVolumePlot(method="Method of Disks", volumeType="EF", fromFile="VolumeTracings", pathToFrames="Masks_From_VolumeTracing")

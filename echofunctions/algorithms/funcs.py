@@ -403,10 +403,9 @@ def calculateVolume(path, number, method = "Method of Disks"):
   degrees = {}
 
   # Volumes for all 0 to 5 cases
-  for i in range(-1, 1, 1):
+  for i in range(-30, 31, 1):
     x1, y1 = lowerIntercept[i]
     x2, y2 = higherIntercept[i]
-
 
     slope = getSlope([x1, y1], [x2, y2])
     angle = math.atan(slope)

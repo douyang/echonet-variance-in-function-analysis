@@ -122,9 +122,9 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, roo
           EDV = max(volumes)
           ESV = min(volumes)
 
-          EDV_anglechange = angleChanges[volumes[EDV]]
-          ESV_anglechange = angleChanges[volumes[ESV]]
-            
+          EDV_anglechange = angleChanges[max(volumes)]
+          ESV_anglechange = angleChanges[min(volumes)]
+          
           EF = (1 - (ESV/EDV)) * 100
           diff_EF = (EF-ground_truth_EF)
 
@@ -166,8 +166,6 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
                   fromFile="FileList", normalized=True, numberOfBuckets=30):
   changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized)
   changesInVolumesDict = {k:v for k,v in changesInVolumesDict.items() if len(k) > 200}
-
-  lists = list(sorted(changesInVolumesDict.keys()))
 
   differenceInVolumes = {}
 

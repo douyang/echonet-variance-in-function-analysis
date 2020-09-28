@@ -114,16 +114,17 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
           
         EF = (1 - (ESV/EDV)) * 100
         
-        if volumeType is "EF":
-          x.append(EF)
-          y.append(ground_truth_EF)
-        elif volumeType is "ESV":
-          x.append(EF)
-          y.append(ground_truth_EF)
+        if (EF - ground_truth_EF) > -25:
+          if volumeType is "EF":
+            x.append(EF)
+            y.append(ground_truth_EF)
+          elif volumeType is "ESV":
+            x.append(EF)
+            y.append(ground_truth_EF)
 
-        elif volumeType is "EDV":
-          x.append(EF)
-          y.append(ground_truth_EF)
+          elif volumeType is "EDV":
+            x.append(EF)
+            y.append(ground_truth_EF)
 
   print(len(x))
 
@@ -134,5 +135,5 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
   plt.show()
 
 compareVolumePlot(pathToFrames="Masks_From_VolumeTracing", method="Method of Disks", 
-                  volumeType="EF", fromFile="VolumeTracings", title="EF from MOD Volumes of VolumeTracings vs. EF from Full Algorithm from Masks",
-                  xlabel="Mean of Method of Disks EF vs. VolumeTracings EF", ylabel="Difference in Volumes")
+                  volumeType="EF", fromFile="FileList", title="EF from FileList vs. EF from Full Algorithm from Masks",
+                  xlabel="Mean of Method of Disks EF vs. FileList EF", ylabel="Difference in Volumes")
