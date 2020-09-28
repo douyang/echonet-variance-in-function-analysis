@@ -114,12 +114,8 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           volumes = all_volumes[videoName][angleShift][0]
           
           ZerothEDV = max(all_volumes[videoName][0][0])
-          ZerothESV = max(all_volumes[videoName][0][0])
+          ZerothESV = min(all_volumes[videoName][0][0])
           ZerothEF = ((1 - (ZerothESV/ZerothEDV)) * 100)
-
-          ZerothEDVPercentChange = ((ZerothEDV - ground_truth_EDV)/ground_truth_EDV) * 100
-          ZerothESVPercentChange = ((ZerothESV - ground_truth_ESV)/ground_truth_ESV) * 100
-          ZerothEFPercentChange = ((ZerothEF - ground_truth_EF)/ground_truth_EF) * 100
 
           EDV = max(volumes)
           ESV = min(volumes)
@@ -130,15 +126,15 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           EF_anglechange = (angleChanges[0] + angleChanges[1])/2
 
           if normalized:
-            diff_EDV = (((EDV-ground_truth_EDV)/ground_truth_EDV) * 100) - ZerothEDVPercentChange
-            diff_ESV = (((ESV-ground_truth_ESV)/ground_truth_ESV) * 100) - ZerothESVPercentChange
-            diff_EF = (((EF - ground_truth_EF)/ground_truth_EF) * 100) - ZerothEFPercentChange
+            diff_EDV = (EDV - ZerothEDV)/ZerothEDV * 100
+            diff_ESV = (ESV - ZerothESV)/ZerothESV * 100
+            diff_EF = EF - ZerothEF
           else:
             diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
             diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
-            diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100
+            diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100 if ground_truth_EF != 0 else 0
 
-          if volumeType is "EF":
+          if volumeType is "EF" and ground_truth_EF!=0:
             if int(EF_anglechange) not in changesInVolumesDict:
               changesInVolumesDict[int(EF_anglechange)] = []
             
@@ -214,17 +210,16 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   
   # show plot
   plt.show()
-  includeNormalized = "Normalized - " if normalized else ""
-  plt.savefig("figures/" + includeNormalized + inputFolder + " EF vs " + fromFile + " EF.png")
 
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="FileList", normalized=True, sweeps=30)
-
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="FileList", normalized=False, sweeps=30)
 
 # createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=30)
+#               fromFile="FileList", normalized=True, sweeps=30)
+
+# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+#               fromFile="FileList", normalized=False, sweeps=30)
+
+createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+              fromFile="VolumeTracings", normalized=True, sweeps=30)
 
 # createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=False, sweeps=30)
