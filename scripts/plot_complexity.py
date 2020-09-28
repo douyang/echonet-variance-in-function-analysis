@@ -68,6 +68,7 @@ def main(root=os.path.join("timing", "video"),
     plt.savefig(os.path.join(fig_root, "complexity.eps"))
     plt.close(fig)
 
+
 def load(root, model, frames, period, pretrained, split):
     """Loads runtime and memory usage for specified hyperparameter choice."""
     with open(os.path.join(root, "{}_{}_{}_{}".format(model, frames, period, "pretrained" if pretrained else "random"), "log.csv"), "r") as f:
