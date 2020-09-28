@@ -115,6 +115,8 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           
           ZerothEDV = ((max(all_volumes[videoName][0][0]) - ground_truth_EDV)/ground_truth_EDV) * 100
           ZerothESV = ((min(all_volumes[videoName][0][0]) - ground_truth_ESV)/ground_truth_ESV) * 100
+          ZerothEF = 1 - (min(all_volumes[videoName][0][0])/max(all_volumes[videoName][0][0])) * 100
+          ZerothEFPercentChange = ((ZerothEF - ground_truth_EF)/ground_truth_EF) * 100
 
           angleChangeAverage = (angleChanges[0] + angleChanges[1])/2
 
@@ -130,6 +132,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           if normalized:
             diff_EDV = (((EDV-ground_truth_EDV)/ground_truth_EDV) * 100) - ZerothEDV
             diff_ESV = (((ESV-ground_truth_ESV)/ground_truth_ESV) * 100) - ZerothESV
+            diff_EF = (((EF - ground_truth_EF)/ground_truth_EF) * 100) - ZerothEFPercentChange
           else:
             diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
             diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
@@ -170,7 +173,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       residue = key % 5
       lowerBucketValue = key - residue
       lowerBucketValue = lowerBucketValue - 180 if lowerBucketValue > 90 else lowerBucketValue
-      lowerBucketValue = lowerBucketValue + 180  if lowerBucketValue < -90 else lowerBucketValue
+      lowerBucketValue = lowerBucketValue + 175  if lowerBucketValue < -90 else lowerBucketValue
 
       upperBucketValue = lowerBucketValue + 5
       bucket = (int(lowerBucketValue), int(upperBucketValue))
@@ -198,7 +201,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
     ax.set_title('Difference in Calculated ' + volumeType + ' against ' + fromFile)
   else:
     ax.set_title('Normalized (from mean) Difference in Calculated ' + volumeType + ' against ' + fromFile)
-yth
+
   ax.set_xlabel('Angle Changes (Degrees)')
 
   if volumeType is "ESV" or volumeType is "EDV":
