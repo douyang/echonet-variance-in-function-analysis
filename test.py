@@ -1,6 +1,6 @@
-differenceInVolumes = {(-90, -85): 10, (-100, -95): 11, (0, 5): 6}
+differenceInVolumes = {(0, 5): 11, (0, 0): 10, (-5, 0): 6}
 differenceInVolumes = list(differenceInVolumes.items())
-differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0])
+differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0] + volumeShift[0][1])
 
 # setting x-tick labels
 labels = [str(volumeShift[0]) for volumeShift in differenceInVolumes]

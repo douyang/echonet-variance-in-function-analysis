@@ -181,11 +181,13 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       differenceInVolumes[bucket] = []
     differenceInVolumes[bucket] += changesInVolumesDict[key]
   
-
+  print("normalized: " + str(normalized))
+  print(volumeType)
+  print(fromFile)
   print(totalDifferences/totalItems)
 
   differenceInVolumes = list(differenceInVolumes.items())
-  differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0])
+  differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0] + volumeShift[0][1])
 
   # setting x-tick labels
   labels = [str(volumeShift[0]) for volumeShift in differenceInVolumes]
@@ -232,11 +234,11 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 # createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=True, sweeps=10)
 
-createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="VolumeTracings", normalized=False, sweeps=10)
+# createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
+#               fromFile="VolumeTracings", normalized=False, sweeps=10)
 
 # createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=30)
+#               fromFile="VolumeTracings", normalized=True, sweeps=10)
 
 # createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=False, sweeps=30)
+#               fromFile="VolumeTracings", normalized=False, sweeps=10)
