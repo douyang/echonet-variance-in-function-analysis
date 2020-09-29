@@ -113,9 +113,9 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
         if len(angleChanges) > 1:
           volumes = all_volumes[videoName][angleShift][0]
           
-          ZerothEDV = max(all_volumes[videoName][0][0])
-          ZerothESV = min(all_volumes[videoName][0][0])
-          ZerothEF = ((1 - (ZerothESV/ZerothEDV)) * 100)
+          # ZerothEDV = max(all_volumes[videoName][0][0])
+          # ZerothESV = min(all_volumes[videoName][0][0])
+          # ZerothEF = ((1 - (ZerothESV/ZerothEDV)) * 100)
 
           EDV = max(volumes)
           ESV = min(volumes)
@@ -125,14 +125,14 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           ESV_anglechange = angleChanges[volumes.index(min(volumes))]
           EF_anglechange = (angleChanges[0] + angleChanges[1])/2
 
-          if normalized:
-            diff_EDV = (EDV - ZerothEDV)/ZerothEDV * 100
-            diff_ESV = (ESV - ZerothESV)/ZerothESV * 100
-            diff_EF = EF - ZerothEF
-          else:
-            diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
-            diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
-            diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100 if ground_truth_EF != 0 else 0
+          # if normalized:
+          #   diff_EDV = (EDV - ZerothEDV)/ZerothEDV * 100
+          #   diff_ESV = (ESV - ZerothESV)/ZerothESV * 100
+          #   diff_EF = EF - ZerothEF
+          # else:
+          diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
+          diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
+          diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100 if ground_truth_EF != 0 else 0
 
           if volumeType is "EF" and ground_truth_EF!=0:
             if int(EF_anglechange) not in changesInVolumesDict:
@@ -161,12 +161,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   totalDifferences = 0
   totalItems = 0
 
-
   for key in changesInVolumesDict:
-    if abs(key) <= 10:
-      totalDifferences += sum([abs(change) for change in changesInVolumesDict[key]])
-      totalItems += len(changesInVolumesDict[key])
-  
     if key == 0:
       bucket = (0, 0)
     else:
@@ -181,17 +176,34 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       differenceInVolumes[bucket] = []
     differenceInVolumes[bucket] += changesInVolumesDict[key]
   
-  print("normalized: " + str(normalized))
-  print(volumeType)
-  print(fromFile)
-  print(totalDifferences/totalItems)
-
+ 
   differenceInVolumes = list(differenceInVolumes.items())
   differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0] + volumeShift[0][1])
-
+  zeroItems = differenceInVolumes[sweeps][1]
+  percentShift = sum(zeroItems)/len(zeroItems)
+  
   # setting x-tick labels
   labels = [str(volumeShift[0]) for volumeShift in differenceInVolumes]
   data = [volumeShift[1] for volumeShift in differenceInVolumes]
+  # print(len(data[2]))
+
+  if normalized:
+    data = [[shift - percentShift for shift in dataItem] for dataItem in data]
+  
+  totalErr = 0
+  totalItems = 0
+  for sweep in differenceInVolumes:
+    bucket = sweep[0]
+    if abs(bucket[0] + bucket[1]) <= 15:
+      totalErr += sum([abs(shift - percentShift) for shift in sweep[1]])
+      totalItems += len(sweep[1])
+  
+  averageError = totalErr/totalItems
+  
+  print("normalized: " + str(normalized))
+  print(volumeType)
+  print(fromFile)
+  print(averageError)
 
   # figure related code
   loader.latexify()
@@ -237,8 +249,8 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 # createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=False, sweeps=10)
 
-# createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=10)
+createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
+              fromFile="VolumeTracings", normalized=True, sweeps=10)
 
 # createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=False, sweeps=10)
