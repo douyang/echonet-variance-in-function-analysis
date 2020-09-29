@@ -5,9 +5,6 @@ import os
 
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
 # Use same version from code
 # See 3 from
 # https://packaging.python.org/guides/single-sourcing-package-version/

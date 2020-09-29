@@ -267,7 +267,7 @@ def run_epoch(model, dataloader, train, optim, device, save_all=False, block_siz
     yhat = []
     y = []
 
-    with torch.set_grad_enabled(train):
+    with torch.set_grad_enabled(False):
         with tqdm.tqdm(total=len(dataloader)) as pbar:
             for (X, outcome) in dataloader:
 

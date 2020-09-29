@@ -84,7 +84,6 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
 
     d = {'Video Name': video, "Angle Shift": angleshift, 'EF': ef, "ESV": esv, "EDV": edv, "True EF": true_EF, "True ESV": true_ESV, "True EDV": true_EDV}
     df = pd.DataFrame(d)
-    #df.set_index('Video Name', inplace=True)
     
     export_path = os.path.join(config.CONFIG.DATA_DIR, method + "-Volume.csv")
 
