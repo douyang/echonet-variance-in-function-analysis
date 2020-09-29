@@ -21,7 +21,7 @@ def initVars(method="Method of Disks"):
 
   fnames = []
 
-  root, _, df = loader.dataModules()
+  root, df = loader.dataModules()
 
   with open(os.path.join(root, "FileList.csv")) as f:
     header = f.readline().strip().split(",")
