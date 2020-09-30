@@ -17,7 +17,7 @@ import echonet
 
 
 def main(fig_root=os.path.join("figure", "noise"),
-         video_output=os.path.join("output", "video", "r2plus1d_18_32_2_pretrained"),
+         video_output=os.path.join("output", "video", "r2plus1d_18_32_1_pretrained"),
          seg_output=os.path.join("output", "segmentation", "deeplabv3_resnet50_random"),
          NOISE=(0, 0.1, 0.2, 0.3, 0.4, 0.5)):
     """Generate plots for Extended Data Fig. 6."""
