@@ -34,7 +34,7 @@ def main(root=os.path.join("timing", "video"),
     for (model, color) in zip(["r2plus1d_18", "r3d_18", "mc3_18"], matplotlib.colors.TABLEAU_COLORS):
         for split in ["val"]:  # ["val", "train"]:
             print(model, split)
-            data = [load(root, model, frames, 1, pretrained, split) for frames in FRAMES]
+            data = [load("/Users/ishan/Documents/Stanford/EchoData/output/video/r2plus1d_18_32_1_pretrained/scripts/verbose_normalizedlargeindex.csv", split)]
             time = np.array(list(map(lambda x: x[0], data)))
             n = np.array(list(map(lambda x: x[1], data)))
             mem_allocated = np.array(list(map(lambda x: x[2], data)))
@@ -69,9 +69,9 @@ def main(root=os.path.join("timing", "video"),
     plt.close(fig)
 
 
-def load(root, model, frames, period, pretrained, split):
+def load(path, split):
     """Loads runtime and memory usage for specified hyperparameter choice."""
-    with open(os.path.join(root, "{}_{}_{}_{}".format(model, frames, period, "pretrained" if pretrained else "random"), "log.csv"), "r") as f:
+    with open((path), "r") as f:
         for line in f:
             line = line.split(",")
             if len(line) < 4:

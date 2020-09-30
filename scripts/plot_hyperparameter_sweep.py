@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import echonet
 
 
-def main(root=os.path.join("output", "video"),
+def main(root=os.path.join("/Users/ishan/Documents/Stanford/EchoData/output/video"),
          fig_root=os.path.join("figure", "hyperparameter"),
          FRAMES=(1, 8, 16, 32, 64, 96, None),
          PERIOD=(1, 2, 4, 6, 8)
@@ -55,7 +55,7 @@ def main(root=os.path.join("output", "video"),
     for (model, color) in zip(["r2plus1d_18", "r3d_18", "mc3_18"],
                               matplotlib.colors.TABLEAU_COLORS):
         for pretrained in [True, False]:
-            loss = [load(root, model, frames, 1, pretrained) for frames in FRAMES]
+            loss = [load(root, model, 32, 1, pretrained) for frames in FRAMES]
             print(model, pretrained)
             print("    ".join(list(map(lambda x: "{:.1f}".format(x) if x is not None else None, loss))))
 
