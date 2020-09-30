@@ -172,9 +172,10 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
       upperBucketValue = lowerBucketValue + 5
       bucket = (int(lowerBucketValue), int(upperBucketValue))
 
-    if abs(upperBucketValue + lowerBucketValue) < 60 and bucket not in differenceInVolumes:
-      differenceInVolumes[bucket] = []
-    differenceInVolumes[bucket] += changesInVolumesDict[key]
+    if abs(upperBucketValue + lowerBucketValue) < 130: 
+      if bucket not in differenceInVolumes:
+        differenceInVolumes[bucket] = []
+      differenceInVolumes[bucket] += changesInVolumesDict[key]
   
  
   differenceInVolumes = list(differenceInVolumes.items())
@@ -199,12 +200,6 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   if normalized:
     data = [[(shift - percentShift) for shift in dataItem] for dataItem in data]
-  
-  print(percentShift)
-  zeros = data[sweeps]
-  zeros.sort()
-
-  print(zeros[len(zeros)//2])
 
   totalErr = 0
   totalItems = 0
@@ -248,26 +243,26 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   plt.show()
 
 
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="FileList", normalized=True, sweeps=20)
+# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+#               fromFile="FileList", normalized=True, sweeps=25)
 
 # createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="FileList", normalized=False, sweeps=20)
+#               fromFile="FileList", normalized=False, sweeps=25)
 
 # createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=20)
+#               fromFile="VolumeTracings", normalized=True, sweeps=25)
 
 # createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=False, sweeps=20)
+#               fromFile="VolumeTracings", normalized=False, sweeps=25)
 
 # createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=20)
+#               fromFile="VolumeTracings", normalized=True, sweeps=25)
 
 # createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=False, sweeps=20)
+#               fromFile="VolumeTracings", normalized=False, sweeps=25)
 
 # createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=20)
+#               fromFile="VolumeTracings", normalized=True, sweeps=25)
 
-# createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=False, sweeps=20)
+createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
+              fromFile="VolumeTracings", normalized=False, sweeps=25)
