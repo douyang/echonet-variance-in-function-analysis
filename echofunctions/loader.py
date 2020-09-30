@@ -33,7 +33,7 @@ def READ_AND_CROP_FRAME(videoPath: str, timing: int):
         videoPath (str): The path to the video/clip
         timing (int): The frame number that needs to be read
     Returns:
-        Cropped image based on coords and height, width
+        Cropped image based e coords and height, width
     """
   cap = cv2.VideoCapture(videoPath) # Create VideoCapture object
 
