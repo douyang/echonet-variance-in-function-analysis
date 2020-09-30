@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-def show_images(images, cols = 2, titles = None):
+def show_images(images, cols = 6, titles = None):
     """Display a list of images in a single figure with matplotlib.
     
     Parameters
@@ -29,23 +29,20 @@ def show_images(images, cols = 2, titles = None):
     n_images = len(images)
     if titles is None: titles = ['Image (%d)' % i for i in range(1,n_images + 1)]
     fig = plt.figure()
+    plt.title("Point Shift Sweeps from -30 to 30")
    
     for n, (image, title) in enumerate(zip(images, titles)):
         
         a = fig.add_subplot(cols, np.ceil(n_images/float(cols)), n + 1)
         a.get_yaxis().set_visible(False)
         a.get_xaxis().set_visible(False)
-        if n in range(5, 10):
-            a.get_xaxis().set_visible(True)
-            plt.xticks(np.arange(0, 101, 30.0))
-        if n is 0 or n is 5:
-          a.get_yaxis().set_visible(True)
-          plt.yticks(np.arange(0, 101, 30.0))
-          plt.tick_params(axis='y', direction='out')
+
         if image.ndim == 2:
             plt.gray()
         plt.imshow(image, origin='lower') 
     fig.set_size_inches(np.array(fig.get_size_inches()))
+    
+
     plt.show()
 
 
