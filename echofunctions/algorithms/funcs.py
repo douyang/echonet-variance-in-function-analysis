@@ -411,6 +411,7 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
     x1, y1 = lowerIntercept[i]
     x2, y2 = higherIntercept[i]
 
+
     slope = getSlope([x1, y1], [x2, y2])
     angle = math.atan(slope)
 
@@ -418,6 +419,7 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
       angle -= math.pi
 
     degrees[i] = (baseAngle - angle) * 180/math.pi
+
 
     p1Index = points.index([x1, y1])
     p2Index = points.index([x2, y2])
@@ -440,6 +442,30 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
     x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
     y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
+    # if i < 100:
+    #   print(i)
+    #   image = cv2.imread(path) 
+
+
+    #   # for point in points:
+    #   #   cv2.circle(image,tuple(point), 1, (255,255,255), -1)
+    #   #   if point[0] <50:
+    #   #     print(point)
+
+
+    #   # for point in weighted_avg: 
+    #   #   cv2.circle(image,tuple((int(point[0]), int(point[1]))), 1, (0,0,0), -1)
+      
+    #   for j in range(len(lowerInterceptAveragePoints)): 
+    #     cv2.line(image, tuple(lowerInterceptAveragePoints[j]), tuple(higherInterceptAveragePoints[j]), (255,255,0), 1)
+
+
+    #   cv2.line(image, (x1, y1), (x2, y2), (0,0,0), 1)
+
+    #   cv2_imshow(image)
+    #   cv2.waitKey(0)
+    #   cv2.destroyAllWindows()
+
     if  method == "Method of Disks":
       volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
@@ -448,8 +474,3 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
       volumes[i] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     
   return (volumes, x1s, y1s, x2s, y2s, degrees)
-
-#print(calculateVolume(path, 20, 30, method = "Method of Disks"))
-# print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
-# print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
-# print(calculateVolume("/content/output/image.png", method = "Bullet"))
