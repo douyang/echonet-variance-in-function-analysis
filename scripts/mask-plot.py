@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-def show_images(images, cols = 6, titles = None):
+def show_images(images, cols = 1, titles = None):
     """Display a list of images in a single figure with matplotlib.
     
     Parameters
@@ -51,7 +51,7 @@ import glob
 import numpy as np
 
 X_data = []
-files = glob.glob ("/Users/ishan/Documents/Stanford/echonet-function-evaluation/testing/samples/*.png")
+files = glob.glob ("/Users/ishan/Documents/Stanford/echonet-function-evaluation/testing/plots/*.png")
 for myFile in files:
     print(myFile)
     image = cv2.imread (myFile)
