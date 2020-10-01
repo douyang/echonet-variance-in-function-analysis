@@ -96,7 +96,7 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
       
       givenTrueDict[videoName] = [ground_truth_ESV, ground_truth_EDV]
 
-  return givenTrueDict, imageLines
+  return givenTrueDict
 
 def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method="Method of Disks", volumeType="ESV", fromFile=None):
   
@@ -108,7 +108,7 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
   if fromFile is "VolumeTracings":
     tracings_volumes = sortFrameVolumeTracings(method)
   else:
-    tracings_volumes, imageLines = sortVolumesFromFileList()
+    tracings_volumes = sortVolumesFromFileList()
 
   for videoName in tracings_volumes:
     volumeData = tracings_volumes[videoName]
