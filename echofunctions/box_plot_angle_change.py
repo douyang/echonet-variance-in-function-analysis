@@ -215,7 +215,8 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # sum(zeroItems)/len(zeroItems)
   
   # setting x-tick labels
-  labels = [str(volumeShift[0]) if (max(abs(volumeShift[0][0]), abs(volumeShift[0][1])) % 10 == 0) else "" for volumeShift in differenceInVolumes]
+  # labels = [str(volumeShift[0]) if (max(abs(volumeShift[0][0]), abs(volumeShift[0][1])) % 10 == 0) else "" for volumeShift in differenceInVolumes]
+  labels = [str(volumeShift[0]) for volumeShift in differenceInVolumes]
   data = [volumeShift[1] for volumeShift in differenceInVolumes]
   # print(len(data[2]))
 
@@ -240,7 +241,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   # figure related code
   loader.latexify()
-  fig = plt.figure(figsize=(2, 2))
+  fig = plt.figure(figsize=(2.5, 2))
   # fig.suptitle('Comparison', fontsize=14, fontweight='bold')
 
   ax = fig.add_subplot(111)
@@ -272,7 +273,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 #               fromFile="FileList", normalized=False, sweeps=30)
 
 createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="VolumeTracings", normalized=True, sweeps=30)
+              fromFile="VolumeTracings", normalized=True, sweeps=3)
 
 # createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
 #               fromFile="VolumeTracings", normalized=False, sweeps=30)
