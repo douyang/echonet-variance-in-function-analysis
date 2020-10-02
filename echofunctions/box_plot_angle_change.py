@@ -208,7 +208,10 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   # figure related code
   loader.latexify()
-  fig = plt.figure(figsize=(2.5, 2))
+  fig = plt.figure(figsize=(12, 8))
+  plt.xticks(fontsize=18)
+  plt.yticks(fontsize=18)
+
 
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
@@ -216,14 +219,14 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   ax.set_xticklabels(labels, Rotation=90)
   
   # show plot
-  plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png",bbox_inches='tight')
+  plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
   plt.show()
 
-createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="FileList", normalized=True, sweeps=30)
+# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
+#               fromFile="FileList", normalized=True, sweeps=30)
 
 createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="VolumeTracings", normalized=False, sweeps=30)
-
-createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
               fromFile="VolumeTracings", normalized=True, sweeps=30)
+
+# createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
+#               fromFile="VolumeTracings", normalized=True, sweeps=30)
