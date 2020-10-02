@@ -60,7 +60,7 @@ class Echo(torch.utils.data.Dataset):
         external_test_location (string): Path to videos to use for external testing.
     """
 
-    def __init__(self, root=None,
+    def __init__(self, root="/Users/ishan/Documents/Stanford/EchoData",
                  split="train", target_type="EF",
                  mean=0., std=1.,
                  length=16, period=2,
