@@ -97,10 +97,14 @@ def calculateSweeps(timing, makeSweepFrames):
 
   for videoName in tracingsVolumes:
     counter+=1
-    ground_truth_ESV = funcs.calculateVolume(os.path.join(esv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")
-    ground_truth_EDV = funcs.calculateVolume(os.path.join(edv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")
-    ground_truth_EF = (ground_truth_EDV - ground_truth_ESV)/ground_truth_EDV
 
+    if os.path.exists(os.path.join(esv_path, videoName, "frame_0.png")):
+      try:
+        ground_truth_ESV = funcs.calculateVolume(os.path.join(esv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")[0][0]
+        ground_truth_EDV = funcs.calculateVolume(os.path.join(edv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")[0][0]
+        ground_truth_EF = ((ground_truth_EDV - ground_truth_ESV)/ground_truth_EDV)
+      except:
+        continue
     if counter % 100 == 0:
       print(counter)
 
@@ -120,7 +124,7 @@ def calculateSweeps(timing, makeSweepFrames):
           # EF Calculations
           EF = (EDV - ESV)/EDV
           diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100
-          
+
           # Frame Index
           indexName = frameSweep.split('_')[1][:-4]
 
@@ -143,12 +147,8 @@ def calculateSweeps(timing, makeSweepFrames):
           EF_Sweeps_Volumes[int(indexName)].append(diff_EF)
         except:
           continue
-  
-  esv_dict = normalize.normalizeDict(ESV_Sweeps_Volumes)
-  edv_dict = normalize.normalizeDict(EDV_Sweeps_Volumes)
-  ef_dict = normalize.normalizeDict(EF_Sweeps_Volumes)
 
-  return esv_dict, edv_dict, ef_dict
+  return ESV_Sweeps_Volumes, EDV_Sweeps_Volumes, EF_Sweeps_Volumes
 
 def createBoxPlot(volumeType="EDV", makeSweeps=True):
   ESVVolumes, EDVVolumes, EFVolumes = calculateSweeps(volumeType, makeSweeps)
@@ -167,7 +167,7 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
   totalErr = 0
   totalItems = 0
   for sweep in volumesDict:
-    if abs(sweep[0]) == 0:
+    if abs(sweep[0]) <= 10:
       shifts = sweep[1]
       totalErr += sum([abs(shift) for shift in shifts])
       totalItems += len(shifts)
@@ -183,12 +183,12 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
   # figure related code
   loader.latexify()
   fig = plt.figure(figsize=(12, 8))
-  plt.xticks(fontsize=18)
-  plt.yticks(fontsize=18)
+  plt.xticks(fontsize=13)
+  plt.yticks(fontsize=13)
 
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
-  ax.set_xticklabels(labels, Rotation=45)
+  ax.set_xticklabels(labels)
   
   # show plot
   plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
@@ -196,4 +196,4 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
 
 #createBoxPlot(volumeType="ESV", makeSweeps=False)
 #createBoxPlot(volumeType="EDV", makeSweeps=False)
-createBoxPlot(volumeType="EF", makeSweeps=False)
+#createBoxPlot(volumeType="EF", makeSweeps=False)
