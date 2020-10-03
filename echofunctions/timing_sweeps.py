@@ -1,5 +1,5 @@
-"""Echonet Function Evaluation comparisons of different methods'
- angle shifts to compare volume vs. ground truth on angle changes"""
+"""Echonet Function Evaluation comparisons of different timing sweeps with up
+and down frame shifts to calculate and understand differences in cardiac assessment"""
 
 import pandas as pd
 import numpy as np
@@ -10,6 +10,7 @@ import config
 import loader
 from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
+from algorithms import normalizations as normalize
 import collections
 import cv2
 from ast import literal_eval
@@ -137,21 +138,11 @@ def calculateSweeps(timing, makeSweepFrames):
         except:
           continue
 
-  esv_dict = normalizeDict(ESV_Sweeps_Volumes)
-  edv_dict = normalizeDict(EDV_Sweeps_Volumes)
-  ef_dict = normalizeDict(EF_Sweeps_Volumes)
+  esv_dict = normalize.normalizeDict(ESV_Sweeps_Volumes)
+  edv_dict = normalize.normalizeDict(EDV_Sweeps_Volumes)
+  ef_dict = normalize.normalizeDict(EF_Sweeps_Volumes)
 
   return esv_dict, edv_dict, ef_dict
-
-def normalizeDict(changesInVolumesDict):
-  zeroItems = changesInVolumesDict[0]
-  zeroItems.sort()
-  shift = zeroItems[len(zeroItems)//2]
-
-  for angle in changesInVolumesDict:
-      for i in range(len(changesInVolumesDict[angle])):
-          changesInVolumesDict[angle][i] -= shift
-  return changesInVolumesDict
 
 def createBoxPlot(volumeType="EDV", makeSweeps=True):
   ESVVolumes, EDVVolumes, EFVolumes = calculateSweeps(volumeType, makeSweeps)
@@ -196,5 +187,5 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
   plt.show()
 
 #createBoxPlot(volumeType="ESV", makeSweeps=False)
-createBoxPlot(volumeType="EDV", makeSweeps=False)
+#createBoxPlot(volumeType="EDV", makeSweeps=False)
 #createBoxPlot(volumeType="EF", makeSweeps=False)
