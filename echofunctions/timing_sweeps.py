@@ -49,9 +49,11 @@ def generateFrameSweeps(timing, makeSweepFrames):
   PATH_TO_VIDEOS = os.path.join(root, "segmented-videos") # frames path
   PATH_TO_ESVSWEEPS = os.path.join(root, "ESV_sweeps")
   PATH_TO_EDVSWEEPS = os.path.join(root, "EDV_sweeps")
+  PATH_TO_CSVS = os.path.join(root, "CSVs")
   
   os.makedirs(PATH_TO_ESVSWEEPS, exist_ok=True)
   os.makedirs(PATH_TO_EDVSWEEPS, exist_ok=True)
+  os.makedirs(PATH_TO_CSVS, exist_ok=True)
 
   for i in range(len(df)): # iterates through each row of data frame
     videoName = df.iloc[i, 0] + ".avi" # name of video
@@ -84,69 +86,88 @@ def generateFrameSweeps(timing, makeSweepFrames):
           cv2.imwrite(sweep_path, frame)
         except:
           continue
-  return PATH_TO_ESVSWEEPS, PATH_TO_EDVSWEEPS, allVolumes
+
+  return PATH_TO_ESVSWEEPS, PATH_TO_EDVSWEEPS, PATH_TO_CSVS, allVolumes
 
 def calculateSweeps(timing, makeSweepFrames):
-  esv_path, edv_path, tracingsVolumes = generateFrameSweeps(timing, makeSweepFrames)
+  esv_path, edv_path, csv_path, tracingsVolumes = generateFrameSweeps(timing, makeSweepFrames)
 
   ESV_Sweeps_Volumes = {}
   EDV_Sweeps_Volumes = {}
   EF_Sweeps_Volumes = {}
 
   counter = 0
+  
+  with open(os.path.join(csv_path, "EDV_Timing_Sweeps"), 'w') as edv_outfile, open(os.path.join(csv_path, "ESV_Timing_Sweeps"), 'w') as esv_outfile, open(os.path.join(csv_path, "EF_Timing_Sweeps"), 'w') as ef_outfile:
+    edv_outfile.write("name," + ",".join([i for i in range(-15, 16)]))
+    esv_outfile.write("name," + ",".join([i for i in range(-15, 16)]))
+    ef_outfile.write("name," + ",".join([i for i in range(-15, 16)]))
 
-  for videoName in tracingsVolumes:
-    counter+=1
+    for videoName in tracingsVolumes:
+      esv_list = edv_list = ef_list = ["" for i in range(31)]
 
-    if os.path.exists(os.path.join(esv_path, videoName, "frame_0.png")):
-      try:
-        ground_truth_ESV = funcs.calculateVolume(os.path.join(esv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")[0][0]
-        ground_truth_EDV = funcs.calculateVolume(os.path.join(edv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")[0][0]
-        ground_truth_EF = ((ground_truth_EDV - ground_truth_ESV)/ground_truth_EDV)
-      except:
-        continue
-    if counter % 100 == 0:
-      print(counter)
+      counter+=1
 
-    if (os.path.exists(os.path.join(esv_path, videoName))) and (os.path.exists(os.path.join(edv_path, videoName))):
-      for frameSweep in os.listdir(os.path.join(esv_path, videoName)):
+      if os.path.exists(os.path.join(esv_path, videoName, "frame_0.png")):
         try:
-          # ESV Calculations
-          volumes, *_ = funcs.calculateVolume(os.path.join(esv_path, videoName, frameSweep), 20, 0, "Method of Disks")
-          ESV = volumes[0]
-          diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
-
-          # EDV Calculations
-          volumes, *_ = funcs.calculateVolume(os.path.join(edv_path, videoName, frameSweep), 20, 0, "Method of Disks")
-          EDV = volumes[0]
-          diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
-
-          # EF Calculations
-          EF = (EDV - ESV)/EDV
-          diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100
-
-          # Frame Index
-          indexName = frameSweep.split('_')[1][:-4]
-
-          # Add ESV percent change to dictionary
-          if int(indexName) not in ESV_Sweeps_Volumes:
-            ESV_Sweeps_Volumes[int(indexName)] = [] 
-
-          ESV_Sweeps_Volumes[int(indexName)].append(diff_ESV)
-
-          # Add EDV percent change to dictionary
-          if int(indexName) not in EDV_Sweeps_Volumes:
-            EDV_Sweeps_Volumes[int(indexName)] = [] 
-
-          EDV_Sweeps_Volumes[int(indexName)].append(diff_EDV)
-
-          # Add EF percent change to dictionary
-          if int(indexName) not in EF_Sweeps_Volumes:
-            EF_Sweeps_Volumes[int(indexName)] = [] 
-
-          EF_Sweeps_Volumes[int(indexName)].append(diff_EF)
+          ground_truth_ESV = funcs.calculateVolume(os.path.join(esv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")[0][0]
+          ground_truth_EDV = funcs.calculateVolume(os.path.join(edv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")[0][0]
+          ground_truth_EF = ((ground_truth_EDV - ground_truth_ESV)/ground_truth_EDV)
         except:
           continue
+      if counter % 100 == 0:
+        print(counter)
+    
+      if (os.path.exists(os.path.join(esv_path, videoName))) and (os.path.exists(os.path.join(edv_path, videoName))):
+        for frameSweep in os.listdir(os.path.join(esv_path, videoName)):
+          try:
+            # ESV Calculations
+            volumes, *_ = funcs.calculateVolume(os.path.join(esv_path, videoName, frameSweep), 20, 0, "Method of Disks")
+            ESV = volumes[0]
+            diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
+
+            # EDV Calculations
+            volumes, *_ = funcs.calculateVolume(os.path.join(edv_path, videoName, frameSweep), 20, 0, "Method of Disks")
+            EDV = volumes[0]
+            diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
+
+            # EF Calculations
+            EF = (EDV - ESV)/EDV
+            diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100
+
+            # Frame Index
+            indexName = frameSweep.split('_')[1][:-4]
+            esv_list[indexName+15] = ESV
+            edv_list[indexName+15] = EDV
+            ef_list[indexName+15] = EF
+
+            # Add ESV percent change to dictionary
+            if int(indexName) not in ESV_Sweeps_Volumes:
+              ESV_Sweeps_Volumes[int(indexName)] = []
+
+            ESV_Sweeps_Volumes[int(indexName)].append(diff_ESV)
+
+            # Add EDV percent change to dictionary
+            if int(indexName) not in EDV_Sweeps_Volumes:
+              EDV_Sweeps_Volumes[int(indexName)] = [] 
+
+            EDV_Sweeps_Volumes[int(indexName)].append(diff_EDV)
+
+            # Add EF percent change to dictionary
+            if int(indexName) not in EF_Sweeps_Volumes:
+              EF_Sweeps_Volumes[int(indexName)] = [] 
+
+            EF_Sweeps_Volumes[int(indexName)].append(diff_EF)
+          except:
+            continue
+      
+      esv_line = ", ".join([videoName] + esv_list) 
+      edv_line = ", ".join([videoName] + edv_list) 
+      ef_line = ", ".join([videoName] + ef_list) 
+
+      esv_outfile.write(esv_line)
+      edv_outfile.write(edv_line)
+      ef_outfile.write(ef_line)
 
   return ESV_Sweeps_Volumes, EDV_Sweeps_Volumes, EF_Sweeps_Volumes
 
@@ -161,8 +182,8 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
     volumesDict = EFVolumes
 
   volumesDict = list(volumesDict.items())
-  volumesDict.sort(key=lambda volumeShift: volumeShift[0])
-  
+  volumesDict.sort(key=lambda volumeShift: volumeShift[0])    
+
   # Calculating error and specs
   totalErr = 0
   totalItems = 0
