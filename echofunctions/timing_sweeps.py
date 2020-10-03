@@ -14,6 +14,7 @@ from algorithms import normalizations as normalize
 import collections
 import cv2
 from ast import literal_eval
+import tqdm
 
 def sortFrameVolumeTracings():
   _, df = loader.dataModules()
@@ -92,11 +93,17 @@ def calculateSweeps(timing, makeSweepFrames):
   EDV_Sweeps_Volumes = {}
   EF_Sweeps_Volumes = {}
 
+  counter = 0
+
   for videoName in tracingsVolumes:
+    counter+=1
     volumeData = tracingsVolumes[videoName][0]
     ground_truth_ESV = min(volumeData)
     ground_truth_EDV = max(volumeData)
     ground_truth_EF = (ground_truth_EDV - ground_truth_ESV)/ground_truth_EDV
+
+    if counter % 100 == 0:
+      print(counter)
 
     if (os.path.exists(os.path.join(esv_path, videoName))) and (os.path.exists(os.path.join(edv_path, videoName))):
       for frameSweep in os.listdir(os.path.join(esv_path, videoName)):
@@ -137,7 +144,7 @@ def calculateSweeps(timing, makeSweepFrames):
           EF_Sweeps_Volumes[int(indexName)].append(diff_EF)
         except:
           continue
-
+  
   esv_dict = normalize.normalizeDict(ESV_Sweeps_Volumes)
   edv_dict = normalize.normalizeDict(EDV_Sweeps_Volumes)
   ef_dict = normalize.normalizeDict(EF_Sweeps_Volumes)
@@ -161,12 +168,14 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
   totalErr = 0
   totalItems = 0
   for sweep in volumesDict:
-    if abs(sweep) == 0:
-      totalErr += sum([abs(shift) for shift in sweep[1]])
-      totalItems += len(sweep[1])
+    if abs(sweep[0]) == 0:
+      shifts = sweep[1]
+      totalErr += sum([abs(shift) for shift in shifts])
+      totalItems += len(shifts)
   
   averageError = totalErr/totalItems
   print(averageError)
+  print(volumeType)
 
   # getting figure labels and data in right format
   labels = [volumeShift[0] for volumeShift in volumesDict]
