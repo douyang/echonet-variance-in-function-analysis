@@ -14,8 +14,6 @@ import collections
 import cv2
 from ast import literal_eval
 
-root, df = loader.dataModules()
-
 def sortFrameVolumeTracings():
   calculatedVolumeFromGroundTruth={}
   
@@ -41,9 +39,10 @@ def sortFrameVolumeTracings():
       calculatedVolumeFromGroundTruth[videoName][1].append(frameNumber)
   return calculatedVolumeFromGroundTruth
 
-def generateFrameSweeps(timing, makeSweepFrames):
-  allVolumes = sortFrameVolumeTracings()
+root, df = loader.dataModules()
+allVolumes = sortFrameVolumeTracings()
 
+def generateFrameSweeps(timing, makeSweepFrames):
   PATH_TO_VIDEOS = os.path.join(root, "segmented-videos") # frames path
   PATH_TO_ESVSWEEPS = os.path.join(root, "ESV_sweeps")
   PATH_TO_EDVSWEEPS = os.path.join(root, "EDV_sweeps")
