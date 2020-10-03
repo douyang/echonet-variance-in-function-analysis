@@ -6,13 +6,14 @@ from ast import literal_eval
 import os
 import cv2
 
-import funcs
+from algorithms import funcs as funcs
 import loader
 
 def capture(method, createRawFrames, imageType):
 
   PATH_DATA = [] # list that contains path information (later used for masks)
-  root, segmented_echo_data, df = loader.dataModules()
+  root, df = loader.dataModules()
+  segmented_echo_data = os.path.join(root, "Videos")
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, "Masks_From_VolumeTracing")
   PATH_TO_MASK_FRAMES_PARENT_DIR = os.path.join(root, "Masks_From_VolmeTracing_And_Lines_From_Algorithm")
@@ -24,10 +25,8 @@ def capture(method, createRawFrames, imageType):
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
 
-    videoPath = os.path.join(segmented_echo_data, videoName) # path to each video
-
+    videoPath = os.path.join(segmented_echo_data, videoName + ".avi") # path to each video
     if (os.path.exists(videoPath)):
-
       OUTPUT_FRAME_NAME = videoName + "_" + str(frameNumber) + "." + imageType # concatenate video name with frame number as file name
       OUTPUT_FRAME_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, OUTPUT_FRAME_NAME) # (data directory)/frames/(file name)
       
@@ -65,4 +64,4 @@ def generateMasks(method="Method of Disks", createRawFrames=False, imageType="pn
       except:
         print(PATH_TO_RAW_FRAME)
 
-generateMasks(imageType="png")
+generateMasks(imageType="png", createRawFrames=True)

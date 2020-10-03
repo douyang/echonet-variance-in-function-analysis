@@ -11,64 +11,17 @@ import loader
 from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
 import collections
+import cv2
 from ast import literal_eval
 
-def generateFrames(timing):
-    """Loads a video from a file and returns cropped frame
-    Args:
-        timing (str): ESV or EDV
-    """
-    root, df = loader.dataModules()
-    for i in range(len(df)//2):
-        name = df.iloc[2*i, 0]
-        frame = df.iloc[2*i, 1] if timing == "EDV" else df.iloc[2*i + 1, 1]
-        for frameNum in range(frame-15, frame+16, 1):
-            frameImage = loader.READ_AND_CROP_FRAME(name, frameNum)
-            OUTPUT_FRAME_NAME = timing + "_" + name + "_" + str(frameNum) + ".png" # concatenate video name with frame number as file name
-            frameImage.save(os.path.join(root, OUTPUT_FRAME_NAME))
-
-
-
-
-
-
-# def sortFrameVolumes(method, inputFolder, sweeps):
-#   root, df = loader.dataModules()
-#   all_volumes={}
-
-#   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolder) # frames path
-  
-#   for i in range(len(df)): # iterates through each row of data frame
-#     videoName = df.iloc[i, 0] # name of video
-#     frameNumber = df.iloc[i, 1] # timing for clip
-    
-#     OUTPUT_FRAME_NAME = videoName + "_" + str(frameNumber) + ".png" # concatenate video name with frame number as file name
-
-#     FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, OUTPUT_FRAME_NAME) # path to each video
-    
-#     if os.path.exists(FRAMES_PATH):
-#       try:
-#         volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(FRAMES_PATH, 20, sweeps, method)
-#         if videoName not in all_volumes and volumes is not "":
-#           all_volumes[videoName] = {}
-#         for r in range(-(sweeps), sweeps+1, 1):
-#           if r not in all_volumes[videoName]:
-#             all_volumes[videoName][r] = [], []
-          
-#           all_volumes[videoName][r][0].append(volumes[r])
-#           all_volumes[videoName][r][1].append(degrees[r])
-#       except:
-#         print(OUTPUT_FRAME_NAME)
-
-#   return all_volumes
-
-def sortFrameVolumesFromTracings(method):
+def sortFrameVolumeTracings():
   _, df = loader.dataModules()
   calculatedVolumeFromGroundTruth={}
   
   for i in range(len(df)):
-    videoName = df.iloc[i, 0]
-    
+    videoName = df.iloc[i, 0] + ".avi"
+    frameNumber = df.iloc[i, 1] # timing for clip
+
     x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
     y1 = list(literal_eval(df.iloc[i, 3])) # y1 coords
     x2 = list(literal_eval(df.iloc[i, 4])) # x2 coords
@@ -79,89 +32,151 @@ def sortFrameVolumesFromTracings(method):
     maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = tracings.calcParallelAndMaxPoints(x1, y1, x2, y2)
 
     if number < 22:
-      if method == "Method of Disks":
-        ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
-      elif method == "Prolate Ellipsoid":
-        ground_truth_volume = funcs.volumeProlateEllipsoidMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
-      elif method == "Bullet Method":
-        ground_truth_volume = funcs.volumeBulletMethod(maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
-
+      ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       if videoName not in calculatedVolumeFromGroundTruth:
-        calculatedVolumeFromGroundTruth[videoName] = []
+        calculatedVolumeFromGroundTruth[videoName] = [], []
       
-      calculatedVolumeFromGroundTruth[videoName].append(ground_truth_volume)
+      calculatedVolumeFromGroundTruth[videoName][0].append(ground_truth_volume)
+      calculatedVolumeFromGroundTruth[videoName][1].append(frameNumber)
   return calculatedVolumeFromGroundTruth
 
+def generateFrameSweeps(timing, makeSweepFrames):
+  root, df = loader.dataModules()
+  allVolumes = sortFrameVolumeTracings()
 
-
-# def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",
-#                   fromFile="FileList", normalized=True, sweeps=20):
-#   changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps)
-#   differenceInVolumes = {}
-#   totalItems = 0
-
-#   for key in changesInVolumesDict:
-#     if key == 0:
-#       bucket = (0, 0)
-#     else:
-#       residue = key % 5  
-#       lowerBucketValue = key - residue
-#       lowerBucketValue = lowerBucketValue - 180 if lowerBucketValue >= 90 else lowerBucketValue
-#       lowerBucketValue = lowerBucketValue + 180  if lowerBucketValue < -90 else lowerBucketValue
-#       upperBucketValue = lowerBucketValue + 5
-#       bucket = (int(lowerBucketValue), int(upperBucketValue))
-
-#     if abs(upperBucketValue + lowerBucketValue) < 120: 
-#       if bucket not in differenceInVolumes:
-#         differenceInVolumes[bucket] = []
-#       differenceInVolumes[bucket] += changesInVolumesDict[key]
+  PATH_TO_VIDEOS = os.path.join(root, "segmented-videos") # frames path
+  PATH_TO_ESVSWEEPS = os.path.join(root, "ESV_sweeps")
+  PATH_TO_EDVSWEEPS = os.path.join(root, "EDV_sweeps")
   
- 
-#   differenceInVolumes = list(differenceInVolumes.items())
-#   differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0] + volumeShift[0][1])
+  os.makedirs(PATH_TO_ESVSWEEPS, exist_ok=True)
+  os.makedirs(PATH_TO_EDVSWEEPS, exist_ok=True)
 
-#   zeroItems = differenceInVolumes[len(differenceInVolumes)//2 + 1][1]
-#   zeroItems.sort()
-#   labels = [str(volumeShift[0]) for volumeShift in differenceInVolumes]
-#   data = [volumeShift[1] for volumeShift in differenceInVolumes]
+  for i in range(len(df)): # iterates through each row of data frame
+    videoName = df.iloc[i, 0] + ".avi" # name of video
+    videoPath = os.path.join(PATH_TO_VIDEOS, videoName) # path to each raw video
 
-#   totalErr = 0
-#   totalItems = 0
-#   for sweep in differenceInVolumes:
-#     bucket = sweep[0]
-#     if abs(bucket[0] + bucket[1]) <= 15:
-#       totalErr += sum([abs(shift) for shift in sweep[1]])
-#       totalItems += len(sweep[1])
+    if (videoName in allVolumes) and (makeSweepFrames) and os.path.exists(videoPath):
+      os.makedirs(os.path.join(PATH_TO_ESVSWEEPS, videoName), exist_ok=True)
+      os.makedirs(os.path.join(PATH_TO_EDVSWEEPS, videoName), exist_ok=True)
+
+      volumes = allVolumes[videoName][0]
+      ESVFrame = allVolumes[videoName][1][volumes.index(min(volumes))]
+      EDVFrame = allVolumes[videoName][1][volumes.index(max(volumes))]
+
+      for frameSweep in range(int(ESVFrame)-15, int(ESVFrame)+16, 1):
+        try:
+          FRAME_NAME =  "frame_" + str(int(frameSweep) - int(ESVFrame)) + ".png"
+          sweep_path = os.path.join(PATH_TO_ESVSWEEPS, videoName, FRAME_NAME)
+
+          frame = loader.READ_AND_CROP_FRAME(videoPath, frameSweep, makeCrop=True)
+          cv2.imwrite(sweep_path, frame)
+        except:
+          continue
+
+      for frameSweep in range(int(EDVFrame)-15, int(EDVFrame)+16, 1):
+        try:
+          FRAME_NAME =  "frame_" + str(int(frameSweep) - int(EDVFrame)) + ".png"
+          sweep_path = os.path.join(PATH_TO_EDVSWEEPS, videoName, FRAME_NAME)
+
+          frame = loader.READ_AND_CROP_FRAME(videoPath, frameSweep, makeCrop=True)
+          cv2.imwrite(sweep_path, frame)
+        except:
+          continue
+  return PATH_TO_ESVSWEEPS, PATH_TO_EDVSWEEPS, allVolumes
+
+def calculateSweeps(timing, makeSweepFrames):
+  esv_path, edv_path, tracingsVolumes = generateFrameSweeps(timing, makeSweepFrames)
+
+  ESV_Sweeps_Volumes = {}
+  EDV_Sweeps_Volumes = {}
+
+  for videoName in tracingsVolumes:
+    volumeData = tracingsVolumes[videoName][0]
+    ground_truth_ESV = min(volumeData)
+    ground_truth_EDV = max(volumeData)
+
+    if (os.path.exists(os.path.join(esv_path, videoName))) and (os.path.exists(os.path.join(edv_path, videoName))):
+      for frameSweep in os.listdir(os.path.join(esv_path, videoName)):
+        volumes, *_ = funcs.calculateVolume(os.path.join(esv_path, videoName, frameSweep), 20, 0, "Method of Disks")
+        ESV = volumes[0]
+
+        diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
+
+        indexName = frameSweep.split('_')[1][:-4]
+
+        if int(indexName) not in ESV_Sweeps_Volumes:
+          ESV_Sweeps_Volumes[int(indexName)] = [] 
+
+        ESV_Sweeps_Volumes[int(indexName)].append(diff_ESV)
+
+      for frameSweep in os.listdir(os.path.join(edv_path, videoName)):
+        volumes, *_ = funcs.calculateVolume(os.path.join(edv_path, videoName, frameSweep), 20, 0, "Method of Disks")
+
+        EDV = volumes[0]
+
+        diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
+
+        indexName = frameSweep.split('_')[1][:-4]
+
+        if int(indexName) not in EDV_Sweeps_Volumes:
+          EDV_Sweeps_Volumes[int(indexName)] = [] 
+
+        EDV_Sweeps_Volumes[int(indexName)].append(diff_EDV)
+
+  esv_dict = normalizeDict(ESV_Sweeps_Volumes)
+  edv_dict = normalizeDict(EDV_Sweeps_Volumes)
+  return esv_dict, edv_dict
+
+def normalizeDict(changesInVolumesDict):
+  zeroItems = changesInVolumesDict[0]
+  zeroItems.sort()
+  shift = zeroItems[len(zeroItems)//2]
+
+  for angle in changesInVolumesDict:
+      for i in range(len(changesInVolumesDict[angle])):
+          changesInVolumesDict[angle][i] -= shift
+  return changesInVolumesDict
+
+def createBoxPlot(volumeType="EDV", makeSweeps=True):
+  ESVVolumes, EDVVolumes = calculateSweeps(volumeType, makeSweeps)
   
-#   averageError = totalErr/totalItems
+  if volumeType is "ESV":
+    volumesDict = ESVVolumes
+  elif volumeType is "EDV":
+    volumesDict = EDVVolumes
+
+  volumesDict = list(volumesDict.items())
+  volumesDict.sort(key=lambda volumeShift: volumeShift[0])
   
-#   print("normalized: " + str(normalized))
-#   print(volumeType)
-#   print(fromFile)
-#   print(averageError)
-#   print(sweeps)
-
-#   # figure related code
-#   loader.latexify()
-#   fig = plt.figure(figsize=(12, 8))
-#   plt.xticks(fontsize=18)
-#   plt.yticks(fontsize=18)
-
-
-#   ax = fig.add_subplot(111)
-#   ax.boxplot(data, showfliers=False)
-
-#   ax.set_xticklabels(labels, Rotation=90)
+  # Calculating error and specs
+  totalErr = 0
+  totalItems = 0
+  for sweep in volumesDict:
+    if abs(sweep) == 0:
+      shifts = volumesDict[sweep]
+      totalErr += sum([abs(shift) for shift in sweep[1]])
+      totalItems += len(sweep[1])
   
-#   # show plot
-#   plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
-#   plt.show()
+  averageError = totalErr/totalItems
+  print(averageError)
 
-# # createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-# #               fromFile="FileList", normalized=True, sweeps=30)
+  # getting figure labels and data in right format
+  labels = [volumeShift[0] for volumeShift in volumesDict]
+  data = [volumeShift[1] for volumeShift in volumesDict]
+  
+  # figure related code
+  loader.latexify()
+  fig = plt.figure(figsize=(12, 8))
+  plt.xticks(fontsize=18)
+  plt.yticks(fontsize=18)
 
-# createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=30)
+  ax = fig.add_subplot(111)
+  ax.boxplot(data, showfliers=False)
+  ax.set_xticklabels(labels, Rotation=45)
+  
+  # show plot
+  plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
+  plt.show()
 
-# # createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
-# #               fromFile="VolumeTracings", normalized=True, sweeps=30)
+createBoxPlot(volumeType="ESV", makeSweeps=True)
+createBoxPlot(volumeType="EDV", makeSweeps=True)

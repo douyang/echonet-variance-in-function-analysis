@@ -10,8 +10,8 @@ def obtainContourPoints(path):
   rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
   # set lower and upper bounds on blue color
-  lower = (0,0,100)
-  upper = (100, 100, 255)
+  lower = (200,200,200)
+  upper = (255, 255, 255)
 
   # threshold and invert so hexagon is white on black background
   thresh = cv2.inRange(rgb, lower, upper)
@@ -440,7 +440,14 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
     
   return (volumes, x1s, y1s, x2s, y2s, degrees)
 
-#print(calculateVolume(path, 20, 30, method = "Method of Disks"))
+volumes, x1, y1, x2, y2, degrees = calculateVolume("/Users/ishan/Documents/Stanford/echonet-function-evaluation/testing/samples/jj.png", 20, 1, method = "Method of Disks")
+
+blank_image = np.zeros((126, 126, 3), dtype="uint8")
+blank_image.fill(255)
+for coord in range(len(x1[0])):
+  cv2.line(blank_image, (int(x1[0][coord]), int(y1[0][coord])), (int(x2[0][coord]), int(y2[0][coord])), (10, 10, 200), 1)
+
+cv2.imwrite("/Users/ishan/Documents/Stanford/echonet-function-evaluation/testing/samples/img.png", blank_image)
 # print(calculateVolume("/content/output/image.png", method = "Single Ellipsoid"))
 # print(calculateVolume("/content/output/image.png", method = "Biplane Area"))
 # print(calculateVolume("/content/output/image.png", method = "Bullet"))

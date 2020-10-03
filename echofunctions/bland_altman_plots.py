@@ -111,7 +111,7 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method
       if len(volumes) > 1:
         EDV = max(volumes)
         ESV = min(volumes)
-          
+
         EF = (1 - (ESV/EDV)) * 100
         
         if (EF - ground_truth_EF) > -25:

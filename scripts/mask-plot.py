@@ -51,13 +51,14 @@ import glob
 import numpy as np
 
 X_data = []
-files = glob.glob ("/Users/ishan/Documents/Stanford/echonet-function-evaluation/testing/plots/*.png")
+files = glob.glob ("/Users/ishan/Documents/Stanford/echonet-function-evaluation/testing/samples/*.png")
 for myFile in files:
     print(myFile)
     image = cv2.imread (myFile)
     im_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     X_data.append (im_rgb[::-1])
 
+titles = ["Original Video", "Segmented Frame", "Method of Disks", "Total"]
 print('X_data shape:', np.array(X_data).shape)
 
-show_images(np.array(X_data) )
+show_images(np.array(X_data), titles=titles)

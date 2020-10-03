@@ -27,7 +27,7 @@ def dataModules(root=None):
 
   return root, df
 
-def READ_AND_CROP_FRAME(videoPath: str, timing: int):
+def READ_AND_CROP_FRAME(videoPath: str, timing: int, makeCrop=True):
   """Loads a video from a file and returns cropped frame
     Args:
         videoPath (str): The path to the video/clip
@@ -47,7 +47,10 @@ def READ_AND_CROP_FRAME(videoPath: str, timing: int):
   # Crop
   crop = frame[x1:x2, y1:y2]
 
-  return crop
+  if makeCrop:
+    return crop
+  else:
+    return frame
 
 def scatterPlot(title="Plot", xlabel="", ylabel="", x1=[], y1=[], lineOfBestFit=True, alpha=0.5):
   x = np.array(x1)
