@@ -89,11 +89,13 @@ def calculateSweeps(timing, makeSweepFrames):
 
   ESV_Sweeps_Volumes = {}
   EDV_Sweeps_Volumes = {}
+  EF_Sweeps_Volumes = {}
 
   for videoName in tracingsVolumes:
     volumeData = tracingsVolumes[videoName][0]
     ground_truth_ESV = min(volumeData)
     ground_truth_EDV = max(volumeData)
+    ground_truth_EF = (ground_truth_EDV - ground_truth_ESV)/ground_truth_EDV
 
     if (os.path.exists(os.path.join(esv_path, videoName))) and (os.path.exists(os.path.join(edv_path, videoName))):
       for frameSweep in os.listdir(os.path.join(esv_path, videoName)):
@@ -122,10 +124,29 @@ def calculateSweeps(timing, makeSweepFrames):
           EDV_Sweeps_Volumes[int(indexName)] = [] 
 
         EDV_Sweeps_Volumes[int(indexName)].append(diff_EDV)
+      
+      commonFrames = list(set(os.listdir(os.path.join(edv_path, videoName))) & set(os.listdir(os.path.join(esv_path, videoName))))
+      
+      for frameSweep in commonFrames:
+        volumes, *_ = funcs.calculateVolume(os.path.join(edv_path, videoName, frameSweep), 20, 0, "Method of Disks")
+        EDV = volumes[0]
+
+        volumes, *_ = funcs.calculateVolume(os.path.join(esv_path, videoName, frameSweep), 20, 0, "Method of Disks")
+        ESV = volumes[0]
+        EF = (EDV - ESV)/EDV
+        diff_EF = EF - ground_truth_EF
+        indexName = frameSweep.split('_')[1][:-4]
+
+        if int(indexName) not in EF_Sweeps_Volumes:
+          EF_Sweeps_Volumes[int(indexName)] = [] 
+
+        EF_Sweeps_Volumes[int(indexName)].append(diff_EF)
 
   esv_dict = normalizeDict(ESV_Sweeps_Volumes)
   edv_dict = normalizeDict(EDV_Sweeps_Volumes)
-  return esv_dict, edv_dict
+  ef_dict = normalizeDict(EF_Sweeps_Volumes)
+
+  return esv_dict, edv_dict, ef_dict
 
 def normalizeDict(changesInVolumesDict):
   zeroItems = changesInVolumesDict[0]
@@ -138,12 +159,14 @@ def normalizeDict(changesInVolumesDict):
   return changesInVolumesDict
 
 def createBoxPlot(volumeType="EDV", makeSweeps=True):
-  ESVVolumes, EDVVolumes = calculateSweeps(volumeType, makeSweeps)
+  ESVVolumes, EDVVolumes, EFVolumes = calculateSweeps(volumeType, makeSweeps)
   
   if volumeType is "ESV":
     volumesDict = ESVVolumes
   elif volumeType is "EDV":
     volumesDict = EDVVolumes
+  elif volumeType is "EF":
+    volumesDict = EFVolumes
 
   volumesDict = list(volumesDict.items())
   volumesDict.sort(key=lambda volumeShift: volumeShift[0])
