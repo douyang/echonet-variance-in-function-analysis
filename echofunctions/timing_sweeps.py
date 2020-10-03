@@ -120,7 +120,7 @@ def calculateSweeps(timing, makeSweepFrames):
 
           # EF Calculations
           EF = (EDV - ESV)/EDV
-          diff_EF = EF - ground_truth_EF
+          diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100
           
           # Frame Index
           indexName = frameSweep.split('_')[1][:-4]
@@ -197,4 +197,4 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
 
 #createBoxPlot(volumeType="ESV", makeSweeps=False)
 #createBoxPlot(volumeType="EDV", makeSweeps=False)
-#createBoxPlot(volumeType="EF", makeSweeps=False)
+createBoxPlot(volumeType="EF", makeSweeps=False)
