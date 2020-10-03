@@ -171,7 +171,6 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
   totalItems = 0
   for sweep in volumesDict:
     if abs(sweep) == 0:
-      shifts = volumesDict[sweep]
       totalErr += sum([abs(shift) for shift in sweep[1]])
       totalItems += len(sweep[1])
   
@@ -196,5 +195,6 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True):
   plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
   plt.show()
 
-createBoxPlot(volumeType="ESV", makeSweeps=False)
-#createBoxPlot(volumeType="EDV", makeSweeps=True)
+#createBoxPlot(volumeType="ESV", makeSweeps=False)
+createBoxPlot(volumeType="EDV", makeSweeps=False)
+#createBoxPlot(volumeType="EF", makeSweeps=False)
