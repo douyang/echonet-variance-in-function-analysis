@@ -97,9 +97,8 @@ def calculateSweeps(timing, makeSweepFrames):
 
   for videoName in tracingsVolumes:
     counter+=1
-    volumeData = tracingsVolumes[videoName][0]
-    ground_truth_ESV = min(volumeData)
-    ground_truth_EDV = max(volumeData)
+    ground_truth_ESV = funcs.calculateVolume(os.path.join(esv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")
+    ground_truth_EDV = funcs.calculateVolume(os.path.join(edv_path, videoName, "frame_0.png"), 20, 0, "Method of Disks")
     ground_truth_EF = (ground_truth_EDV - ground_truth_ESV)/ground_truth_EDV
 
     if counter % 100 == 0:
