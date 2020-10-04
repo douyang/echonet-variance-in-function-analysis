@@ -381,6 +381,13 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
 
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
+def angle(vector1, vector2):
+  x1, y1 = vector1
+  x2, y2 = vector2
+  inner_product = x1*x2 + y1*y2
+  len1 = math.hypot(x1, y1)
+  len2 = math.hypot(x2, y2)
+  return math.acos(inner_product/(len1*len2))
 
 def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))
@@ -390,10 +397,7 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
     x1, y1, x2, y2 = x2, y2, x1, y1
 
   mainLineSlope = getSlope([x1, y1], [x2, y2])
-  baseAngle = math.atan(mainLineSlope)
 
-  if baseAngle>0:
-      baseAngle -= math.pi
   lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
 
   if (higherIntercept[0][0] + higherIntercept[0][1]) > (lowerIntercept[0][0] + lowerIntercept[0][1]):
@@ -411,16 +415,15 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
     x1, y1 = lowerIntercept[i]
     x2, y2 = higherIntercept[i]
 
-
     slope = getSlope([x1, y1], [x2, y2])
-    angle = math.atan(slope)
 
-    if angle>0:
-      angle -= math.pi
+    degree = math.atan((mainLineSlope-slope)/(1+mainLineSlope*slope)) * 180/math.pi
 
-    degrees[i] = (baseAngle - angle) * 180/math.pi
-
-
+    if (degree < 0 and i > 0) or (degree > 0 and i < 0): 
+      degree *= -1
+    
+    degrees[i] = degree
+    
     p1Index = points.index([x1, y1])
     p2Index = points.index([x2, y2])
 
