@@ -417,7 +417,10 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
 
     slope = getSlope([x1, y1], [x2, y2])
 
-    degree = math.atan((mainLineSlope-slope)/(1+mainLineSlope*slope)) * 180/math.pi
+    try:
+      degree = math.atan((mainLineSlope-slope)/(1+mainLineSlope*slope)) * 180/math.pi
+    except:
+      degree = 90
 
     if (degree < 0 and i > 0) or (degree > 0 and i < 0): 
       degree *= -1

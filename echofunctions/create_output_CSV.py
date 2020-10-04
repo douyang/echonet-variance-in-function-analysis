@@ -12,7 +12,7 @@ import config
 def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
   givenTrueDict={}
 
-  df = pd.read_csv(os.path.join(root, "FileList.csv"), ) # reading in FileList.csv
+  df = pd.read_csv(os.path.join(root, "FileList.csv")) # reading in FileList.csv
 
   for i in range(len(df)):
     videoName = df.iloc[i, 0]
@@ -35,7 +35,7 @@ def sortCoords(method, inputFolderPath):
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolderPath) # frames path
   
   # for i in range(len(df)): # iterates through each row of data frame
-  for i in range(100):
+  for i in range(10000):
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
@@ -66,7 +66,6 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName =
 
     dataList = []
     # cond = True
-    condition = True
     for videoName in calculatedData:
       volumes = calculatedData[videoName]
       groundtrue_ESV = min(fileListData[videoName])
@@ -76,10 +75,7 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName =
       for angleShift in volumes:
         EDV = max([volumes[angleShift][i][0] for i in range(len(volumes[angleShift]))])
         ESV = min([volumes[angleShift][i][0] for i in range(len(volumes[angleShift]))])
-        if condition:
-          print(ESV, EDV)
-          print(volumes[angleShift])
-          condition = False
+
         esvAngleShiftIndex = [volumes[angleShift][i][0] for i in range(len(volumes[angleShift]))].index(ESV)
         edvAngleShiftIndex = [volumes[angleShift][i][0] for i in range(len(volumes[angleShift]))].index(EDV)
         esvAngleShift = volumes[angleShift][esvAngleShiftIndex][1]
