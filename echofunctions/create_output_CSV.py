@@ -34,8 +34,7 @@ def sortCoords(method, inputFolderPath):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolderPath) # frames path
   
-  # for i in range(len(df)): # iterates through each row of data frame
-  for i in range(10000):
+  for i in range(len(df)): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     

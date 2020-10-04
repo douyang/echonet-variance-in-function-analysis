@@ -422,9 +422,12 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
     except:
       degree = 90
 
-    if (degree < 0 and i > 0) or (degree > 0 and i < 0): 
-      degree *= -1
-    
+    if (degree > 0 and i < 0): 
+      degree = -180+degree
+
+    elif (degree < 0 and i > 0):
+      degree = 180+degree
+
     degrees[i] = degree
     
     p1Index = points.index([x1, y1])
