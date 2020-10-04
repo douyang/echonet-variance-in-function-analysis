@@ -1,5 +1,5 @@
-"""Creating output CSV data on mask coordinates
-and different volume calculations for a video"""
+"""Creating output CSV data on angle
+sweep volume calculations for a video"""
 
 import pandas as pd
 import numpy as np
@@ -86,13 +86,17 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName =
         pointShift = volumes[angleShift][0][2]
         EF = (1 - (ESV/EDV)) * 100
 
+<<<<<<< Updated upstream:echofunctions/create_output_CSV.py
+=======
+<<<<<<< HEAD:echofunctions/sweep_CSV.py
+        miniDict = {'Video Name': videoName, "Angle Shift": angleShift, 'EF': EF, "ESV": ESV, "EDV": EDV, "True EF": groundtrue_EF, "True ESV": groundtrue_ESV, "True EDV": groundtrue_EDV}
+=======
+>>>>>>> Stashed changes:echofunctions/sweep_CSV.py
         miniDict = {'Video Name': videoName, "Point Shift": pointShift, 'ESV Angle Shift': esvAngleShift, 'EDV Angle Shift': edvAngleShift, 'EF Angle Shift': efAngleShift, 'EF': EF, "ESV": ESV, "EDV": EDV, "True EF": groundtrue_EF, "True ESV": groundtrue_ESV, "True EDV": groundtrue_EDV}
         # miniDict = {'Video Name': videoName, "Angle Shift": angleShift, 'EF': EF, "ESV": ESV, "EDV": EDV}
+>>>>>>> 363c9a219f6326f2b7a35645c0d238f19e5268e4:echofunctions/create_output_CSV.py
 
         dataList.append(miniDict)
-        # if cond and not len(true_EF) == len(true_ESV) == len(true_EDV) == len(ef) == len(esv) == len(edv) == len(video):
-        #   print(video, len(true_EF), len(true_ESV), len(true_EDV), len(ef), len(esv), len(edv), len(video))
-        #   cond = False
 
     df = pd.DataFrame(dataList)
 
