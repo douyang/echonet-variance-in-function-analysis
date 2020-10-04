@@ -10,8 +10,8 @@ def obtainContourPoints(path):
   rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
   # set lower and upper bounds on blue color
-  lower = (0,0,100)
-  upper = (50,50,255)
+  lower = (200,200,200)
+  upper = (255,255,255)
 
   # threshold and invert so hexagon is white on black background
   thresh = cv2.inRange(rgb, lower, upper)
@@ -380,14 +380,6 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   higherInterceptAveragePoints = [[matchedAveragePoints[i][2], matchedAveragePoints[i][3]] for i in range(len(matchedAveragePoints))]
 
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
-
-def angle(vector1, vector2):
-  x1, y1 = vector1
-  x2, y2 = vector2
-  inner_product = x1*x2 + y1*y2
-  len1 = math.hypot(x1, y1)
-  len2 = math.hypot(x2, y2)
-  return math.acos(inner_product/(len1*len2))
 
 def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))

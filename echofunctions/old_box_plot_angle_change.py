@@ -28,7 +28,7 @@ def sortFrameVolumes(method, inputFolder, sweeps):
     FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, OUTPUT_FRAME_NAME) # path to each video
       
     if os.path.exists(FRAMES_PATH):
-      try:
+      # try:
         volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(FRAMES_PATH, 20, sweeps, method)
         if videoName not in all_volumes and volumes is not "":
           all_volumes[videoName] = {}
@@ -38,8 +38,8 @@ def sortFrameVolumes(method, inputFolder, sweeps):
           
           all_volumes[videoName][r][0].append(volumes[r])
           all_volumes[videoName][r][1].append(degrees[r])
-      except:
-        print(OUTPUT_FRAME_NAME)
+      # except:
+      #   print(OUTPUT_FRAME_NAME)
 
   return all_volumes
 
