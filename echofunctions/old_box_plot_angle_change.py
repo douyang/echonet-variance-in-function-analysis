@@ -190,7 +190,18 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
     differenceInVolumes[bucket] += changesInVolumesDict[key]
   
   differenceInVolumes = list(differenceInVolumes.items())
-  differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0])
+  differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0] + volumeShift[0][1])
+
+  totalErr = 0
+  totalItems = 0
+  for sweep in differenceInVolumes:
+    bucket = sweep[0]
+    if abs(bucket[0] + bucket[1]) <= 15:
+      totalErr += sum([abs(shift) for shift in sweep[1]])
+      totalItems += len(sweep[1])
+  
+  averageError = totalErr/totalItems
+  print(averageError)
 
   # setting x-tick labels
   labels = [str(volumeShift[0]) for volumeShift in differenceInVolumes]
@@ -198,26 +209,16 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   # figure related code
   loader.latexify()
-  fig = plt.figure()
-  fig.suptitle('Comparison', fontsize=14, fontweight='bold')
+  fig = plt.figure(figsize=(12, 8))
+  plt.xticks(fontsize=13)
+  plt.yticks(fontsize=13)
 
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
 
-  if not normalized:
-    ax.set_title('Difference in Calculated ' + volumeType + ' against ' + fromFile)
-  else:
-    ax.set_title('Normalized (from mean) Difference in Calculated ' + volumeType + ' against ' + fromFile)
-
-  ax.set_xlabel('Angle Changes (Degrees)')
-
-  if volumeType is "ESV" or volumeType is "EDV":
-    ax.set_ylabel('% Difference in ' + volumeType)
-  else:
-    ax.set_ylabel('Difference in ' + volumeType)
-
   ax.set_xticklabels(labels, Rotation=45)
   
+  plt.savefig("./figures/paperBoxPlots/AngleSweeps/" + volumeType + ".png", bbox_inches='tight')
   # show plot
   plt.show()
 

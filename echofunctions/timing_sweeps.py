@@ -233,7 +233,7 @@ def createBoxPlot(volumeType="EDV", makeSweeps=True, makeCSV=True):
   ax.set_xticklabels(labels)
   
   # show plot
-  plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
+  plt.savefig("./figures/paperBoxPlots/TimingSweeps/" + volumeType + ".png", bbox_inches='tight')
   plt.show()
 
 # createBoxPlot(volumeType="ESV", makeSweeps=False, makeCSV=True)
