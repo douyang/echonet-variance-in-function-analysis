@@ -27,7 +27,7 @@ def sortCoords(method, inputFolderPath):
 
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, method)
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 30, method)
         
         for angleShift in volumes:
           if videoName not in calculatedData:
