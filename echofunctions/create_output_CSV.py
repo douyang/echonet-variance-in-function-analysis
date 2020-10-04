@@ -27,7 +27,7 @@ def sortCoords(method, inputFolderPath):
 
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 0, method)
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 30, method)
         
         for angleShift in volumes:
           if videoName not in calculatedData:
@@ -62,7 +62,7 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
     calculatedData = sortCoords(method, inputFolderPath) # dictionary of all different coords
     fileListData = sortVolumesFromFileList()
 
-    video, angleshift, ef, esv, edv, true_EF, true_EDV, true_ESV = [], [], [], [], [], [], [], []
+    dataList = []
     # cond = True
     for videoName in calculatedData:
       volumes = calculatedData[videoName]
@@ -75,22 +75,16 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
         ESV = min(volumes[angleShift])
         EF = (1 - (ESV/EDV)) * 100
 
-        video.append(videoName)
-        ef.append(EF)
-        esv.append(esv)
-        edv.append(edv)
-        true_EF.append(groundtrue_EF)
-        true_ESV.append(groundtrue_ESV)
-        true_EDV.append(groundtrue_EDV)
+        miniDict = {'Video Name': videoName, "Angle Shift": angleShift, 'EF': EF, "ESV": ESV, "EDV": EDV, "True EF": groundtrue_EF, "True ESV": groundtrue_ESV, "True EDV": groundtrue_EDV}
+        # miniDict = {'Video Name': videoName, "Angle Shift": angleShift, 'EF': EF, "ESV": ESV, "EDV": EDV}
+
+        dataList.append(miniDict)
         # if cond and not len(true_EF) == len(true_ESV) == len(true_EDV) == len(ef) == len(esv) == len(edv) == len(video):
         #   print(video, len(true_EF), len(true_ESV), len(true_EDV), len(ef), len(esv), len(edv), len(video))
         #   cond = False
 
-    d = {'Video Name': video, "Angle Shift": angleshift, 'EF': ef, "ESV": esv, "EDV": edv, "True EF": true_EF, "True ESV": true_ESV, "True EDV": true_EDV}
-    print(video[0], len(true_EF), len(true_ESV), len(true_EDV), len(ef), len(esv), len(edv), len(video))
-    df = pd.DataFrame(list(d.items()),d.keys()) 
+    df = pd.DataFrame(dataList)
 
-    
     export_path = os.path.join(config.CONFIG.DATA_DIR, method + "-Volume.csv")
 
     df.to_csv(export_path)
