@@ -27,7 +27,7 @@ def sortCoords(method, inputFolderPath):
 
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 30, method)
+        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 0, method)
         
         for angleShift in volumes:
           if videoName not in calculatedData:
@@ -63,6 +63,7 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
     fileListData = sortVolumesFromFileList()
 
     video, angleshift, ef, esv, edv, true_EF, true_EDV, true_ESV = [], [], [], [], [], [], [], []
+    # cond = True
     for videoName in calculatedData:
       volumes = calculatedData[videoName]
       groundtrue_ESV = min(fileListData[videoName])
@@ -74,16 +75,21 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
         ESV = min(volumes[angleShift])
         EF = (1 - (ESV/EDV)) * 100
 
-        video.append(video)
+        video.append(videoName)
         ef.append(EF)
         esv.append(esv)
         edv.append(edv)
         true_EF.append(groundtrue_EF)
         true_ESV.append(groundtrue_ESV)
         true_EDV.append(groundtrue_EDV)
+        # if cond and not len(true_EF) == len(true_ESV) == len(true_EDV) == len(ef) == len(esv) == len(edv) == len(video):
+        #   print(video, len(true_EF), len(true_ESV), len(true_EDV), len(ef), len(esv), len(edv), len(video))
+        #   cond = False
 
     d = {'Video Name': video, "Angle Shift": angleshift, 'EF': ef, "ESV": esv, "EDV": edv, "True EF": true_EF, "True ESV": true_ESV, "True EDV": true_EDV}
-    df = pd.DataFrame(d)
+    print(video[0], len(true_EF), len(true_ESV), len(true_EDV), len(ef), len(esv), len(edv), len(video))
+    df = pd.DataFrame(list(d.items()),d.keys()) 
+
     
     export_path = os.path.join(config.CONFIG.DATA_DIR, method + "-Volume.csv")
 
