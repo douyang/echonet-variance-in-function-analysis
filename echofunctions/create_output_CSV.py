@@ -68,7 +68,7 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None):
       volumes = calculatedData[videoName]
       groundtrue_ESV = min(fileListData[videoName])
       groundtrue_EDV = max(fileListData[videoName])
-      groundtrue_EF = (1 - (groundtrue_ESV/groundtrue_EDV) * 100)
+      groundtrue_EF = (1 - (groundtrue_ESV/groundtrue_EDV))*100
       
       for angleShift in volumes:
         EDV = max(volumes[angleShift])
