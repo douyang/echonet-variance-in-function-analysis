@@ -41,7 +41,6 @@ def sortCoords(method, inputFolderPath):
     FRAME_FILENAME = videoName + "_" + str(frameNumber) + ".png" # concatenate video name with frame number as file name
 
     FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, FRAME_FILENAME) # path to each video
-    condition = True
     if os.path.exists(FRAMES_PATH):
       try:
         volumes, x1s, y1s, x2s, y2s, degrees = funcs.calculateVolume(FRAMES_PATH, 20, 30, method)
@@ -86,12 +85,8 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName =
         EF = (1 - (ESV/EDV)) * 100
 
         miniDict = {'Video Name': videoName, "Point Shift": pointShift, 'ESV Angle Shift': esvAngleShift, 'EDV Angle Shift': edvAngleShift, 'EF Angle Shift': efAngleShift, 'EF': EF, "ESV": ESV, "EDV": EDV, "True EF": groundtrue_EF, "True ESV": groundtrue_ESV, "True EDV": groundtrue_EDV}
-        # miniDict = {'Video Name': videoName, "Angle Shift": angleShift, 'EF': EF, "ESV": ESV, "EDV": EDV}
 
         dataList.append(miniDict)
-        # if cond and not len(true_EF) == len(true_ESV) == len(true_EDV) == len(ef) == len(esv) == len(edv) == len(video):
-        #   print(video, len(true_EF), len(true_ESV), len(true_EDV), len(ef), len(esv), len(edv), len(video))
-        #   cond = False
 
     df = pd.DataFrame(dataList)
 

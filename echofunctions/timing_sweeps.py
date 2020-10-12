@@ -170,8 +170,7 @@ def calculateSweeps(timing, makeSweepFrames, makeCSV):
 
     if counter % 100 == 0:
       print(counter)
-    
-
+  
   if makeCSV:
     EDVdf = pd.DataFrame(edvList)
     ESVdf = pd.DataFrame(edvList)
@@ -185,7 +184,10 @@ def calculateSweeps(timing, makeSweepFrames, makeCSV):
     ESVdf.to_csv(edv_export_path)
     EFdf.to_csv(ef_export_path)
 
-  
+  print("ESV STD: ", loader.returnSTD(esv_export_path))
+  print("EDV STD: ", loader.returnSTD(edv_export_path))
+  print("EF STD: ", loader.returnSTD(ef_export_path))
+
   return ESV_Sweeps_Volumes, EDV_Sweeps_Volumes, EF_Sweeps_Volumes
 
 def processData(volumesDict, volumeType):
