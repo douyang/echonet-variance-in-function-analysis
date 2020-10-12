@@ -41,7 +41,6 @@ def sortCoords(method, inputFolderPath):
     FRAME_FILENAME = videoName + "_" + str(frameNumber) + ".png" # concatenate video name with frame number as file name
 
     FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, FRAME_FILENAME) # path to each video
-    condition = True
     if os.path.exists(FRAMES_PATH):
       try:
         volumes, x1s, y1s, x2s, y2s, degrees = funcs.calculateVolume(FRAMES_PATH, 20, 30, method)
