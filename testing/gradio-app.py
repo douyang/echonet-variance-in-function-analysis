@@ -22,7 +22,7 @@ if os.path.exists(destination_for_weights):
 else:
     print("Creating folder at ", destination_for_weights, " to store weights")
     os.mkdir(destination_for_weights)
-    
+
 segmentationWeightsURL = 'https://github.com/douyang/EchoNetDynamic/releases/download/v1.0.0/deeplabv3_resnet50_random.pt'
 
 if not os.path.exists(os.path.join(destination_for_weights, os.path.basename(segmentationWeightsURL))):
@@ -85,7 +85,7 @@ def segment(inp):
     rescaled = (255.0 / mask.max() * (mask - mask.min())).astype(np.uint8)
 
     im = Image.fromarray(rescaled)
-    imagePath = os.path.join("testing", "segmented_img.png")
+    imagePath = "testing/segmented_img.png"
     im.save(imagePath)
 
     volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(imagePath, 20, 1, "Method of Disks")
@@ -100,7 +100,9 @@ def segment(inp):
         
     cv2.line(image, longLine1stCoords, longLine2ndCoords, (255, 255, 255), 1) # Drawing the perpendicular/long line in different color
 
-    return image
+    volume_data = "Volume: " + str(volumes[0])
+
+    return image, volume_data
 
 import gradio as gr
 
@@ -112,5 +114,5 @@ title = "Cardiac Function Evaluation"
 description = "Accurate assessment of ventricular vol-umes  and  cardiac  function  is  essentialfor  diagnosis  and  treatment  of  cardio-vascular  disease,   however  the  assess-ment  has  many  dependencies,  unreli-able assumptions in algorithm calcula-tion, and variability in accurate humanassessment.   We  developed  an  end-to-end  deep  learning  model  for  evaluat-ing  cardiac  function  by  1)  automatedidentification  of  end-systole  and  end-diastole, 2) segmentation of the left ven-tricle, and 3) algorithmic evaluation ofthe  cardiac  function.    Using  a  video-based deep learning model, end systolewas accurately identified an average ofwithin  150  ms  from  the  human  labelsand  end  diastole  was  accurately  iden-tified an average of within 167 ms fromthe human labels.  From the determinedframes, ventricular volumes were calcu-lated.  Even with the same ventriculartracing, slight perturbations in long axisposition resulted in variance in the esti-mates of ventricular volume up to 8.0%for  end  systole  and  5.2%  for  end  dias-tole.  Using standard volumetric formu-las, the ultimate calculated LVEF var-ied up to 5.8%.  Even with precise iden-tification of cardiac times and segmen-tation of cardiac structures, small varia-tions can compound to significantly im-pact eventual evaluations of ventricularfunction,  suggesting  limitations  in  theprecision of deep learning models for as-sessing cardiac function"
 thumbnail = "https://raw.githubusercontent.com/gradio-app/hub-echonet/master/thumbnail.png"
 
-gr.Interface(segment, i, o, examples=examples, allow_flagging=False,
+gr.Interface(segment, i, [o, "text"], examples=examples, allow_flagging=False,
 	title=title, description=description, thumbnail=thumbnail).launch()
