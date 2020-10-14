@@ -13,6 +13,7 @@ import loader
 from functools import reduce
 import operator
 import math
+import tqdm
 
 # Capture and Make Frames + Crop
 def initVars(method="Method of Disks"):
@@ -21,7 +22,7 @@ def initVars(method="Method of Disks"):
 
   fnames = []
 
-  root, df = loader.dataModules()
+  root, _ = loader.dataModules()
 
   with open(os.path.join(root, "FileList.csv")) as f:
     header = f.readline().strip().split(",")

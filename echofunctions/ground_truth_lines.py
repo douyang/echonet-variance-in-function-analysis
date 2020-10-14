@@ -6,14 +6,11 @@ from ast import literal_eval
 import os
 import cv2
 import loader
-
+import tqdm
 
 # Capture and Make Frames + Crop
 def createMasks(inputFolderName="Masks_From_VolumeTracing", outputFolderName="Masks_From_VolumeTracing_Lines_From_VolumeTracing"):
-  """Calculates volumes from EDV/ESV timing frames and sorts volumes
-  
-  Returns:
-    A dictionary that contains the sorted volumes
+  """Draws lines from ground truth coordinates on given masks
   """
 
   root, df = loader.dataModules()
@@ -23,7 +20,8 @@ def createMasks(inputFolderName="Masks_From_VolumeTracing", outputFolderName="Ma
   
   os.makedirs(PATH_TO_OUTPUT_DIR, exist_ok=True) # creates ground truth mask parent directory
 
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Drawing lines on each mask from VolumeTracings")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
 
@@ -32,7 +30,7 @@ def createMasks(inputFolderName="Masks_From_VolumeTracing", outputFolderName="Ma
     PATH_TO_OUTPUT_RAW_FRAME = os.path.join(PATH_TO_OUTPUT_DIR, frameName)
 
     image = cv2.imread(PATH_TO_RAW_FRAME) # read in the image from the specified frame path
-    if frameName in os.listdir(PATH_TO_RAW_FRAMES_PARENT_DIR): # checks if frame exists
+    if os.path.exists(PATH_TO_RAW_FRAME): # checks if frame exists
       x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
       y1 = list(literal_eval(df.iloc[i, 3])) # y1 coords
       x2 = list(literal_eval(df.iloc[i, 4])) # x2 coords

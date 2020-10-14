@@ -11,12 +11,14 @@ import config
 import loader
 from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
+import tqdm
 
 def sortFrameVolumes(method):
   _, df = loader.dataModules()
   calculatedVolumeFromGroundTruth={}
   
-  for i in range(len(df)):
+  print("Calculating ground truth volumes from VolumeTracings")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0]
     
     x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
@@ -49,7 +51,8 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, method="Method of Disks", tim
 
   df = pd.read_csv(os.path.join(root, "FileList.csv"), ) # reading in VolumeTracings.csv
 
-  for i in range(len(df)):
+  print("Comparing volumes from VolumeTracings and FileList")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0]
 
     ground_EF = df.iloc[i, 1]

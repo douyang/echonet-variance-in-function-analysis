@@ -12,6 +12,7 @@ from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
 import collections
 from ast import literal_eval
+import tqdm
 
 def sortFrameVolumes(method, inputFolder, sweeps):
   root, df = loader.dataModules()
@@ -19,7 +20,8 @@ def sortFrameVolumes(method, inputFolder, sweeps):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolder) # frames path
   
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Calculating volumes for each frame given an angle change")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
@@ -47,7 +49,8 @@ def sortFrameVolumesFromTracings(method):
   _, df = loader.dataModules()
   calculatedVolumeFromGroundTruth={}
   
-  for i in range(len(df)):
+  print("\nCalculating volumes from VolumeTracings coordinates")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0]
     
     x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
@@ -77,8 +80,9 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
   givenTrueDict={}
 
   df = pd.read_csv(os.path.join(root, "FileList.csv"), ) # reading in FileList.csv
-
-  for i in range(len(df)):
+  
+  print("\nGathering volumes from FileList")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0]
     ground_truth_ESV = df.iloc[i, 2]
     ground_truth_EDV = df.iloc[i, 3]
@@ -99,7 +103,6 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
     tracings_volumes = sortVolumesFromFileList()
 
   changesInVolumesDict = {}
-
 
   for videoName in tracings_volumes:
     volumeData = tracings_volumes[videoName]
@@ -221,12 +224,6 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # show plot
   plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
   plt.show()
-
-# createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="FileList", normalized=True, sweeps=30)
-
-# createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="Masks_From_VolumeTracing", 
-#               fromFile="VolumeTracings", normalized=True, sweeps=30)
 
 createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
               fromFile="VolumeTracings", normalized=True, sweeps=30)

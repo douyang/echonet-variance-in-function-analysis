@@ -5,7 +5,7 @@ import pandas as pd
 from ast import literal_eval
 import os
 import cv2
-
+import tqdm
 from algorithms import funcs as funcs
 import loader
 
@@ -21,7 +21,8 @@ def capture(method, createRawFrames, imageType):
   os.makedirs(PATH_TO_RAW_FRAMES_PARENT_DIR, exist_ok=True) # creates frames parent directory
   os.makedirs(PATH_TO_MASK_FRAMES_PARENT_DIR, exist_ok=True) # creates mask parent directory
 
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Iterating through each video and making frame if selected")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
 

@@ -9,6 +9,7 @@ import os
 import loader
 from algorithms import funcs as funcs
 import config
+import tqdm
 
 def calculateLength(x1, y1, x2, y2):
   """Returns a value of distance between two sets of coordinates
@@ -25,7 +26,8 @@ def sortCoords(method, inputFolderPath):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolderPath) # frames path
   
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Calculating axis length for each video...")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
@@ -49,18 +51,18 @@ def sortCoords(method, inputFolderPath):
   return calculatedData
 
 def exportCSV(method="Method of Disks", inputFolderPath=None, fileName="axis-lengths.csv"):
-    calculatedData = sortCoords(method, inputFolderPath) # dictionary of all different coords
+  calculatedData = sortCoords(method, inputFolderPath) # dictionary of all different coords
 
-    dataList = []
-    for videoName in calculatedData:
-      for i in range(1):
-        miniDict = {'Video Name': videoName, "Frame Number": calculatedData[videoName][i][0], 'Main Axis Length': calculatedData[videoName][i][1]}
-        dataList.append(miniDict)
+  dataList = []
+  for videoName in calculatedData:
+    for i in range(1):
+      miniDict = {'Video Name': videoName, "Frame Number": calculatedData[videoName][i][0], 'Main Axis Length': calculatedData[videoName][i][1]}
+      dataList.append(miniDict)
 
-    df = pd.DataFrame(dataList)
+  df = pd.DataFrame(dataList)
 
-    export_path = os.path.join(config.CONFIG.DATA_DIR, fileName)
+  export_path = os.path.join(config.CONFIG.DATA_DIR, fileName)
 
-    df.to_csv(export_path, index=False)
+  df.to_csv(export_path, index=False)
 
 exportCSV(method="Method of Disks", inputFolderPath="Masks_From_VolumeTracing", fileName="axis_lengths.csv")

@@ -10,6 +10,7 @@ import mask
 import config
 import loader
 from algorithms import funcs
+import tqdm
 
 # Capture and Make Frames + Crop
 def sortFrameVolumes1(method):
@@ -19,7 +20,8 @@ def sortFrameVolumes1(method):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, "frames") # frames path
   
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Calculating volumes using second method..")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
@@ -48,7 +50,8 @@ def sortFrameVolumes2(method):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, "frames") # frames path
   
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Calculating volumes using second method..")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
@@ -75,7 +78,8 @@ def compareVolumePlot(root=config.CONFIG.DATA_DIR, method1="Method of Disks", me
     volumes1 = sortFrameVolumes1(method=method1) # dictionary of all volumes1
     volumes2 = sortFrameVolumes2(method=method2) # dictionary of all volumes2
 
-    for i in range(len(df)):
+    print("Comparing volumes and generating plot")
+    for i in tqdm(range(len(df))):
       videoName = df.iloc[i, 0]
 
       if (videoName in volumes1) and (videoName in volumes2):

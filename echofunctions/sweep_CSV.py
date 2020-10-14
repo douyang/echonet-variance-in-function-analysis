@@ -8,13 +8,15 @@ import os
 import loader
 from algorithms import funcs as funcs
 import config
+import tqdm
 
 def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
   givenTrueDict={}
 
   df = pd.read_csv(os.path.join(root, "FileList.csv")) # reading in FileList.csv
 
-  for i in range(len(df)):
+  print("Gathering ground truth volume values")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0]
     ground_truth_ESV = df.iloc[i, 2]
     ground_truth_EDV = df.iloc[i, 3]
@@ -34,7 +36,8 @@ def sortCoords(method, inputFolderPath):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolderPath) # frames path
   
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Calculating volumes for frames with sweeps")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     

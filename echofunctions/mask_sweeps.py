@@ -7,6 +7,7 @@ import os
 import cv2
 from algorithms import funcs as funcs
 import loader
+import tqdm
 
 # Capture and Make Frames + Crop
 def capture(method, inputFramesFolder, outputFramesFolder, masksWithMoreThan21Lines, sweepsOfMoreThan21Lines):
@@ -26,7 +27,8 @@ def capture(method, inputFramesFolder, outputFramesFolder, masksWithMoreThan21Li
     
       PATH_DATA.append([PATH_TO_FRAME, PATH_TO_MASK_FRAMES_PARENT_DIR, FRAME_FILENAME])
   else:
-    for i in range(len(df)): # iterates through each row of data frame
+    print("Iterating through each video and gathering filenames")
+    for i in tqdm(range(len(df))): # iterates through each row of data frame
       videoName = df.iloc[i, 0] # name of video
       frameNumber = df.iloc[i, 1] # timing for clip
 

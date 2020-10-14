@@ -10,6 +10,7 @@ import config
 import loader
 from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
+import tqdm
 
 def sortVolumesFromAlgo(frames_path, method):
 
@@ -18,7 +19,8 @@ def sortVolumesFromAlgo(frames_path, method):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, frames_path) # frames path
   
-  for i in range(len(df)): # iterates through each row of data frame
+  print("Calculating volumes using algorithm")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
@@ -43,7 +45,8 @@ def sortFrameVolumeTracings(method):
   _, df = loader.dataModules()
   calculatedVolumeFromGroundTruth={}
   
-  for i in range(len(df)):
+  print("Calculating Ground Truth Values from VolumeTracings")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0]
     
     x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
@@ -74,7 +77,8 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
   df = pd.read_csv(os.path.join(root, "FileList.csv"), ) # reading in FileList.csv
 
-  for i in range(len(df)):
+  print("Calculating Ground Truth Values")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0]
     ground_truth_ESV = df.iloc[i, 2]
     ground_truth_EDV = df.iloc[i, 3]

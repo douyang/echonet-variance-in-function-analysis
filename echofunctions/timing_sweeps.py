@@ -20,7 +20,8 @@ def sortFrameVolumeTracings():
   _, df = loader.dataModules()
   calculatedVolumeFromGroundTruth={}
   
-  for i in range(len(df)):
+  print("Calculatng ground truth volumes from VolumeTracings")
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0] + ".avi"
     frameNumber = df.iloc[i, 1] # timing for clip
 
@@ -56,7 +57,8 @@ def generateFrameSweeps(timing, makeSweepFrames):
   os.makedirs(PATH_TO_CSVS, exist_ok=True)
 
   if makeSweepFrames:
-    for i in range(len(df)): # iterates through each row of data frame
+    print("\nGenerating frames with sweeps for each video")
+    for i in tqdm(range(len(df))): # iterates through each row of data frame
       videoName = df.iloc[i, 0] + ".avi" # name of video
       videoPath = os.path.join(PATH_TO_VIDEOS, videoName) # path to each raw video
 
