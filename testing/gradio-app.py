@@ -115,11 +115,19 @@ def segment(frame1, frame2):
 
     EF = (1 - (ESV/EDV)) * 100
 
+    # Determine disease correlation
+    if EF > 75:
+      diseaseCorrelation = "Hyperdynamic Left Ventricle"
+    elif EF < 40:
+      diseaseCorrelation = "Potential Heart Failure or Cardiomyopathy"
+    else:
+      diseaseCorrelation = "Normal Patient"
+    
     EF = "EF: " + str(EF)
     EDV = "EDV: " + str(EDV)
     ESV = "ESV: " + str(ESV)
 
-    return image1, image2, EF, ESV, EDV
+    return image1, image2, EF, ESV, EDV, diseaseCorrelation
 
 import gradio as gr
 
@@ -129,10 +137,13 @@ p = gr.inputs.Image(shape=(112, 112))
 o = gr.outputs.Image()
 q = gr.outputs.Image()
 
-examples = ["testing/img1.jpg", "testing/img2.jpg"]
-title = "Cardiac Function Evaluation"
-description = "Accurate assessment of ventricular vol-umes  and  cardiac  function  is  essentialfor  diagnosis  and  treatment  of  cardio-vascular  disease,   however  the  assess-ment  has  many  dependencies,  unreli-able assumptions in algorithm calcula-tion, and variability in accurate humanassessment.   We  developed  an  end-to-end  deep  learning  model  for  evaluat-ing  cardiac  function  by  1)  automatedidentification  of  end-systole  and  end-diastole, 2) segmentation of the left ven-tricle, and 3) algorithmic evaluation ofthe  cardiac  function.    Using  a  video-based deep learning model, end systolewas accurately identified an average ofwithin  150  ms  from  the  human  labelsand  end  diastole  was  accurately  iden-tified an average of within 167 ms fromthe human labels.  From the determinedframes, ventricular volumes were calcu-lated.  Even with the same ventriculartracing, slight perturbations in long axisposition resulted in variance in the esti-mates of ventricular volume up to 8.0%for  end  systole  and  5.2%  for  end  dias-tole.  Using standard volumetric formu-las, the ultimate calculated LVEF var-ied up to 5.8%.  Even with precise iden-tification of cardiac times and segmen-tation of cardiac structures, small varia-tions can compound to significantly im-pact eventual evaluations of ventricularfunction,  suggesting  limitations  in  theprecision of deep learning models for as-sessing cardiac function"
+hypertrophic = ["testing/hypertrophic1.jpg", "testing/hypertrophic2.jpg"]
+normal = ["testing/normal1.jpg", "testing/normal2.jpg"]
+heartFailure = ["testing/heartFailure1.jpg", "testing/heartFailure2.jpg"]
+
+title = "Cardiac Function Evaluation (Physician Dashboard)"
+description = "Accurate assessment of ventricular vol-umes  and  cardiac  function  is  essential for  diagnosis  and  treatment  of  cardio-vascular  disease,   however  the  assess-ment  has  many  dependencies,  unreli-able assumptions in algorithm calcula-tion, and variability in accurate humanassessment.   We  developed  an  end-to-end  deep  learning  model  for  evaluat-ing  cardiac  function  by  1)  automatedidentification  of  end-systole  and  end-diastole, 2) segmentation of the left ven-tricle, and 3) algorithmic evaluation ofthe  cardiac  function.    Using  a  video-based deep learning model, end systolewas accurately identified an average ofwithin  150  ms  from  the  human  labelsand  end  diastole  was  accurately  iden-tified an average of within 167 ms fromthe human labels.  From the determinedframes, ventricular volumes were calcu-lated.  Even with the same ventriculartracing, slight perturbations in long axisposition resulted in variance in the esti-mates of ventricular volume up to 8.0%for  end  systole  and  5.2%  for  end  dias-tole.  Using standard volumetric formu-las, the ultimate calculated LVEF var-ied up to 5.8%.  Even with precise iden-tification of cardiac times and segmen-tation of cardiac structures, small varia-tions can compound to significantly im-pact eventual evaluations of ventricularfunction,  suggesting  limitations  in  theprecision of deep learning models for as-sessing cardiac function"
 thumbnail = "https://raw.githubusercontent.com/gradio-app/hub-echonet/master/thumbnail.png"
 
-gr.Interface(segment, [i, p], [o, q, "text", "text", "text"], examples=[examples], allow_flagging=False,
+gr.Interface(segment, [i, p], [o, q, "text", "text", "text", "text"], examples=[hypertrophic, normal, heartFailure], allow_flagging=False,
 	title=title, description=description, thumbnail=thumbnail).launch()

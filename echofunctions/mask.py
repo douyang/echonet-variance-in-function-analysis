@@ -65,4 +65,4 @@ def generateMasks(method="Method of Disks", createRawFrames=False, imageType="pn
       except:
         print(PATH_TO_RAW_FRAME)
 
-generateMasks(imageType="png", createRawFrames=True)
+#generateMasks(imageType="png", createRawFrames=True)
