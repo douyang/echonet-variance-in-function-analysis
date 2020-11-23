@@ -62,4 +62,4 @@ def returnPeaks(videoName="0X1BDEEC24D5FC570C.avi", outputFolderName="find_peaks
   ED_index = k[v.index(max(v))]
   ES_index = k[v.index(min(v))]
 
-  return os.path.splitext(os.path.basename(ES_index))[0], os.path.splitext(os.path.basename(ED_index))[0]
+  return int(os.path.splitext(os.path.basename(ES_index))[0]), int(os.path.splitext(os.path.basename(ED_index))[0])

@@ -16,7 +16,7 @@ def sortFrameVolumes(method="Method of Disks"):
   calculatedVolumeFromGroundTruth={}
   
   print("Calculating ground truth volumes from VolumeTracings")
-  for i in tqdm(range(len(df))):
+  for i in range(len(df)):
     videoName = df.iloc[i, 0]
     
     x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
@@ -34,7 +34,7 @@ def sortFrameVolumes(method="Method of Disks"):
         ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
       
       if videoName not in calculatedVolumeFromGroundTruth:
-        calculatedVolumeFromGroundTruth[videoName] = []
+        calculatedVolumeFromGroundTruth[videoName] = {}
       
       calculatedVolumeFromGroundTruth[videoName][frame] = ground_truth_volume
   return calculatedVolumeFromGroundTruth
@@ -43,15 +43,15 @@ def comparePredictedTimingAgainstTrue(fileName):
   _, df = loader.dataModules()
   dataList = []
   trueVolumes = sortFrameVolumes()
-
-  for i in range(len(df)):
+  print(trueVolumes)
+  for i in tqdm(range(len(df))):
     videoName = df.iloc[i, 0] # name of video
     
     # Get true frame index values
     v=list(trueVolumes[videoName].values())
     k=list(trueVolumes[videoName].keys())
-    true_EDV = k[v.index(max(v))]
-    true_ESV = k[v.index(min(v))]
+    true_EDV = int(k[v.index(max(v))])
+    true_ESV = int(k[v.index(min(v))])
 
     # Gather predicted EDV and ESV timing frames
     ESV_index, EDV_index = find_peaks.returnPeaks(videoName=videoName+".avi")
