@@ -28,7 +28,7 @@ def returnTrueFrames(frames, x1, y1, x2, y2):
 
   return ED, ES
 
-def calculateVolumesForEachFrame(videoName, outputFolderName, method):
+def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, method):
     """Function to extract frames from input video file
     and save them as separate frames in an output directory.
     Args:
@@ -52,7 +52,7 @@ def calculateVolumesForEachFrame(videoName, outputFolderName, method):
     true_ED, true_ES = returnTrueFrames(frameIndices, x1, y1, x2, y2) # returns ED and ES frame values
     print(true_ED, true_ES)
 
-    inputVideoPath = os.path.join(root, "segmented-videos", videoName + ".avi")
+    inputVideoPath = os.path.join(root, inputFolderName, videoName + ".avi")
     outputPath = os.path.join(root, outputFolderName)
     currentVideoPath = os.path.join(outputPath, videoName)
 
@@ -85,8 +85,8 @@ def calculateVolumesForEachFrame(videoName, outputFolderName, method):
     
     return volumeDict, true_ES, true_ED
 
-def returnPeaks(videoName="0X1BDEEC24D5FC570C", outputFolderName="find_peaks", method="Method of Disks"):
-  volumeDict, true_ES, true_ED = calculateVolumesForEachFrame(videoName, outputFolderName, method)
+def returnPeaks(videoName="0X1BDEEC24D5FC570C", inputFolderName="segmented-videos", outputFolderName="find_peaks", method="Method of Disks"):
+  volumeDict, true_ES, true_ED = calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, method)
   
   v=list(volumeDict.values())
   k=list(volumeDict.keys())

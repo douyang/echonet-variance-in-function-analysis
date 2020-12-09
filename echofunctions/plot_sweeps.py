@@ -1,71 +1,34 @@
-"""Echonet Function Evaluation to find
-EDV and ESV frame indices for given video"""
+"""Echonet Function Evaluation to compare
+predicted ES and ED frame against true"""
 
-from ast import literal_eval
+import find_peaks
 import loader
-from algorithms import find_peaks
 import tqdm
-from algorithms import funcs
-from algorithms import volume_tracings_calculations as tracings
-import config
-import pandas as pd
-import os
+import numpy as np
+import matplotlib.pyplot as plt
 
-def sortFrameVolumes(method="Method of Disks"):
-  _, df = loader.dataModules()
-  calculatedVolumeFromGroundTruth={}
-  
-  print("Calculating ground truth volumes from VolumeTracings")
-  for i in range(len(df)):
-    videoName = df.iloc[i, 0]
-    
-    x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
-    y1 = list(literal_eval(df.iloc[i, 3])) # y1 coords
-    x2 = list(literal_eval(df.iloc[i, 4])) # x2 coords
-    y2 = list(literal_eval(df.iloc[i, 5])) # y2 coords
-    frame = df.iloc[i, 1] # frame number
-    
-    number = len(x1) - 1
+def compareTrueAgainstPredicted(inputVideoFolderPath="segmented-videos"):
+  root, df = loader.dataModules()
+  ESDifferences, EDDifferences = [], []
 
-    maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = tracings.calcParallelAndMaxPoints(x1, y1, x2, y2)
-
-    if number < 22:
-      if method == "Method of Disks":
-        ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
-      
-      if videoName not in calculatedVolumeFromGroundTruth:
-        calculatedVolumeFromGroundTruth[videoName] = {}
-      
-      calculatedVolumeFromGroundTruth[videoName][frame] = ground_truth_volume
-  return calculatedVolumeFromGroundTruth
-
-def comparePredictedTimingAgainstTrue(fileName):
-  _, df = loader.dataModules()
-  dataList = []
-  trueVolumes = sortFrameVolumes()
-  print(trueVolumes)
-  for i in tqdm(range(len(df))):
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     
-    # Get true frame index values
-    v=list(trueVolumes[videoName].values())
-    k=list(trueVolumes[videoName].keys())
-    true_EDV = int(k[v.index(max(v))])
-    true_ESV = int(k[v.index(min(v))])
+    predictedIndices, trueIndices = find_peaks.returnPeaks(videoName=videoName, inputFolderName=inputVideoFolderPath)
 
-    # Gather predicted EDV and ESV timing frames
-    ESV_index, EDV_index = find_peaks.returnPeaks(videoName=videoName+".avi")
+    differenceInES, differenceInED = abs(trueIndices[0] - predictedIndices[0]), abs(trueIndices[1] - predictedIndices[1])
+    
+    ESDifferences.append(differenceInES)
+    EDDifferences.append(differenceInED)
+  
+  createHistogram(ESDifferences, EDDifferences)
 
-    # Calculate Differences
-    differenceInEDV = abs(true_EDV - EDV_index)
-    differenceInESV = abs(true_ESV - ESV_index)
+def createHistogram(ES_list, ED_list):
+  x = [ES_list, ED_list]
 
-    miniDict = {'Video Name': videoName, "Predicted ESV Frame": ESV_index, 'Predicted EDV Frame': EDV_index, 'True ESV Frame': true_ESV, 'True EDV Frame': true_EDV, 'Difference in ESV Frame': differenceInESV, 'Difference in EDV Frame': differenceInEDV}
+  plt.hist(x, bins=2, histtype='step', align='mid', color=["g", "r"], label=["Differences in ES", "Differences in ED"])
+  plt.legend(loc=2)
+  plt.title('Timing Predictions vs. True Timings')
+  plt.show()
 
-    dataList.append(miniDict)
-
-  df = pd.DataFrame(dataList)
-  export_path = os.path.join(config.CONFIG.DATA_DIR, fileName)
-  df.to_csv(export_path)
-
-comparePredictedTimingAgainstTrue("prediction-sweeps.csv")
+compareTrueAgainstPredicted(inputVideoFolderPath="segmented-videos")
