@@ -17,7 +17,6 @@ def obtainContourPoints(path):
   thresh = cv2.inRange(rgb, lower, upper)
 
   # get contours
-  result = np.zeros_like(thresh)
   contours = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
   contours = contours[0] if len(contours) == 2 else contours[1]
 
@@ -30,10 +29,69 @@ def obtainContourPoints(path):
   
   return points
 
+# Gets all the eroded contours for certain image
+def obtainErodedContourPoints(path, iterations):
+  # read image
+  img = cv2.imread(path)
+  rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+  # set lower and upper bounds on blue color
+  lower = (0,0,100)
+  upper = (50,50,255)
+  
+  # threshold and invert so hexagon is white on black background
+  thresh = cv2.inRange(rgb, lower, upper)
+
+  # get contours
+  kernel = np.ones((2,2),np.uint8)
+  erosion = cv2.erode(thresh,kernel,iterations = iterations)
+
+  contours = cv2.findContours(erosion, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+  contours = contours[0] if len(contours) == 2 else contours[1]
+
+  # Gets all contour points
+  points = []
+  for pt in contours:
+      for i in pt:
+        for coord in i:
+          points.append(coord.tolist())
+  
+  return points
+
+# Gets all the dilated contours for certain image
+def obtainDilatedContourPoints(path, iterations):
+  # read image
+  img = cv2.imread(path)
+  rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+  # set lower and upper bounds on blue color
+  lower = (0,0,100)
+  upper = (50,50,255)
+  
+  # threshold and invert so hexagon is white on black background
+  thresh = cv2.inRange(rgb, lower, upper)
+
+  # get contours
+  kernel = np.ones((2,2),np.uint8)
+  dilation = cv2.dilate(thresh,kernel,iterations = iterations)
+
+  contours = cv2.findContours(dilation, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+  contours = contours[0] if len(contours) == 2 else contours[1]
+
+  # Gets all contour points
+  points = []
+  for pt in contours:
+      for i in pt:
+        for coord in i:
+          points.append(coord.tolist())
+  
+  return points
+    
 def getIdealPointGroup(points):
   pointGroups = []
   index = 0
   subgroup = [points[0]]
+
 
   for i in range(len(points) - 1):
     prevPoint = points[i]
@@ -291,15 +349,15 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             condition = False
             higherIndex -= 1
         elif not (len(higherInterceptAveragePoints)>0 and higherInterceptAveragePoints[0] == point and point == start_point):
-          if slopeCond and not betweenCond:
+          if (slopeCond and not betweenCond) and prev_point != start_point and abs(slope)<10.1:
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
-          elif (abs(perp_slope) > 6) and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
+          elif (abs(perp_slope) > 7.1) and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
-          elif (abs(slope) > 6) and ((point[1] < averagePoint[1] and prev_point[1] > averagePoint[1]) or (point[1] > averagePoint[1] and prev_point[1] < averagePoint[1])):
+          elif (abs(slope) > 7.1) and ((point[1] < averagePoint[1] and prev_point[1] > averagePoint[1]) or (point[1] > averagePoint[1] and prev_point[1] < averagePoint[1])):
             higherInterceptAveragePoints.append(point)
             condition = False
             higherIndex -= 1
@@ -336,11 +394,6 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
         slopeCond = (new_slope >= perp_slope and prev_slope<=perp_slope) or  (new_slope <= perp_slope and prev_slope>=perp_slope)
         # print(slopeCond and not betweenCond, len(lowerInterceptAveragePoints), count, point, prev_point, averagePoint, prev_slope, new_slope, perp_slope)
 
-# False 0 1 [62, 20] [62, 19] [62.0001, 20.285714285714285] 12857.142856716035 2857.1428570479998 0.003003003003003003 61.93993993993994
-# False 0 2 [63, 21] [62, 20] [62.0001, 20.285714285714285] 2857.1428570479998 0.7143571500007178 0.003003003003003003 62.93693693693694
-# False 0 3 [64, 22] [63, 21] [62.0001, 20.285714285714285] 0.7143571500007178 0.8571857164286805 0.003003003003003003 63.933933933933936
-# False 0 4 [65, 23] [64, 22] [62.0001, 20.285714285714285] 0.8571857164286805 0.9047920644973894 0.003003003003003003 64.93093093093093
-
         count += 1
         lowerIndex += 1
 
@@ -350,15 +403,15 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
             condition = False
             lowerIndex -= 1
         elif not (len(lowerInterceptAveragePoints)>0 and lowerInterceptAveragePoints[0] == point and point == start_point):
-          if slopeCond and not betweenCond:            
+          if (slopeCond and not betweenCond) and prev_point != start_point and abs(slope)<10.1:            
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
-          elif (abs(perp_slope) > 6) and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
+          elif (abs(perp_slope) > 7.1) and ((new_slope > 1.1*abs(slope) and prev_slope < -1.1*abs(slope)) or (new_slope < -1.1*abs(slope) and prev_slope > 1.1*abs(slope))):
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
-          elif (abs(slope) > 6) and ((point[1] < averagePoint[1] and prev_point[1] > averagePoint[1]) or (point[1] > averagePoint[1] and prev_point[1] < averagePoint[1])):
+          elif (abs(slope) > 7.1) and ((point[1] < averagePoint[1] and prev_point[1] > averagePoint[1]) or (point[1] > averagePoint[1] and prev_point[1] < averagePoint[1])):
             lowerInterceptAveragePoints.append(point)
             condition = False
             lowerIndex -= 1
@@ -381,7 +434,8 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
 
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
-def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
+# Angle Shifts
+def calculateVolumeAngleShift(path, number, sweeps = 15, method = "Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))
 
   x1, y1, x2, y2 = getTopAndBottomCoords(points)
@@ -443,6 +497,21 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
     x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
     y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
+    if i < 100:
+      print(i)
+      image = cv2.imread(path)
+
+      for j in range(len(lowerInterceptAveragePoints)): 
+        cv2.line(image, tuple(lowerInterceptAveragePoints[j]), tuple(higherInterceptAveragePoints[j]), (255,255,0), 1)
+
+
+      cv2.line(image, (int(x1), int(y1)), (int(x2), int(y2)), (0,0,0), 1)
+
+      cv2_imshow(image)
+      cv2.waitKey(0)
+      cv2.destroyAllWindows()
+
+
     if  method == "Method of Disks":
       volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
@@ -451,3 +520,123 @@ def calculateVolume(path, number, sweeps = 15, method = "Method of Disks"):
       volumes[i] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     
   return (volumes, x1s, y1s, x2s, y2s, degrees)
+
+# Main Axis Shifts
+def calculateVolumeMainAxisShift(path, number, pointShifts = 15, method = "Method of Disks"):
+  points = getIdealPointGroup(obtainContourPoints(path))
+
+  x1, y1, x2, y2 = getTopAndBottomCoords(points)
+  if (x1 + y1) > (x2 + y2):
+    x1, y1, x2, y2 = x2, y2, x1, y1
+  
+  mainLineSlope = getSlope([x1, y1], [x2, y2])
+
+  xChange = 1/math.sqrt(1+mainLineSlope**2) * abs(mainLineSlope)/mainLineSlope
+  yChange = abs(mainLineSlope/math.sqrt(1+mainLineSlope**2))
+
+  lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
+
+  if (higherIntercept[0][0] + higherIntercept[0][1]) > (lowerIntercept[0][0] + lowerIntercept[0][1]):
+    lowerIntercept, higherIntercept = higherIntercept, lowerIntercept
+
+  volumes = {}
+  x1s = {}
+  y1s = {}
+  x2s = {}
+  y2s = {}
+
+  p1Index = points.index([x1, y1])
+  p2Index = points.index([x2, y2])
+
+  lowerIndex = min(p1Index, p2Index)
+  higherIndex = max(p1Index, p2Index)
+
+  higherInterceptPoints = points[lowerIndex:higherIndex]
+  lowerInterceptPoints = points[higherIndex:] + points[:lowerIndex]
+
+  if (higherInterceptPoints[0][0] + higherInterceptPoints[0][1]) < (lowerInterceptPoints[0][0] + lowerInterceptPoints[0][1]):
+    lowerInterceptPoints, higherInterceptPoints = higherInterceptPoints, lowerInterceptPoints
+
+  # Volumes for all 0 to 5 cases
+  for i in range(0, pointShifts):
+
+    x1 += xChange
+    x2 -= xChange
+    y1 += yChange
+    y2 -= yChange
+
+    slope = getSlope([x1, y1], [x2, y2])
+
+    weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
+    lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope, i)
+    
+    x1s[i] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
+    y1s[i] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
+
+    x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
+    y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
+
+    if  method == "Method of Disks":
+      volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+    elif method == "Prolate Ellipsoid":
+      volumes[i] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+    elif method == "Bullet Method":
+      volumes[i] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+    
+  return (volumes, x1s, y1s, x2s, y2s)
+
+# Main Axis Shifts
+def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Method of Disks"):
+  volumes = {}
+  x1s = {}
+  y1s = {}
+  x2s = {}
+  y2s = {}
+
+  for i in range(-iterations, iterations, 1):
+    if i > 0:
+      points = getIdealPointGroup(obtainErodedContourPoints(path, iterations=abs(i)))
+    elif i < 0:
+      points = getIdealPointGroup(obtainDilatedContourPoints(path, iterations=abs(i)))
+    else:
+      points = getIdealPointGroup(obtainContourPoints(path))
+
+    x1, y1, x2, y2 = getTopAndBottomCoords(points)
+    if (x1 + y1) > (x2 + y2):
+      x1, y1, x2, y2 = x2, y2, x1, y1
+    
+    mainLineSlope = getSlope([x1, y1], [x2, y2])
+
+    lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
+
+    if (higherIntercept[0][0] + higherIntercept[0][1]) > (lowerIntercept[0][0] + lowerIntercept[0][1]):
+      lowerIntercept, higherIntercept = higherIntercept, lowerIntercept
+
+    p1Index = points.index([x1, y1])
+    p2Index = points.index([x2, y2])
+
+    lowerIndex = min(p1Index, p2Index)
+    higherIndex = max(p1Index, p2Index)
+
+    higherInterceptPoints = points[lowerIndex:higherIndex]
+    lowerInterceptPoints = points[higherIndex:] + points[:lowerIndex]
+
+    if (higherInterceptPoints[0][0] + higherInterceptPoints[0][1]) < (lowerInterceptPoints[0][0] + lowerInterceptPoints[0][1]):
+      lowerInterceptPoints, higherInterceptPoints = higherInterceptPoints, lowerInterceptPoints
+
+    lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope, i)
+
+    x1s[i] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
+    y1s[i] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
+
+    x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
+    y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
+    
+    if  method == "Method of Disks":
+      volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+    elif method == "Prolate Ellipsoid":
+      volumes[i] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+    elif method == "Bullet Method":
+      volumes[i] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+    
+  return (volumes, x1s, y1s, x2s, y2s)
