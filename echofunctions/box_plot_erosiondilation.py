@@ -1,5 +1,5 @@
 """Echonet Function Evaluation comparisons of different
-methods' main axis shifts to compare the volume vs. ground truth"""
+methods with erosion and dilation to compare the volume vs. ground truth"""
 
 import pandas as pd
 import numpy as np
@@ -12,8 +12,8 @@ from algorithms import volume_tracings_calculations as tracings
 from ast import literal_eval
 from tqdm import tqdm
 
-# Returns dictionary of volume data with main axis shifts from algorithms
-def sortFrameVolumes(method, inputFolder, pointShifts):
+# Return dictionary of volume data with erosion and dilation using algorithms
+def sortFrameVolumes(method, inputFolder, iterations):
   root, df = loader.dataModules()
   all_volumes={}
 
@@ -21,7 +21,7 @@ def sortFrameVolumes(method, inputFolder, pointShifts):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolder) # frames path
   
-  print("Calculating volumes for each frame with point shifts")
+  print("Calculating volumes for each frame with erosion and dilation")
   for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] + ".avi" # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
@@ -32,16 +32,17 @@ def sortFrameVolumes(method, inputFolder, pointShifts):
     
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolumeMainAxisShift(FRAMES_PATH, 20, method=method, pointShifts=pointShifts)
+        volumes, *_ = funcs.calculateVolumeErosionAndDilation(FRAMES_PATH, 20, method=method, iterations=iterations)
         if videoName not in all_volumes and volumes is not "":
-          all_volumes[videoName] = {}
-        for r in range(0, pointShifts, 1):
-          if r not in all_volumes[videoName]:
-            all_volumes[videoName][r] = []
-
-          all_volumes[videoName][r].append(volumes[r])
+            all_volumes[videoName] = {}
+            for r in range(-iterations, iterations, 1):
+                all_volumes[videoName][r] = []
+        
+        for r in range(-iterations, iterations, 1):
+            all_volumes[videoName][r].append(volumes[r])
       except:
         exception_frames += 1
+    
   print(str(exception_frames) + " frames were not able to be calculated")
 
   return all_volumes
@@ -97,9 +98,9 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
   return givenTrueDict
 
-# Compare volumes using calculated main axis shifts against FileList or VolumeTracings
-def compareVolumePlot(inputFolder, method, volumeType, fromFile, pointShifts, root=config.CONFIG.DATA_DIR):
-  all_volumes = sortFrameVolumes(method, inputFolder, pointShifts)
+# Compare volumes using calculated erosion and dilation iterations against FileList or VolumeTracings
+def compareVolumePlot(inputFolder, method, volumeType, fromFile, iterations, root=config.CONFIG.DATA_DIR):
+  all_volumes = sortFrameVolumes(method, inputFolder, iterations)
 
   if fromFile is "VolumeTracings":
     tracings_volumes = sortFrameVolumesFromTracings(method)
@@ -107,7 +108,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, pointShifts, ro
     tracings_volumes = sortVolumesFromFileList()
 
   changesInVolumesDict = {}
-  for r in range(0, pointShifts, 1):
+  for r in range(-iterations, iterations, 1):
     changesInVolumesDict[r] = []
 
   for videoName in tracings_volumes:
@@ -119,7 +120,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, pointShifts, ro
     ground_truth_EF = (1 - (ground_truth_ESV/ground_truth_EDV)) * 100
 
     if videoName in all_volumes:
-      for r in range(0, pointShifts, 1):
+      for r in range(-iterations, iterations, 1):
         volumes = all_volumes[videoName][r]
 
         EDV = max(volumes)
@@ -143,8 +144,8 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, pointShifts, ro
 
 # Create box plot by calling functions and graphing data
 def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",
-                  fromFile="FileList", pointShifts=15):
-  differenceInVolumes = compareVolumePlot(inputFolder, method, volumeType, fromFile, pointShifts)
+                  fromFile="FileList", iterations=5):
+  differenceInVolumes = compareVolumePlot(inputFolder, method, volumeType, fromFile, iterations)
   labels = []
 
   for i in differenceInVolumes.keys():
@@ -160,8 +161,8 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
 
-  ax.set_title('Difference in Calculated ' + volumeType + ' against ' + fromFile + ' using Main Axis Shifts')
-  ax.set_xlabel('Main Axis Shifts')
+  ax.set_title('Difference in Calculated ' + volumeType + ' against ' + fromFile + ' using Erosion and Dilation')
+  ax.set_xlabel('Erosion and Dilation Iterations')
 
   if volumeType is "ESV" or volumeType is "EDV":
     ax.set_ylabel('% Difference in ' + volumeType)
@@ -170,9 +171,10 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
 
   ax.set_xticklabels(labels)
 
-  plt.show() #show plot
+  # show plot
+  plt.show()
 
-#createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="frames", fromFile="FileList", pointShifts=15)
+createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="frames", fromFile="FileList", iterations=5)
 #createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="frames", fromFile="VolumeTracings")
 #createBoxPlot(method="Method of Disks", volumeType="ESV", inputFolder="frames", fromFile="VolumeTracings")
 #createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="frames", fromFile="VolumeTracings")

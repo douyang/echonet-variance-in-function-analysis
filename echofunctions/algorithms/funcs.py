@@ -435,7 +435,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   return (lowerInterceptAveragePoints, higherInterceptAveragePoints)
 
 # Angle Shifts
-def calculateVolumeAngleShift(path, number, sweeps = 15, method = "Method of Disks"):
+def calculateVolumeAngleShift(path, number, sweeps=15, method = "Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))
 
   x1, y1, x2, y2 = getTopAndBottomCoords(points)
@@ -497,21 +497,6 @@ def calculateVolumeAngleShift(path, number, sweeps = 15, method = "Method of Dis
     x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
     y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
-    if i < 100:
-      print(i)
-      image = cv2.imread(path)
-
-      for j in range(len(lowerInterceptAveragePoints)): 
-        cv2.line(image, tuple(lowerInterceptAveragePoints[j]), tuple(higherInterceptAveragePoints[j]), (255,255,0), 1)
-
-
-      cv2.line(image, (int(x1), int(y1)), (int(x2), int(y2)), (0,0,0), 1)
-
-      cv2_imshow(image)
-      cv2.waitKey(0)
-      cv2.destroyAllWindows()
-
-
     if  method == "Method of Disks":
       volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
@@ -522,7 +507,7 @@ def calculateVolumeAngleShift(path, number, sweeps = 15, method = "Method of Dis
   return (volumes, x1s, y1s, x2s, y2s, degrees)
 
 # Main Axis Shifts
-def calculateVolumeMainAxisShift(path, number, pointShifts = 15, method = "Method of Disks"):
+def calculateVolumeMainAxisShift(path, number, pointShifts=15, method="Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))
 
   x1, y1, x2, y2 = getTopAndBottomCoords(points)
@@ -586,7 +571,7 @@ def calculateVolumeMainAxisShift(path, number, pointShifts = 15, method = "Metho
   return (volumes, x1s, y1s, x2s, y2s)
 
 # Main Axis Shifts
-def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Method of Disks"):
+def calculateVolumeErosionAndDilation(path, number, iterations=5, method = "Method of Disks"):
   volumes = {}
   x1s = {}
   y1s = {}
@@ -607,6 +592,7 @@ def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Me
     
     mainLineSlope = getSlope([x1, y1], [x2, y2])
 
+    weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
     lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
 
     if (higherIntercept[0][0] + higherIntercept[0][1]) > (lowerIntercept[0][0] + lowerIntercept[0][1]):
@@ -624,7 +610,7 @@ def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Me
     if (higherInterceptPoints[0][0] + higherInterceptPoints[0][1]) < (lowerInterceptPoints[0][0] + lowerInterceptPoints[0][1]):
       lowerInterceptPoints, higherInterceptPoints = higherInterceptPoints, lowerInterceptPoints
 
-    lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope, i)
+    lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, mainLineSlope, i)
 
     x1s[i] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
     y1s[i] = [y1] + [point[1] for point in lowerInterceptAveragePoints]

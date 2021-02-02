@@ -1,5 +1,5 @@
 """Echonet Function Evaluation comparisons of different methods'
- angle shifts to compare volume vs. ground truth on angle changes"""
+ angle shifts to compare volume vs. ground truth on angle shifts"""
 
 import pandas as pd
 import numpy as np
@@ -12,17 +12,19 @@ from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
 import collections
 from ast import literal_eval
-import tqdm
+from tqdm import tqdm
 
-def sortFrameVolumes(method, inputFolder, sweeps):
+# Returns dictionary with calculated volumes
+def calculateAndSortVolumes(method, inputFolder, sweeps):
   root, df = loader.dataModules()
-  all_volumes={}
+  calculatedVolumes={}
 
+  exception_frames = 0
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolder) # frames path
   
-  print("Calculating volumes for each frame given an angle change")
+  print("Calculating volumes for each frame with a given angle change")
   for i in tqdm(range(len(df))): # iterates through each row of data frame
-    videoName = df.iloc[i, 0] # name of video
+    videoName = df.iloc[i, 0] + ".avi" # name of video
     frameNumber = df.iloc[i, 1] # timing for clip
     
     OUTPUT_FRAME_NAME = videoName + "_" + str(frameNumber) + ".png" # concatenate video name with frame number as file name
@@ -31,27 +33,55 @@ def sortFrameVolumes(method, inputFolder, sweeps):
     
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, x1, y1, x2, y2, degrees = funcs.calculateVolume(FRAMES_PATH, 20, sweeps, method)
-        if videoName not in all_volumes and volumes is not "":
-          all_volumes[videoName] = {}
-        for r in range(-(sweeps), sweeps+1, 1):
-          if r not in all_volumes[videoName]:
-            all_volumes[videoName][r] = [], []
+        volumes, x1, y1, x2, y2, degrees = funcs.calculateVolumeAngleShift(FRAMES_PATH, 20, sweeps=sweeps, method="Method of Disks")
+    
+        if videoName not in calculatedVolumes and volumes is not "": # create subdictionary if volumes not already in it and if not null
+          calculatedVolumes[videoName] = {}
+        for r in range(-(sweeps), sweeps+1, 1): # iterate through negative and positive keys
+          if r not in calculatedVolumes[videoName]:
+            calculatedVolumes[videoName][r] = [], [] # add two empty arrays if angle change not in subdictionary
           
-          all_volumes[videoName][r][0].append(volumes[r])
-          all_volumes[videoName][r][1].append(degrees[r])
+          calculatedVolumes[videoName][r][0].append(volumes[r]) # add volumes from given shift
+          calculatedVolumes[videoName][r][1].append(degrees[r]) # add degrees from given shift
       except:
-        print(OUTPUT_FRAME_NAME)
+        exception_frames += 1 # add to exception frames if frame was not able to be calculated
+      
+  print(str(exception_frames) + " were not able to be calculated")
 
-  return all_volumes
+  return calculatedVolumes
 
+# Returns dictionary with calculated volumes (received from CSV)
+def getCalculationsFromCSV(sweeps):
+  root, _ = loader.dataModules() # get path data
+  calculatedVolumes = {}
+
+  df = pd.read_csv(os.path.join(root, "Angle Shift Volume Data.csv")) # reading in CSV
+  df = df.astype(str).groupby(['Video Name']).agg(','.join).reset_index() # group based on file name
+
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
+    videoName = df.iloc[i, 0] # name of video
+    
+    for x in range((sweeps * 2) - 1):
+      sweep = list(literal_eval((df.iloc[i, 2])))[x] # degree change
+      ESV_angleshift = float(list(literal_eval((df.iloc[i, 3])))[x]) # ESV shift
+      EDV_angleshift = float(list(literal_eval((df.iloc[i, 4])))[x]) # EDV shift
+      calculatedESV = float(list(literal_eval((df.iloc[i, 7])))[x]) # ESV calculation
+      calculatedEDV = float(list(literal_eval((df.iloc[i, 8])))[x]) # EDV calculation
+
+      if videoName not in calculatedVolumes:
+        calculatedVolumes[videoName] = {}
+      if sweep not in calculatedVolumes[videoName]:
+        calculatedVolumes[videoName][sweep] = [calculatedESV, calculatedEDV], [ESV_angleshift, EDV_angleshift]
+      
+  return calculatedVolumes
+# Returns dictionary of volumes calculated from VolumeTracings
 def sortFrameVolumesFromTracings(method):
   _, df = loader.dataModules()
   calculatedVolumeFromGroundTruth={}
   
   print("\nCalculating volumes from VolumeTracings coordinates")
   for i in tqdm(range(len(df))):
-    videoName = df.iloc[i, 0]
+    videoName = df.iloc[i, 0] + ".avi"
     
     x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
     y1 = list(literal_eval(df.iloc[i, 3])) # y1 coords
@@ -76,6 +106,7 @@ def sortFrameVolumesFromTracings(method):
       calculatedVolumeFromGroundTruth[videoName].append(ground_truth_volume)
   return calculatedVolumeFromGroundTruth
 
+# Returns dictionary of true volumes from FileList
 def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
   givenTrueDict={}
 
@@ -94,80 +125,86 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
   return givenTrueDict
 
-def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps, root=config.CONFIG.DATA_DIR):
-  all_volumes = sortFrameVolumes(method, inputFolder, sweeps)
-
-  if fromFile is "VolumeTracings":
-    tracings_volumes = sortFrameVolumesFromTracings(method)
+# Compare volumes from calculations against true volumes
+def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps, useCSV, root=config.CONFIG.DATA_DIR):
+  if useCSV == True:
+    all_volumes = getCalculationsFromCSV(sweeps)
+  
   else:
-    tracings_volumes = sortVolumesFromFileList()
+    all_volumes = calculateAndSortVolumes(method, inputFolder, sweeps) # get dictionary of calculated volumes
+
+  # Get true volumes from VolumeTracings or FileList
+  if fromFile is "VolumeTracings":
+    true_volumes = sortFrameVolumesFromTracings(method)
+  else:
+    true_volumes = sortVolumesFromFileList()
 
   changesInVolumesDict = {}
 
-  for videoName in tracings_volumes:
-    volumeData = tracings_volumes[videoName]
+  for videoName in true_volumes: # iterate through each video from true volumes dictionary
+    volumeData = true_volumes[videoName] # get volumes from dictionary
 
-    ground_truth_ESV = min(volumeData)
-    ground_truth_EDV = max(volumeData)
-    ground_truth_EF = (1 - (ground_truth_ESV/ground_truth_EDV)) * 100
+    ground_truth_ESV = min(volumeData) # true ESV value
+    ground_truth_EDV = max(volumeData) # true EDV value
+    ground_truth_EF = (1 - (ground_truth_ESV/ground_truth_EDV)) * 100 # true EF value
 
-    if videoName in all_volumes:
-      for angleShift in all_volumes[videoName]:
-        angleChanges = all_volumes[videoName][angleShift][1]
+    if videoName in all_volumes: # check if video in calculated volumes' dictionary
+      for angleShift in all_volumes[videoName]: # iterate through shift in calculated volumes
+        angleChanges = all_volumes[videoName][angleShift][1] # degrees of angle change for given shift
         if len(angleChanges) > 1:
-          volumes = all_volumes[videoName][angleShift][0]
+          volumes = all_volumes[videoName][angleShift][0] # calculated volumes
           
-          EDV = max(volumes)
-          ESV = min(volumes)
-          EF = (1 - (ESV/EDV)) * 100
+          #EDV = max(volumes) # calculated EDV value
+          EDV = max(all_volumes[videoName][0][0]) # zeroth EDV (keep constant)
+          ESV = min(volumes) # calculated ESV value
+          EF = (1 - (ESV/EDV)) * 100 # calculated EF value
 
-          EDV_anglechange = angleChanges[volumes.index(max(volumes))]
-          ESV_anglechange = angleChanges[volumes.index(min(volumes))]
-          EF_anglechange = (angleChanges[0] + angleChanges[1])/2
+          EDV_anglechange = angleChanges[volumes.index(max(volumes))] # EDV angle change
+          ESV_anglechange = angleChanges[volumes.index(min(volumes))] # ESV angle change
+          EF_anglechange = (angleChanges[0] + angleChanges[1])/2 # EF angle change is average of EDV and ESV angle change
 
-          diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100
-          diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100
-          diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100 if ground_truth_EF != 0 else 0
+          diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100 # difference in true and calculated EDV
+          diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100 # difference in true and calculated ESV
+          diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100 if ground_truth_EF != 0 else 0 # difference in true and calculated EF
 
-          if volumeType is "EF" and ground_truth_EF!=0:
-
+          if volumeType == "EF" and ground_truth_EF != 0:
             if int(EF_anglechange) not in changesInVolumesDict:
-              changesInVolumesDict[int(EF_anglechange)] = []
+              changesInVolumesDict[int(EF_anglechange)] = [] # create empty array in dictionary
             
-            changesInVolumesDict[int(EF_anglechange)].append(diff_EF)
+            changesInVolumesDict[int(EF_anglechange)].append(diff_EF) # add difference in EF
             
-          elif volumeType is "ESV":
-
+          elif volumeType == "ESV":
             if int(ESV_anglechange) not in changesInVolumesDict:
-              changesInVolumesDict[int(ESV_anglechange)] = []
+              changesInVolumesDict[int(ESV_anglechange)] = []  # create empty array in dictionary
             
-            changesInVolumesDict[int(ESV_anglechange)].append(diff_ESV)
+            changesInVolumesDict[int(ESV_anglechange)].append(diff_ESV) # add difference in ESV
 
-          elif volumeType is "EDV":
-            
+          elif volumeType == "EDV":
             if int(EDV_anglechange) not in changesInVolumesDict:
-              changesInVolumesDict[int(EDV_anglechange)] = []
+              changesInVolumesDict[int(EDV_anglechange)] = []  # create empty array in dictionary
             
-            changesInVolumesDict[int(EDV_anglechange)].append(diff_EDV)
+            changesInVolumesDict[int(EDV_anglechange)].append(diff_EDV) # add difference in EDV
 
   if normalized:
-    zeroItems = changesInVolumesDict[0]
+    zeroItems = changesInVolumesDict[0] # get zeroth values
     zeroItems.sort()
     shift = zeroItems[len(zeroItems)//2]
-    print(shift)
+    print("Shift" + str(shift))
 
     for angle in changesInVolumesDict:
-        for i in range(len(changesInVolumesDict[angle])):
-            changesInVolumesDict[angle][i] -= shift
+      for i in range(len(changesInVolumesDict[angle])):
+        changesInVolumesDict[angle][i] -= shift
   
   return changesInVolumesDict
 
 def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",
-                  fromFile="FileList", normalized=True, sweeps=20):
-  changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps)
+                  fromFile="FileList", normalized=True, sweeps=20, useCSV=True):
+  
+  changesInVolumesDict = compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps, useCSV)
   differenceInVolumes = {}
   totalItems = 0
 
+  # Bucketing algorithm to bucket based off of degrees
   for key in changesInVolumesDict:
     if key == 0:
       bucket = (0, 0)
@@ -184,7 +221,6 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
         differenceInVolumes[bucket] = []
       differenceInVolumes[bucket] += changesInVolumesDict[key]
   
- 
   differenceInVolumes = list(differenceInVolumes.items())
   differenceInVolumes.sort(key=lambda volumeShift: volumeShift[0][0] + volumeShift[0][1])
 
@@ -203,18 +239,21 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   
   averageError = totalErr/totalItems
   
-  print("normalized: " + str(normalized))
-  print(volumeType)
-  print(fromFile)
-  print(averageError)
-  print(sweeps)
+  print("Normalized: " + str(normalized))
+  print("Volume Type: " + str(volumeType))
+  print("Comparison with: " + str(fromFile))
+  print("Average Error: " + str(averageError))
+  print("Sweeps: " + str(sweeps))
 
   # figure related code
-  loader.latexify()
-  fig = plt.figure(figsize=(12, 8))
-  plt.xticks(fontsize=18)
-  plt.yticks(fontsize=18)
+  loader.latexify() # latexify the graphs
+  fig = plt.figure(figsize=(12, 8)) # create plt figure
+  plt.title(volumeType + " Volumes with Angle Shift against Volume Tracings' Coordinates") # set title
+  plt.xticks(fontsize=8)
+  plt.yticks(fontsize=8)
 
+  plt.xlabel('Degrees of Rotation of the Longitudinal Axis')
+  plt.ylabel('% Change in Ejection Fraction')
 
   ax = fig.add_subplot(111)
   ax.boxplot(data, showfliers=False)
@@ -225,5 +264,5 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
   plt.show()
 
-createBoxPlot(method="Method of Disks", volumeType="EDV", inputFolder="Masks_From_VolumeTracing", 
-              fromFile="VolumeTracings", normalized=True, sweeps=30)
+createBoxPlot(method="Method of Disks", volumeType="EF", inputFolder="frames", 
+              fromFile="VolumeTracings", normalized=True, sweeps=15, useCSV=True)
