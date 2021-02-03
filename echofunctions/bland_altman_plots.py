@@ -12,7 +12,7 @@ import loader
 from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
 import pyCompare
-import tqdm
+from tqdm import tqdm
 
 def sortVolumesFromAlgo(frames_path, method):
 
@@ -32,7 +32,7 @@ def sortVolumesFromAlgo(frames_path, method):
 
     if os.path.exists(FRAMES_PATH):
       try:
-        volumes, *_ = funcs.calculateVolume(FRAMES_PATH, 20, 1, method)
+        volumes, *_ = funcs.calculateVolumeMainAxisTopShift(FRAMES_PATH, 20, 1, method)
 
         if videoName not in all_volumes and volumes is not "":
           all_volumes[videoName] = []

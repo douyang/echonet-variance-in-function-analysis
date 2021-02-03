@@ -65,4 +65,4 @@ def exportCSV(method="Method of Disks", inputFolderPath=None, fileName="axis-len
 
   df.to_csv(export_path, index=False)
 
-exportCSV(method="Method of Disks", inputFolderPath="Masks_From_VolumeTracing", fileName="axis_lengths.csv")
+exportCSV(method="Method of Disks", inputFolderPath="frames", fileName="axis_lengths.csv")

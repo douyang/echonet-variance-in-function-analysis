@@ -61,7 +61,7 @@ def getCalculationsFromCSV(sweeps):
   for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     
-    for x in range((sweeps * 2) - 1):
+    for x in range((sweeps * 2) + 1):
       sweep = list(literal_eval((df.iloc[i, 2])))[x] # degree change
       ESV_angleshift = float(list(literal_eval((df.iloc[i, 3])))[x]) # ESV shift
       EDV_angleshift = float(list(literal_eval((df.iloc[i, 4])))[x]) # EDV shift
@@ -251,6 +251,8 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   plt.title(volumeType + " Volumes with Angle Shift against Volume Tracings' Coordinates") # set title
   plt.xticks(fontsize=8)
   plt.yticks(fontsize=8)
+
+  #plt.gca().yaxis.set_major_formatter(mtick.PercentFormatter(1)) # sets percentages for y-axis
 
   plt.xlabel('Degrees of Rotation of the Longitudinal Axis')
   plt.ylabel('% Change in Ejection Fraction')

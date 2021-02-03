@@ -46,8 +46,11 @@ def calculateVolumesWithAlgorithm(method, inputFolderPath, task):
         if task == "Erosion and Dilation":
           volumes, x1s, y1s, x2s, y2s = funcs.calculateVolumeErosionAndDilation(FRAMES_PATH, 20, iterations=5, method=method)
         
-        elif task == "Main Axis Shift":
-          volumes, x1s, y1s, x2s, y2s = funcs.calculateVolumeMainAxisShift(FRAMES_PATH, 20, pointShifts=15, method=method)
+        elif task == "Main Axis Top Shift":
+          volumes, x1s, y1s, x2s, y2s = funcs.calculateVolumeMainAxisTopShift(FRAMES_PATH, 20, pointShifts=15, method=method)
+        
+        elif task == "Main Axis Bottom Shift":
+          volumes, x1s, y1s, x2s, y2s = funcs.calculateVolumeMainAxisBottomShift(FRAMES_PATH, 20, pointShifts=15, method=method)
         
         elif task == "Angle Shift":
           volumes, x1s, y1s, x2s, y2s, degrees = funcs.calculateVolumeAngleShift(FRAMES_PATH, 20, sweeps=15, method=method)
@@ -92,7 +95,7 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName="
         miniDict = {'Video Name': videoName, "Iteration": shift, "Calculated EF": EF, "Calculated ESV": ESV,
                     "Calculated EDV": EDV, "True EF": groundtrue_EF, "True ESV": groundtrue_ESV, "True EDV": groundtrue_EDV}
       
-      elif task == "Main Axis Shift":
+      elif task == "Main Axis Top Shift" or "Main Axis Bottom Shift":
         miniDict = {'Video Name': videoName, "Point Shift": shift, "Calculated EF": EF, "Calculated ESV": ESV,
                     "Calculated EDV": EDV, "True EF": groundtrue_EF, "True ESV": groundtrue_ESV, "True EDV": groundtrue_EDV}
       
@@ -116,5 +119,5 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName="
 
   df.to_csv(export_path) # export to CSV
 
-compareVolumePlot(method="Method of Disks", inputFolderPath="frames", fileName="Erosion and Dilation Volume Data.csv",
-                  task="Erosion and Dilation")
+compareVolumePlot(method="Method of Disks", inputFolderPath="frames", fileName="Main Axis Top Shift.csv",
+                  task="Main Axis Top Shift")
