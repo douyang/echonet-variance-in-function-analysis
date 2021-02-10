@@ -55,9 +55,10 @@ def getCalculationsFromCSV(sweeps):
   root, _ = loader.dataModules() # get path data
   calculatedVolumes = {}
 
-  df = pd.read_csv(os.path.join(root, "Angle Shift Volume Data.csv")) # reading in CSV
+  df = pd.read_csv(os.path.join(root, "Intermediaries/Angle Shift Volume Data.csv")) # reading in CSV
   df = df.astype(str).groupby(['Video Name']).agg(','.join).reset_index() # group based on file name
 
+  print("\nGathering data from CSV")
   for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     
@@ -72,7 +73,7 @@ def getCalculationsFromCSV(sweeps):
         calculatedVolumes[videoName] = {}
       if sweep not in calculatedVolumes[videoName]:
         calculatedVolumes[videoName][sweep] = [calculatedESV, calculatedEDV], [ESV_angleshift, EDV_angleshift]
-      
+  
   return calculatedVolumes
 # Returns dictionary of volumes calculated from VolumeTracings
 def sortFrameVolumesFromTracings(method):
@@ -149,6 +150,10 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
     ground_truth_EF = (1 - (ground_truth_ESV/ground_truth_EDV)) * 100 # true EF value
 
     if videoName in all_volumes: # check if video in calculated volumes' dictionary
+      normal_EDV = max(all_volumes[videoName][0][0]) # zeroth EDV (keep constant)
+      normal_ESV = min(all_volumes[videoName][0][0]) # calculated ESV value
+      normal_EF = (1 - (normal_ESV/normal_EDV)) * 100 # calculated EF value
+      
       for angleShift in all_volumes[videoName]: # iterate through shift in calculated volumes
         angleChanges = all_volumes[videoName][angleShift][1] # degrees of angle change for given shift
         if len(angleChanges) > 1:
@@ -165,7 +170,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
 
           diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100 # difference in true and calculated EDV
           diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100 # difference in true and calculated ESV
-          diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100 if ground_truth_EF != 0 else 0 # difference in true and calculated EF
+          diff_EF = ((EF - normal_EF)/normal_EF) * 100 if normal_EF != 0 else 0 # difference in true and calculated EF
 
           if volumeType == "EF" and ground_truth_EF != 0:
             if int(EF_anglechange) not in changesInVolumesDict:
@@ -248,7 +253,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
   # figure related code
   loader.latexify() # latexify the graphs
   fig = plt.figure(figsize=(12, 8)) # create plt figure
-  plt.title(volumeType + " Volumes with Angle Shift against Volume Tracings' Coordinates") # set title
+  #plt.title(volumeType + " Volumes with Angle Shift against Volume Tracings' Coordinates") # set title
   plt.xticks(fontsize=8)
   plt.yticks(fontsize=8)
 

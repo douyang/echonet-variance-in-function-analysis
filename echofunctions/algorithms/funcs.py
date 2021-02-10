@@ -294,6 +294,22 @@ def volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterc
 
   return volume
 
+# Area Calculation
+def areaCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints):
+  long_axis_length = getDistance([x1, y1], [x2, y2])
+  parallelSeperationDistance = long_axis_length/21
+
+  # Manual Area Calc
+  area = 0
+
+  for i in range(len(lowerInterceptAveragePoints)):
+    length = getDistance(lowerInterceptAveragePoints[i], higherInterceptAveragePoints[i])
+    diskArea = length * parallelSeperationDistance
+    area += diskArea
+
+  return area
+
+
 def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2, slope, i):
   # Calculate perpendicular slope
   try:
@@ -313,6 +329,8 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
   if getDistance(weighted_avg[0], higherIntercept[0]) > getDistance(weighted_avg[0], higherIntercept[-1]):
       higherIntercept = higherIntercept[::-1]
   
+  # print(higherIntercept)
+
   # Make sure its from top to bottom direction
   if getDistance(weighted_avg[0], lowerIntercept[0]) > getDistance(weighted_avg[0], lowerIntercept[-1]):
       lowerIntercept = lowerIntercept[::-1]
@@ -367,6 +385,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
               higherInterceptAveragePoints.append(higherIntercept[higherIndex])
             condition = False
             higherIndex -= 1
+        # print(slopeCond and not betweenCond, len(higherIntercept), higherIndex, count, point, prev_point, averagePoint, slope, prev_slope, new_slope, perp_slope, point[0]-perp_slope*point[1])
     except:
       higherInterceptAveragePoints.append(higherIntercept[-1])
   
@@ -384,10 +403,12 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
         else:
           prev_point = lowerIntercept[lowerIndex-1]
 
+
         new_slope = getSlope(point, averagePoint)
         prev_slope =  getSlope(prev_point, averagePoint)
         betweenCond = ((point[0] < averagePoint[0] and prev_point[0] > averagePoint[0]) or (point[0] > averagePoint[0] and prev_point[0] < averagePoint[0])) and abs(new_slope) > abs(slope) and abs(prev_slope) > abs(slope)
         slopeCond = (new_slope >= perp_slope and prev_slope<=perp_slope) or  (new_slope <= perp_slope and prev_slope>=perp_slope)
+        # print(slopeCond and not betweenCond, len(lowerInterceptAveragePoints), count, point, prev_point, averagePoint, prev_slope, new_slope, perp_slope)
 
         count += 1
         lowerIndex += 1
@@ -418,6 +439,7 @@ def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x
               lowerInterceptAveragePoints.append(lowerIntercept[lowerIndex])
             condition = False
             lowerIndex -= 1
+        # print(slopeCond and not betweenCond, len(lowerInterceptAveragePoints), count, point, prev_point, averagePoint, slope, prev_slope, new_slope, perp_slope, point[0]-perp_slope*point[1])
     except:
       lowerInterceptAveragePoints.append(lowerIntercept[-1])
 
@@ -449,6 +471,7 @@ def calculateVolumeAngleShift(path, number, sweeps = 15, method = "Method of Dis
   x2s = {}
   y2s = {}
   degrees = {}
+
 
   # Volumes for all 0 to 5 cases
   for i in range(-sweeps, sweeps+1, 1):
@@ -512,6 +535,7 @@ def calculateVolumeMainAxisTopShift(path, number, pointShifts = 15, method = "Me
 
   xChange = 1/math.sqrt(1+mainLineSlope**2) * abs(mainLineSlope)/mainLineSlope
   yChange = abs(mainLineSlope/math.sqrt(1+mainLineSlope**2))
+  distance = getDistance([x1, y1], [x2, y2])
 
   lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
 
@@ -538,32 +562,37 @@ def calculateVolumeMainAxisTopShift(path, number, pointShifts = 15, method = "Me
 
   # Volumes for all 0 to 5 cases
   for i in range(0, pointShifts):
-    
-    x1 += xChange
-    y1 += yChange
+    # x1, y1 = lowerIntercept[i]
+    # x2, y2 = higherIntercept[i]
+
+    x1 += 2*xChange
+    # x2 -= xChange
+    y1 += 2*yChange
+    # y2 -= yChange
 
     slope = getSlope([x1, y1], [x2, y2])
 
     weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
     lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope, i)
     
-    x1s[i] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
-    y1s[i] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
+    x1s[(i)/distance] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
+    y1s[(i)/distance] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
 
-    x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
-    y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
+    x2s[(i)/distance] = [x2] + [point[0] for point in higherInterceptAveragePoints]
+    y2s[(i)/distance] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
     if  method == "Method of Disks":
-      volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[(i)/distance] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
-      volumes[i] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[(i)/distance] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Bullet Method":
-      volumes[i] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[(i)/distance] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     
   return (volumes, x1s, y1s, x2s, y2s)
 
+
 # Main Axis Bottom Shifts
-def calculateVolumeMainAxisBottomShift(path, number, pointShifts=15, method="Method of Disks"):
+def calculateVolumeMainAxisBottomShift(path, number, pointShifts = 15, method = "Method of Disks"):
   points = getIdealPointGroup(obtainContourPoints(path))
 
   x1, y1, x2, y2 = getTopAndBottomCoords(points)
@@ -574,6 +603,7 @@ def calculateVolumeMainAxisBottomShift(path, number, pointShifts=15, method="Met
 
   xChange = 1/math.sqrt(1+mainLineSlope**2) * abs(mainLineSlope)/mainLineSlope
   yChange = abs(mainLineSlope/math.sqrt(1+mainLineSlope**2))
+  distance = getDistance([x1, y1], [x2, y2])
 
   lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
 
@@ -600,26 +630,31 @@ def calculateVolumeMainAxisBottomShift(path, number, pointShifts=15, method="Met
 
   # Volumes for all 0 to 5 cases
   for i in range(0, pointShifts):
-    x2 -= xChange
-    y2 -= yChange
+    # x1, y1 = lowerIntercept[i]
+    # x2, y2 = higherIntercept[i]
+
+    # x1 += xChange
+    x2 -= 2*xChange
+    # y1 += yChange
+    y2 -= 2*yChange
 
     slope = getSlope([x1, y1], [x2, y2])
 
     weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
     lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, slope, i)
     
-    x1s[i] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
-    y1s[i] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
+    x1s[(i)/distance] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
+    y1s[(i)/distance] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
 
-    x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
-    y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
+    x2s[(i)/distance] = [x2] + [point[0] for point in higherInterceptAveragePoints]
+    y2s[(i)/distance] = [y2] + [point[1] for point in higherInterceptAveragePoints]
 
     if  method == "Method of Disks":
-      volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[(i)/distance] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
-      volumes[i] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[(i)/distance] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Bullet Method":
-      volumes[i] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[(i)/distance] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     
   return (volumes, x1s, y1s, x2s, y2s)
 
@@ -631,6 +666,18 @@ def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Me
   x2s = {}
   y2s = {}
 
+  points = getIdealPointGroup(obtainContourPoints(path))
+  x1, y1, x2, y2 = getTopAndBottomCoords(points)
+  if (x1 + y1) > (x2 + y2):
+    x1, y1, x2, y2 = x2, y2, x1, y1
+  
+  mainLineSlope = getSlope([x1, y1], [x2, y2])
+  weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
+
+  lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
+  lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2, mainLineSlope, 0)
+  baseArea = areaCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+
   for i in range(-iterations, iterations, 1):
     if i > 0:
       points = getIdealPointGroup(obtainErodedContourPoints(path, iterations=abs(i)))
@@ -639,17 +686,18 @@ def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Me
     else:
       points = getIdealPointGroup(obtainContourPoints(path))
 
+    if (higherIntercept[0][0] + higherIntercept[0][1]) > (lowerIntercept[0][0] + lowerIntercept[0][1]):
+      lowerIntercept, higherIntercept = higherIntercept, lowerIntercept
+    
     x1, y1, x2, y2 = getTopAndBottomCoords(points)
     if (x1 + y1) > (x2 + y2):
       x1, y1, x2, y2 = x2, y2, x1, y1
     
     mainLineSlope = getSlope([x1, y1], [x2, y2])
+    weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
 
     lowerIntercept, higherIntercept = splitPoints(x1, y1, x2, y2, mainLineSlope, points)
-
-    if (higherIntercept[0][0] + higherIntercept[0][1]) > (lowerIntercept[0][0] + lowerIntercept[0][1]):
-      lowerIntercept, higherIntercept = higherIntercept, lowerIntercept
-
+  
     p1Index = points.index([x1, y1])
     p2Index = points.index([x2, y2])
 
@@ -662,20 +710,22 @@ def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Me
     if (higherInterceptPoints[0][0] + higherInterceptPoints[0][1]) < (lowerInterceptPoints[0][0] + lowerInterceptPoints[0][1]):
       lowerInterceptPoints, higherInterceptPoints = higherInterceptPoints, lowerInterceptPoints
 
-    weighted_avg = getWeightedAveragePoints(x1, y1, x2, y2, number)
     lowerInterceptAveragePoints, higherInterceptAveragePoints = findCorrespondingMaskPoints(weighted_avg, lowerInterceptPoints, higherInterceptPoints, x1, y1, x2, y2, mainLineSlope, i)
+    newArea = areaCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+    
+    areaChange = round((newArea - baseArea)/baseArea * 100)
 
-    x1s[i] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
-    y1s[i] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
+    x1s[areaChange] = [x1] + [point[0] for point in lowerInterceptAveragePoints]
+    y1s[areaChange] = [y1] + [point[1] for point in lowerInterceptAveragePoints]
 
-    x2s[i] = [x2] + [point[0] for point in higherInterceptAveragePoints]
-    y2s[i] = [y2] + [point[1] for point in higherInterceptAveragePoints]
+    x2s[areaChange] = [x2] + [point[0] for point in higherInterceptAveragePoints]
+    y2s[areaChange] = [y2] + [point[1] for point in higherInterceptAveragePoints]
     
     if  method == "Method of Disks":
-      volumes[i] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[areaChange] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":
-      volumes[i] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[areaChange] = volumeProlateEllipsoidMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Bullet Method":
-      volumes[i] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+      volumes[areaChange] = volumeBulletMethod(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     
   return (volumes, x1s, y1s, x2s, y2s)

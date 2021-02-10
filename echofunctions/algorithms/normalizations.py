@@ -8,5 +8,5 @@ def normalizeDict(inputDict):
 
   for angle in inputDict:
     for i in range(len(inputDict[angle])):
-        inputDict[angle][i] -= shift
+      inputDict[angle][i] -= shift
   return inputDict

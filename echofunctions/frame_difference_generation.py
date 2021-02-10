@@ -1,5 +1,4 @@
-"""Finding the ES and ED frames based on
-max and min volume calculations, respectively"""
+"""Outputting frames with differences in true ESV frame index"""
 
 import pandas as pd
 from ast import literal_eval
@@ -59,12 +58,13 @@ def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, m
   os.makedirs(outputPath, exist_ok=True) # creates parent directory for storing frames
   os.makedirs(currentVideoPath, exist_ok=True) # creates folder for each video under parent directory
   
-  clipNumber, clipEnd = min([true_ES, true_ED]), max([true_ES, true_ED]) # clip start, clip end
-  
+  clipNumber, clipEnd = true_ES - 15, true_ES + 15 # clip start, clip end
+  outputFrameName = -15
+
   try:
     cap = cv2.VideoCapture(inputVideoPath)
     cap.set(clipNumber, clipEnd)
-      
+    
     while cap.isOpened():
       ret, frame = cap.read()
       
@@ -72,35 +72,13 @@ def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, m
       x1, y1, x2, y2 = 0, 0, 112, 112 # cropping coords and specs
       crop = frame[x1:x2, y1:y2]
         
-      cv2.imwrite(os.path.join(outputPath, videoName, str((clipNumber)) + ".jpg"), crop)
+      cv2.imwrite(os.path.join(outputPath, videoName, str((outputFrameName)) + ".jpg"), crop)
       clipNumber += 1
+      outputFrameName += 1
       if (clipNumber is clipEnd):
         cap.release()
         break
   except:
     failed_videos += 1
-  
-  # Calculate Volumes
-  for frame in os.listdir(os.path.join(outputPath, videoName)):
-    try:
-      framePath = os.path.join(outputPath, videoName, frame)
-      volumes, *_ = funcs.calculateVolumeMainAxisTopShift(framePath, 20, pointShifts=1, method=method) # 0th shift for regular volume
-      volumeDict[os.path.splitext(frame)[0]] = volumes[0]
-    
-    except:
-      continue
-  
-  return volumeDict, true_ES, true_ED
 
-def returnPeaks(videoName="0X1BDEEC24D5FC570C", inputFolderName="segmented-videos", outputFolderName="find_peaks", method="Method of Disks"):
-  try:
-    volumeDict, true_ES, true_ED = calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, method)
-    
-    v=list(volumeDict.values())
-    k=list(volumeDict.keys())
-
-    ED_index = k[v.index(max(v))]
-    ES_index = k[v.index(min(v))]
-  except:
-    ES_index, ED_index = 0, 0
-  return [int(ES_index), int(ED_index)], [true_ES, true_ED]
+calculateVolumesForEachFrame("0X1BDEEC24D5FC570C", "segmented-videos", "find_peaks", "Method of Disks")

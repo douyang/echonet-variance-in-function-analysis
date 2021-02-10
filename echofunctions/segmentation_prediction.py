@@ -60,24 +60,24 @@ else:
 model.eval()
 
 def segment(inp):
-    x = inp.transpose([2, 0, 1])  #  channels-first
-    x = np.expand_dims(x, axis=0)  # adding a batch dimension    
+  x = inp.transpose([2, 0, 1])  #  channels-first
+  x = np.expand_dims(x, axis=0)  # adding a batch dimension    
     
-    mean = x.mean(axis=(0, 2, 3))
-    std = x.std(axis=(0, 2, 3))
-    x = x - mean.reshape(1, 3, 1, 1)
-    x = x / std.reshape(1, 3, 1, 1)
-    
-    with torch.no_grad():
-        x = torch.from_numpy(x).type('torch.FloatTensor').to(device)
-        output = model(x)    
-    
-    y = output['out'].numpy()
-    y = y.squeeze()
-    
-    out = y>0
-    
-    mask = inp.copy()
-    mask[out] = np.array([0, 0, 255])
-    
-    return mask
+  mean = x.mean(axis=(0, 2, 3))
+  std = x.std(axis=(0, 2, 3))
+  x = x - mean.reshape(1, 3, 1, 1)
+  x = x / std.reshape(1, 3, 1, 1)
+
+  with torch.no_grad():
+    x = torch.from_numpy(x).type('torch.FloatTensor').to(device)
+    output = model(x)    
+
+  y = output['out'].numpy()
+  y = y.squeeze()
+
+  out = y>0
+
+  mask = inp.copy()
+  mask[out] = np.array([0, 0, 255])
+  
+  return mask

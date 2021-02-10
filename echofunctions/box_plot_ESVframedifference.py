@@ -16,57 +16,74 @@ import cv2
 from ast import literal_eval
 from tqdm import tqdm
 
-def sortFrameVolumeTracings():
-  _, df = loader.dataModules()
-  calculatedVolumeFromGroundTruth={}
+# Returns dictionary of calculated volumes from algorithm
+def calculateVolumesWithAlgorithm(method, inputFolderPath):
+  root, df = loader.dataModules()
+  calculatedData, failed_calculation = {}, 0
+
+  PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, inputFolderPath) # frames path
   
-  print("\nCalculatng ground truth volumes from VolumeTracings")
-  for i in tqdm(range(len(df))):
-    videoName = df.iloc[i, 0] + ".avi"
+  dataList = []
+  print("\nCalculating volumes for EDV frames for each given video")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
+    if (i % 2) is 0:
+      CSVData = {}
 
-    x1 = list(literal_eval(df.iloc[i, 2])) # x1 coords
-    y1 = list(literal_eval(df.iloc[i, 3])) # y1 coords
-    x2 = list(literal_eval(df.iloc[i, 4])) # x2 coords
-    y2 = list(literal_eval(df.iloc[i, 5])) # y2 coords
-    
-    number = len(x1) - 1
-
-    maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = tracings.calcParallelAndMaxPoints(x1, y1, x2, y2)
-
-    if number < 22:
-      ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
-      if videoName not in calculatedVolumeFromGroundTruth:
-        calculatedVolumeFromGroundTruth[videoName] = []
+      videoName = df.iloc[i, 0] + ".avi" # name of video
+      frameNumber = df.iloc[i, 1] # timing for clip
       
-      calculatedVolumeFromGroundTruth[videoName].append(ground_truth_volume)
-  return calculatedVolumeFromGroundTruth
+      # Finds EDV
+      frameIndices = df[df['FileName']==df.iloc[i, 0]]['Frame'].values
+      frameIndices = [int(i) for i in frameIndices]
 
-# Return dictionary of volume data from FileList
-def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
-  givenTrueDict={}
+      x1 = df[df['FileName']==df.iloc[i, 0]]['X1'].values
+      x2 = df[df['FileName']==df.iloc[i, 0]]['X2'].values
+      y1 = df[df['FileName']==df.iloc[i, 0]]['Y1'].values
+      y2 = df[df['FileName']==df.iloc[i, 0]]['Y2'].values
 
-  df = pd.read_csv(os.path.join(root, "FileList.csv"), ) # reading in FileList.csv
+      volumesDict = {}
+      for i in [0, 1]:
+        number = 20
+        frameNumber = frameIndices[i]
 
-  print("\nGathering volumes from FileList")
-  for i in tqdm(range(len(df))):
-    videoName = df.iloc[i, 0]
-    ground_truth_ESV = df.iloc[i, 2]
-    ground_truth_EDV = df.iloc[i, 3]
+        maxX1, maxY1, maxX2, maxY2, lowerInterceptAveragePoints, higherInterceptAveragePoints = tracings.calcParallelAndMaxPoints(list(literal_eval(x1[i])), list(literal_eval(y1[i])), list(literal_eval(x2[i])), list(literal_eval(y2[i])))
+        ground_truth_volume = funcs.volumeMethodOfDisks(maxX1, maxY1, maxX2, maxY2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
+        
+        volumesDict[frameNumber] = ground_truth_volume
 
-    if videoName not in givenTrueDict:
-      givenTrueDict[videoName] = []
-    
-    givenTrueDict[videoName] = [ground_truth_ESV, ground_truth_EDV]
+      ED = max(volumesDict.items(), key=operator.itemgetter(1))[0]
 
-  return givenTrueDict
+      ED_FRAME_FILENAME = videoName + "_" + str(ED) + ".png" # concatenate video name with frame number as file name
+
+      ED_FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, ED_FRAME_FILENAME) # path to each video
+      if os.path.exists(ED_FRAMES_PATH):
+        try:
+          ED_volumes, x1s, y1s, x2s, y2s = funcs.calculateVolumeErosionAndDilation(ED_FRAMES_PATH, 20, iterations=1, method=method)
+          if videoName not in calculatedData: # create sub-dictionary if video name not in dictionary
+            calculatedData[videoName] = {}
+
+          calculatedData[videoName] = ED_volumes[0] # add volumes for each shift
+
+          CSVData = {"Video Name": videoName, "EDV Volume": ED_volumes[0]}
+          dataList.append(CSVData)
+        except:
+          failed_calculation += 1 # if exception case, add 1 (each frame unable to be calculated)
+
+  df = pd.DataFrame(dataList) # convert to dataframe
+  export_path = os.path.join(config.CONFIG.DATA_DIR, "EDV Data.csv") # path to export
+
+  df.to_csv(export_path) # export to CSV
+  print(str(failed_calculation) + " were not able to be calculated") # total number of exception frames
+  
+  return calculatedData
 
 # Returns dictionary with calculated volumes (received from CSV)
-def getCalculationsFromCSV(CSV_NAME, frameDifference):
+def getCalculationsFromCSV(CSV_NAME, frameDifference=15):
   root, _ = loader.dataModules() # get path data
   calculatedVolumes = {}
 
   df = pd.read_csv(os.path.join(root, "CSVs", CSV_NAME)) # reading in CSV
-  df = df.astype(str).groupby(['videoName']).agg(','.join).reset_index() # group based on file name
+  df = df.astype(str).groupby(['Video Name']).agg(','.join).reset_index() # group based on file name
 
   print("\nGathering volumes from CSV calculations")
   for i in tqdm(range(len(df))): # iterates through each row of data frame
@@ -75,58 +92,69 @@ def getCalculationsFromCSV(CSV_NAME, frameDifference):
     
     for frame in range((frameDifference * 2) + 1):
       currentFrameDifference += 1
-      trueEDV = float(df.iloc[i, 2]) # ESV calculation
-      calculatedESV = float(df.iloc[i, frame + 3]) # ESV calculation
+      calculatedESV = float(df.iloc[i, frame + 2]) # ESV calculation
 
       if videoName not in calculatedVolumes:
         calculatedVolumes[videoName] = {}
       if currentFrameDifference not in calculatedVolumes[videoName]:
-        calculatedVolumes[videoName][currentFrameDifference] = [calculatedESV, trueEDV]
-    
+        calculatedVolumes[videoName][currentFrameDifference] = calculatedESV
+  
+  return calculatedVolumes
+
+# Returns dictionary with calculated EDV volumes (received from CSV)
+def returnEDVData():
+  root, _ = loader.dataModules() # get path data
+  calculatedVolumes = {}
+
+  df = pd.read_csv(os.path.join(root, "EDV Data.csv")) # reading in CSV
+
+  print("\nGathering volumes from CSV calculations")
+  for i in tqdm(range(len(df))): # iterates through each row of data frame
+    videoName = df.iloc[i, 1] # name of video
+    calculatedESV = float(df.iloc[i, 2]) # ESV calculation
+
+    calculatedVolumes[videoName] = calculatedESV
+
   return calculatedVolumes
 
 # Compare volumes using calculated erosion and dilation iterations against FileList or VolumeTracings
 def compareVolumePlot(CSV_NAME="esvTimingSweeps.csv", method="Method of Disks", volumeType="EF",
                       fromFile="VolumeTracings", frameDifference=5, root=config.CONFIG.DATA_DIR):
   
-  all_volumes = getCalculationsFromCSV(CSV_NAME, frameDifference)
+  zero_normal_EF = 0
 
-  if fromFile is "VolumeTracings":
-    true_volumes = sortFrameVolumeTracings()
-  else:
-    true_volumes = sortVolumesFromFileList()
+  ES_volumes = getCalculationsFromCSV(CSV_NAME)
+  ED_volumes = returnEDVData()
+  #ED_volumes = calculateVolumesWithAlgorithm(method, "frames")
 
   changesInVolumesDict = {}
-  for frame in range(-frameDifference, frameDifference + 1, 1):
-    changesInVolumesDict[frame] = []
 
-  for videoName in true_volumes:
-    volumeData = true_volumes[videoName]
+  for videoName in ES_volumes:
+    if videoName in ED_volumes:
+      normal_ESV = ES_volumes[videoName][0] # volumes of given iteration
+      normal_EDV = ED_volumes[videoName]
+      
+      normal_EF = (1 - (normal_ESV/normal_EDV)) * 100 # calculated EF for given iteration
 
-    ground_truth_ESV = min(volumeData) # true ESV value
-    ground_truth_EDV = max(volumeData) # true EDV value
-    ground_truth_EF = (1 - (ground_truth_ESV/ground_truth_EDV)) * 100 # true EF value (calculated)
+      if normal_EF != 0:
+        for r in range(-5, 6):
+          if r not in changesInVolumesDict:
+            changesInVolumesDict[r] = []
+          
+          #print(changesInVolumesDict)
+          ESV = ES_volumes[videoName][r] # volumes of given iteration
+          EF = (1 - (ESV/normal_EDV)) * 100 # calculated EF for given iteration
 
-    if videoName in all_volumes:
-      for r in range(-frameDifference, frameDifference + 1, 1):
-        volumes = all_volumes[videoName][r] # volumes of given iteration
+          diff_EF = ((EF - normal_EF)/normal_EF) * 100 # difference in calculated EF and true EF
 
-        EDV = volumes[1] # calculated EDV for given iteration
-        ESV = volumes[0] # calculated ESV for given iteration
-        EF = (1 - (ESV/ground_truth_EDV)) * 100 # calculated EF for given iteration
-        
-        diff_EF = ((EF - ground_truth_EF)/ground_truth_EF) * 100 # difference in calculated EF and true EF
-        diff_EDV = ((EDV-ground_truth_EDV)/ground_truth_EDV) * 100 # difference in calculated EDV and true EDV
-        diff_ESV = ((ESV-ground_truth_ESV)/ground_truth_ESV) * 100 # difference in calculated ESV and true ESV
-        
-        if volumeType is "EF":
-          changesInVolumesDict[r].append(diff_EF)
-        elif volumeType is "ESV":
-          changesInVolumesDict[r].append(diff_ESV)
-        elif volumeType is "EDV":
-          changesInVolumesDict[r].append(diff_EDV)
+          if volumeType is "EF" and diff_EF > -100:
+            changesInVolumesDict[r].append(diff_EF)
+      else:
+        zero_normal_EF += 1
 
-  print(changesInVolumesDict[10])
+  print(changesInVolumesDict.keys())
+  print(zero_normal_EF)
+  
   createBoxPlot(changesInVolumesDict, volumeType)
 
 # Create box plot by calling functions and graphing data
@@ -149,5 +177,5 @@ def createBoxPlot(differenceInVolumes, volumeType):
   # show plot
   plt.show()
 
-compareVolumePlot(CSV_NAME="esvTimingSweeps.csv", method="Method of Disks", volumeType="EF",
-                      fromFile="VolumeTracings", frameDifference=15)
+compareVolumePlot(CSV_NAME="Frame Differences from EDV Timing.csv", method="Method of Disks", volumeType="EF",
+                      fromFile="VolumeTracings", frameDifference=6)
