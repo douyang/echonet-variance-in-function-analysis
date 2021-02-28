@@ -93,4 +93,4 @@ def generateMasks(method="Method of Disks", testImages="all",
       cv2.imwrite(MASK_OUTPUT_PATH, image)
 
 generateMasks(method="Method of Disks", masksWithMoreThan21Lines="frames", inputFramesFolder="frames", shifts=15,
-              outputFramesFolder="Area Increase, Decrease", analysisType="Erosion and Dilation", testImages=30, sweepsOfMoreThan21Lines=False)
+              outputFramesFolder="Angle Change", analysisType="Angle Change", testImages=30, sweepsOfMoreThan21Lines=False)

@@ -40,7 +40,7 @@ def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, m
 
   root, df = loader.dataModules()
   volumeDict = {}
-  failed_videos = 0
+  failed_frames = 0
 
   frameIndices = df[df['FileName']==videoName]['Frame'].values
   frameIndices = [int(i) for i in frameIndices]
@@ -59,26 +59,27 @@ def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, m
   os.makedirs(outputPath, exist_ok=True) # creates parent directory for storing frames
   os.makedirs(currentVideoPath, exist_ok=True) # creates folder for each video under parent directory
   
-  clipNumber, clipEnd = min([true_ES, true_ED]), max([true_ES, true_ED]) # clip start, clip end
-  
-  try:
-    cap = cv2.VideoCapture(inputVideoPath)
-    cap.set(clipNumber, clipEnd)
+  # try:
+  #   cap = cv2.VideoCapture(inputVideoPath)
+    
+  #   length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+  #   clipNumber, clipEnd = 0, length - 1 # clip start, clip end
+  #   cap.set(clipNumber, clipEnd)
+    
+  #   while cap.isOpened():
+  #     ret, frame = cap.read()
       
-    while cap.isOpened():
-      ret, frame = cap.read()
+  #     # Crop
+  #     x1, y1, x2, y2 = 0, 0, 112, 112 # cropping coords and specs
+  #     crop = frame[x1:x2, y1:y2]
       
-      # Crop
-      x1, y1, x2, y2 = 0, 0, 112, 112 # cropping coords and specs
-      crop = frame[x1:x2, y1:y2]
-        
-      cv2.imwrite(os.path.join(outputPath, videoName, str((clipNumber)) + ".jpg"), crop)
-      clipNumber += 1
-      if (clipNumber is clipEnd):
-        cap.release()
-        break
-  except:
-    failed_videos += 1
+  #     cv2.imwrite(os.path.join(outputPath, videoName, str((clipNumber)) + ".jpg"), crop)
+  #     clipNumber += 1
+  #     if (clipNumber is clipEnd):
+  #       cap.release()
+  #       break
+  # except:
+  #   failed_frames += 1
   
   # Calculate Volumes
   for frame in os.listdir(os.path.join(outputPath, videoName)):
@@ -93,14 +94,14 @@ def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, m
   return volumeDict, true_ES, true_ED
 
 def returnPeaks(videoName="0X1BDEEC24D5FC570C", inputFolderName="segmented-videos", outputFolderName="find_peaks", method="Method of Disks"):
-  try:
-    volumeDict, true_ES, true_ED = calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, method)
-    
-    v=list(volumeDict.values())
-    k=list(volumeDict.keys())
 
-    ED_index = k[v.index(max(v))]
-    ES_index = k[v.index(min(v))]
-  except:
-    ES_index, ED_index = 0, 0
+  volumeDict, true_ES, true_ED = calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, method)
+  
+  v=list(volumeDict.values())
+  k=list(volumeDict.keys())
+
+  ED_index = k[v.index(max(v))]
+  ES_index = k[v.index(min(v))]
+
   return [int(ES_index), int(ED_index)], [true_ES, true_ED]
+  

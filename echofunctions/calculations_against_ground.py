@@ -10,7 +10,7 @@ import config
 import loader
 from algorithms import funcs as funcs
 from algorithms import volume_tracings_calculations as tracings
-import tqdm
+from tqdm import tqdm
 
 def sortVolumesFromAlgo(frames_path, method):
 

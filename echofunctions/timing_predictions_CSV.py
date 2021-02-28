@@ -1,5 +1,4 @@
-"""Create CSV for timing data (true frame, predicted
-frames, calculated volume for that frame, etc.)"""
+"""Create CSV for timing data (true frame and predicted frames)"""
 
 import pandas as pd
 import os
@@ -28,8 +27,8 @@ def gatherTimingPredictions(inputFolder, outputFolder, CSVName):
     videoData = {"Video Name": videoName, "Predicted ESV": ES_frame, "Predicted EDV": ED_frame,
                 "True ESV": true_ES_frame, "True EDV": true_ED_frame}
   
-  dataList.append(videoData) # add the sub-dictionaries (each video)
-      
+    dataList.append(videoData) # add the sub-dictionaries (each video)
+    
   df = pd.DataFrame(dataList) # convert to dataframe
   export_path = os.path.join(root, CSVName) # path to export
 

@@ -82,7 +82,7 @@ def getCalculationsFromCSV(CSV_NAME, frameDifference=15):
   root, _ = loader.dataModules() # get path data
   calculatedVolumes = {}
 
-  df = pd.read_csv(os.path.join(root, "CSVs", CSV_NAME)) # reading in CSV
+  df = pd.read_csv(os.path.join(root, "Intermediaries", CSV_NAME)) # reading in CSV
   df = df.astype(str).groupby(['Video Name']).agg(','.join).reset_index() # group based on file name
 
   print("\nGathering volumes from CSV calculations")
@@ -106,7 +106,7 @@ def returnEDVData():
   root, _ = loader.dataModules() # get path data
   calculatedVolumes = {}
 
-  df = pd.read_csv(os.path.join(root, "EDV Data.csv")) # reading in CSV
+  df = pd.read_csv(os.path.join(root, "Intermediaries/EDV Data.csv")) # reading in CSV
 
   print("\nGathering volumes from CSV calculations")
   for i in tqdm(range(len(df))): # iterates through each row of data frame
@@ -163,7 +163,7 @@ def createBoxPlot(differenceInVolumes, volumeType):
   # figure related code
   loader.latexify()
   fig, ax = plt.subplots()
-  ax.boxplot(differenceInVolumes.values(), showfliers=False)
+  ax.boxplot(differenceInVolumes.values(), showfliers=True)
   ax.set_xticklabels(differenceInVolumes.keys())
   
   #ax.set_title('Difference in Calculated ' + volumeType + ' against ' + fromFile + ' using Erosion and Dilation')

@@ -55,7 +55,7 @@ def getCalculationsFromCSV(sweeps):
   root, _ = loader.dataModules() # get path data
   calculatedVolumes = {}
 
-  df = pd.read_csv(os.path.join(root, "Intermediaries/Angle Shift Volume Data.csv")) # reading in CSV
+  df = pd.read_csv(os.path.join(root, "Intermediaries/Angle Shift.csv")) # reading in CSV
   df = df.astype(str).groupby(['Video Name']).agg(','.join).reset_index() # group based on file name
 
   print("\nGathering data from CSV")
@@ -128,6 +128,8 @@ def sortVolumesFromFileList(root=config.CONFIG.DATA_DIR):
 
 # Compare volumes from calculations against true volumes
 def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, sweeps, useCSV, root=config.CONFIG.DATA_DIR):
+  
+  dataList = []
   if useCSV == True:
     all_volumes = getCalculationsFromCSV(sweeps)
   
@@ -162,7 +164,7 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
           #EDV = max(volumes) # calculated EDV value
           EDV = max(all_volumes[videoName][0][0]) # zeroth EDV (keep constant)
           ESV = min(volumes) # calculated ESV value
-          EF = (1 - (ESV/EDV)) * 100 # calculated EF value
+          EF = (1 - (ESV/normal_EDV)) * 100 # calculated EF value
 
           EDV_anglechange = angleChanges[volumes.index(max(volumes))] # EDV angle change
           ESV_anglechange = angleChanges[volumes.index(min(volumes))] # ESV angle change
@@ -177,6 +179,9 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
               changesInVolumesDict[int(EF_anglechange)] = [] # create empty array in dictionary
             
             changesInVolumesDict[int(EF_anglechange)].append(diff_EF) # add difference in EF
+
+            volumesWithRotations = {"Video Name": videoName, "EF Change (Percent)": diff_EF, "Degree of Rotation": ESV_anglechange, "ESV": ESV, "Normal EDV": normal_EDV, "Calculated EF": EF}
+            dataList.append(volumesWithRotations)
             
           elif volumeType == "ESV":
             if int(ESV_anglechange) not in changesInVolumesDict:
@@ -200,6 +205,11 @@ def compareVolumePlot(inputFolder, method, volumeType, fromFile, normalized, swe
       for i in range(len(changesInVolumesDict[angle])):
         changesInVolumesDict[angle][i] -= shift
   
+  df = pd.DataFrame(dataList) # convert to dataframe
+  export_path = os.path.join(config.CONFIG.DATA_DIR, "Angle Shift EF Change.csv") # path to export
+
+  df.to_csv(export_path) # export to CSV
+
   return changesInVolumesDict
 
 def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disks", volumeType="EF",

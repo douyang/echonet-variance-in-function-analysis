@@ -165,7 +165,7 @@ def createBoxPlot(inputFolder="Masks_From_VolumeTracing", method="Method of Disk
     ax.set_ylabel('% Change in Ejection Fraction')
 
   ax.set_xticklabels(labels)
-
+  
   # show plot
   plt.show()
 
