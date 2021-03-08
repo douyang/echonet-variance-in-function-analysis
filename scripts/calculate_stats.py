@@ -13,16 +13,16 @@ from sklearn.metrics import mean_absolute_error
 def returnXAndYList():
 
   x, y = [], []
-  df = pd.read_csv("/Users/ishan/Documents/Stanford/EchoData/Standard Volume Data.csv") # reading in CSV
+  df = pd.read_csv("/Users/ishan/Documents/Stanford/EchoData/Base Volume Data.csv") # reading in CSV
 
   for i in tqdm(range(len(df))): # iterates through each row of data frame
-    EF = df.iloc[i, 2] # calculated EF
-    ESV = df.iloc[i, 3] # calculated ESV
-    EDV = df.iloc[i, 4] # calculated EDV
+    EF = df.iloc[i, 6] # calculated EF
+    ESV = df.iloc[i, 7] # calculated ESV
+    EDV = df.iloc[i, 8] # calculated EDV
 
-    true_EF = df.iloc[i, 5] # true EF
-    true_ESV = df.iloc[i, 6] # true ESV
-    true_EDV = df.iloc[i, 7] # true EDV
+    true_EF = df.iloc[i, 3] # true EF
+    true_ESV = df.iloc[i, 4] # true ESV
+    true_EDV = df.iloc[i, 5] # true EDV
 
     x.append(EF)
     y.append(true_EF)

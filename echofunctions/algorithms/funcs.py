@@ -8,10 +8,19 @@ def obtainContourPoints(path):
   # read image
   img = cv2.imread(path)
   rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+  #rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
 
   # set lower and upper bounds on blue color
-  lower = (0,0,100)
-  upper = (50,50,255)
+  # lower = (0,0,100)
+  # upper = (50,50,255)
+
+  #Red
+  # lower = (0, 0, 220)
+  # upper = (100, 100, 255)
+
+  # White
+  lower = (200,200,200)
+  upper = (255,255,255)
   
   # threshold and invert so hexagon is white on black background
   thresh = cv2.inRange(rgb, lower, upper)
@@ -29,12 +38,14 @@ def obtainContourPoints(path):
   
   return points
 
+
 # Gets all the eroded contours for certain image
 def obtainErodedContourPoints(path, iterations):
   # read image
   img = cv2.imread(path)
-  rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
+  #rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+  rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+  
   # set lower and upper bounds on blue color
   lower = (0,0,100)
   upper = (50,50,255)
@@ -62,7 +73,8 @@ def obtainErodedContourPoints(path, iterations):
 def obtainDilatedContourPoints(path, iterations):
   # read image
   img = cv2.imread(path)
-  rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+  #rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+  rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
 
   # set lower and upper bounds on blue color
   lower = (0,0,100)
@@ -91,7 +103,6 @@ def getIdealPointGroup(points):
   pointGroups = []
   index = 0
   subgroup = [points[0]]
-
 
   for i in range(len(points) - 1):
     prevPoint = points[i]
@@ -308,7 +319,6 @@ def areaCalc(x1, y1, x2, y2, lowerInterceptAveragePoints, higherInterceptAverage
     area += diskArea
 
   return area
-
 
 def findCorrespondingMaskPoints(weighted_avg, lowerIntercept, higherIntercept, x1, y1, x2, y2, slope, i):
   # Calculate perpendicular slope
@@ -720,7 +730,7 @@ def calculateVolumeErosionAndDilation(path, number, iterations = 5, method = "Me
 
     x2s[areaChange] = [x2] + [point[0] for point in higherInterceptAveragePoints]
     y2s[areaChange] = [y2] + [point[1] for point in higherInterceptAveragePoints]
-    
+
     if  method == "Method of Disks":
       volumes[areaChange] = volumeMethodOfDisks(x1, y1, x2, y2, number, lowerInterceptAveragePoints, higherInterceptAveragePoints)
     elif method == "Prolate Ellipsoid":

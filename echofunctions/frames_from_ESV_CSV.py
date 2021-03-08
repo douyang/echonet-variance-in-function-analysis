@@ -21,7 +21,7 @@ def exportTimingsCSV(inputFolderName="ESV_sweeps",
   
   dataList, exception_files = [], 0
 
-  df = pd.read_csv(os.path.join(root, "Frame Timing Predictions.csv")) # reading in CSV
+  df = pd.read_csv(os.path.join(root, "Frame Predictions.csv")) # reading in CSV
 
   for i in tqdm(range(len(df))): # iterates through each row of data frame
     frameNumber = -16
@@ -41,15 +41,16 @@ def exportTimingsCSV(inputFolderName="ESV_sweeps",
     for frame in range(frameDeviationStart, frameDeviationEnd):
       frameNumber += 1
       frame_path = os.path.join(folder_path, str(frame) + ".jpg")
+
       frameVolumes = {}
 
       try:
-        volumes, x1, y1, x2, y2 = funcs.calculateVolumeErosionAndDilation(frame_path, 20, iterations=1, method="Method of Disks")
+        volumes, x1, y1, x2, y2 = funcs.calculateVolumeMainAxisTopShift(frame_path, 20, pointShifts=1, method="Method of Disks")
         frameVolumes[frameNumber] = volumes[0]
         
         frameVolumes = {key:value for key, value in sorted(frameVolumes.items(), key=lambda item: int(item[0]))} # sorting numerically
         videoDict.update(frameVolumes)
-        
+      
       except:
         exception_files += 1
         print(videoName, frame)
@@ -61,4 +62,4 @@ def exportTimingsCSV(inputFolderName="ESV_sweeps",
 
   df.to_csv(export_path) # export to CSV
 
-exportTimingsCSV(inputFolderName="find_peaks", fileName="Frame Differences from EDV Timing.csv")
+exportTimingsCSV(inputFolderName="find-peaks", fileName="Frame Differences from EDV Timing.csv")

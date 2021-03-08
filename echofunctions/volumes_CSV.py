@@ -117,7 +117,7 @@ def exportCSV(root=config.CONFIG.DATA_DIR, pathToFrames="frames", method="Method
         EF = (1 - (ESV/EDV)) * 100
         
         if EF != 0 and ground_truth_EF != 0 and abs((EF - ground_truth_EF)) < 5:
-          calculatedData = {"Video Name": videoName, "Split": split, "EF": EF, "Human Tracings EF": EF,
+          calculatedData = {"Video Name": videoName, "EF": EF, "Human Tracings EF": EF,
                             "Human Tracings ESV": ESV, "Human Tracings EDV": EDV}
           dataList.append(calculatedData)
   

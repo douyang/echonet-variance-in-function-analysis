@@ -22,12 +22,12 @@ def calculateVolumesWithAlgorithm(method, inputFolderPath, task):
   
   print("\nCalculating volumes for both frames for each given video")
   
-  df = pd.read_csv(os.path.join(root, "Frame Timing Predictions.csv")) # reading in CSV
+  df = pd.read_csv(os.path.join(root, "Frame Predictions.csv")) # reading in CSV
 
   for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = os.path.splitext(df.iloc[i, 1])[0] # name of video
     ESV_frame = df.iloc[i, 2] # ESV timing
-    EDV_frame = df.iloc[i, 3] # ESV timing
+    EDV_frame = df.iloc[i, 3 ] # ESV timing
 
     ES_FRAME_FILENAME = str(ESV_frame) + ".jpg" # concatenate video name with frame number as file name
     ED_FRAME_FILENAME = str(EDV_frame) + ".jpg" # concatenate video name with frame number as file name
@@ -35,9 +35,10 @@ def calculateVolumesWithAlgorithm(method, inputFolderPath, task):
     ES_FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, videoName, ES_FRAME_FILENAME) # path to each video
     ED_FRAMES_PATH = os.path.join(PATH_TO_RAW_FRAMES_PARENT_DIR, videoName, ED_FRAME_FILENAME) # path to each video
     
-    if os.path.exists(ES_FRAMES_PATH):
+    if os.path.exists(ES_FRAMES_PATH) and os.path.exists(ED_FRAMES_PATH):
       try:
-        ED_volumes, *_ = funcs.calculateVolumeErosionAndDilation(ED_FRAMES_PATH, 20, iterations=1, method=method)
+        ED_volumes, *_ = funcs.calculateVolumeMainAxisTopShift(ED_FRAMES_PATH, 20, pointShifts=1, method=method)
+
         if task == "Erosion and Dilation":
           ES_volumes, *_ = funcs.calculateVolumeErosionAndDilation(ES_FRAMES_PATH, 20, iterations=5, method=method)
 
@@ -111,5 +112,5 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName="
 
   df.to_csv(export_path) # export to CSV
 
-compareVolumePlot(method="Method of Disks", inputFolderPath="find_peaks", fileName="Angle Shift.csv",
+compareVolumePlot(method="Method of Disks", inputFolderPath="find-peaks", fileName="Angle Shift.csv",
                   task="Angle Shift")
