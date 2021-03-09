@@ -1,5 +1,10 @@
 ## EchoNet Function Evaluation:<br/>Quantifying Model Variation in Assessing Cardiac Function
 
+An automated end-to-end pipeline for  
+1) assessing cardiac function
+2) quantifying error in left ventricular ejection fraction calculation with slight clinical perturbations
+
+
 ## Examples
 We show examples of our different systematic variation of cardiac function assessment. The error opportunities showcased are over/under tracing of the left ventricle, rotations of main longitudinal axis, foreshortened apex and mitral valve annulus level foreshortening. No human tracings for these patients were used.
 
