@@ -1,4 +1,8 @@
-# EchoNet Function Evaluation
+# EchoNet Function Evaluation: Quantifying Model Variation in Assessing Cardiac Function
+
+## Examples
+We show examples of our different systematic variation of cardiac function assessment. The error opportunities showcased are over/under tracing of the left ventricle, rotations of main longitudinal axis, foreshortened apex and mitral valve annulus level foreshortening. No human tracings for these patients were used.
+
 
 ## Installation
 First, clone this repository and enter the directory by running:
@@ -9,20 +13,21 @@ cd echonet-function-evaluation
 
 EchoNet-Function-Evaluation is implemented for Python 3, and depends on the following packages:
 * NumPy
-* Matplot Lib
+* Matplotlib
 * Pandas
 * OpenCV
 * Pillow
 * SciPy
+* tqdm
 
 The dependencies can be installed by navigating to the cloned directory and running:
 ```
-pip install -r requirements.txt
+pip install --user .
 ```
 
 ## Usage
 ### Setting Path to Data
-By default, EchoNet-Function-Evaluation assumes that a copy of the data is saved in a folder named ```EchoData/``` in this directory. This path can be changed by setting an absolute path in the file named ```data.cfg``` (an example is given in the file already).
+By default, the pipeline assumes that a copy of the data is saved in a folder named ```EchoData/``` in this directory. This path can be changed by setting an absolute path in the file named ```data.cfg``` (an example is given in the file already).
 
 ### Running Code
 In order to fully utilize the evaluation pipeline, it is essential to create the necessary frames from the segmented videos generated from Echonet. To adequately perform such a task, we have a ```mask.py``` script. The script locates all of the videos from the data repository, and it creates the necessary frames from ```VolumeTracings.csv```.
