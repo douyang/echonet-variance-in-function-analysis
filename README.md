@@ -4,6 +4,8 @@ An automated end-to-end pipeline for
 1) assessing cardiac function
 2) quantifying error in left ventricular ejection fraction calculation with slight clinical perturbations
 
+## Dataset
+We simulated errors and ran calculations on 10,032 echocardiogram images which were gathered from EchoNet-Dynamic (https://echonet.github.io/dynamic/)
 
 ## Examples
 We show examples of our different systematic variation of cardiac function assessment. The error opportunities showcased are over/under tracing of the left ventricle, rotations of main longitudinal axis, foreshortened apex and mitral valve annulus level foreshortening. No human tracings for these patients were used.
