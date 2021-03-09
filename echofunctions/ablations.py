@@ -66,15 +66,28 @@ def calculateVolumesWithAlgorithm(method, inputFolderPath, task):
       except:
         failed_calculation += 1 # if exception case, add 1 (each frame unable to be calculated)
 
-  print(str(failed_calculation) + " were not able to be calculated") # total number of exception frames
+  print(str(failed_calculation) + " frames were not able to be calculated") # total number of exception frames
   
   return calculatedData
 
 # Compare volumes from FileList against calculations
-def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName="angleSweeps.csv",
-                      task="Erosion and Dilation"):
+def exportCSV(inputFolderPath=None, fileName="angleSweeps.csv", task="Erosion and Dilation"):
+  """Exports CSV with left ventricle volumetric data with ablations
+    Args:
+        inputFolder (str): Input folder containing segmented frames of echo chamber
+        fileName (str): preferred file name for exported CSV
+        task (str): the type of tasks to use are,
+            ``Erosion and Dilation'', ``Angle Shift'', ``Main Axis Top Shift'', ``Main Axis Bottom Shift''
+          Can also be a list to output a tuple with all specified target types.
+          The tasks represent:
+            ``Erosion and Dilation'' (string): over and under tracing the left ventricle
+            ``Angle Shift'' (string): slight rotations in the main axis longitudinal line
+            ``Main Axis Top Shift'' (string): main axis foreshortening from apex
+            ``Main Axis Bottom Shift'' (string): mitral valve annulus level error
+          Defaults to Erosion and Dilation
+    """
   
-  calculatedData = calculateVolumesWithAlgorithm(method, inputFolderPath, task) # dictionary of all different coords
+  calculatedData = calculateVolumesWithAlgorithm("Method of Disks", inputFolderPath, task) # dictionary of all different coords
 
   dataList = []
   for videoName in calculatedData:
@@ -111,6 +124,3 @@ def compareVolumePlot(method="Method of Disks", inputFolderPath=None, fileName="
   export_path = os.path.join(config.CONFIG.DATA_DIR, fileName) # path to export
 
   df.to_csv(export_path) # export to CSV
-
-compareVolumePlot(method="Method of Disks", inputFolderPath="find-peaks", fileName="Angle Shift.csv",
-                  task="Angle Shift")
