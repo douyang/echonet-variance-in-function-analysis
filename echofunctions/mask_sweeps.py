@@ -91,6 +91,3 @@ def generateMasks(method="Method of Disks", testImages="all",
       cv2.line(image, longLine1stCoords, longLine2ndCoords, (31, 55, 145), 2) # Drawing the perpendicular/long line in different color
 
       cv2.imwrite(MASK_OUTPUT_PATH, image)
-
-generateMasks(method="Method of Disks", masksWithMoreThan21Lines="frames", inputFramesFolder="frames", shifts=15,
-              outputFramesFolder="Angle Change", analysisType="Angle Change", testImages=30, sweepsOfMoreThan21Lines=False)
