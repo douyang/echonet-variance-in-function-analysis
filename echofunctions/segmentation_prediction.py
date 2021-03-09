@@ -60,6 +60,14 @@ else:
 model.eval()
 
 def segment(inp):
+  """Uses pre-trained weights from EchoNet-Dynamic to
+    create segmentation of left ventricular region
+  Args:
+    inp (arr): array object of image to segment
+  Returns:
+    None
+  """
+
   x = inp.transpose([2, 0, 1])  #  channels-first
   x = np.expand_dims(x, axis=0)  # adding a batch dimension    
     

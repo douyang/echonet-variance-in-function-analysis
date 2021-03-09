@@ -6,11 +6,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ast import literal_eval
 import os
-import mask
 import config
 import loader
 from algorithms import funcs
-import tqdm
+from tqdm import tqdm
 
 # Capture and Make Frames + Crop
 def sortFrameVolumes1(method):
@@ -20,7 +19,7 @@ def sortFrameVolumes1(method):
 
   PATH_TO_RAW_FRAMES_PARENT_DIR = os.path.join(root, "frames") # frames path
   
-  print("Calculating volumes using second method..")
+  print("Calculating volumes using first method..")
   for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 0] # name of video
     frameNumber = df.iloc[i, 1] # timing for clip

@@ -48,19 +48,27 @@ The pipeline has two main tasks: assessing cardiac function and quantifying vari
 ```
 cmd="import echofunctions; echofunctions.timing_predictions_CSV.gatherTimingPredictons(inputFolder=\"Videos-Segmented\",
                                                             outputFolder=\"all_frames\", 
-                                                            outputCSVName=\"Frame Timing Predictions.csv\")"
+                                                            outputCSVName=\"Frame Timing Predictions.csv\",
+                                                            createFrames=False)"
 python3 -c "${cmd}"
 ```
-We offer a solution to finding the appropriate end-systolic and end-diastolic timings from a given segmented echocardiogram video.
+We offer a solution to finding the appropriate end-systolic and end-diastolic timings from a given segmented echocardiogram video. The above command will output individual frames of each video in the dataset to a folder. It will also create a CSV with the cardiac timing predictions of the pipeline and of human assessment for reference. 
 
-#### Capturing and Creating Frames
+#### Outputting Frames
 ```
-cmd="import echofunctions; echofunctions.mask.generateMasks(method=\"Simpson\",
-                                                      createRawFrames=True)"
+cmd="import echofunctions; echofunctions.mask.generateMasks(segmentedFramesFolder=\"red_frames\",
+                                                      outputMasksPath=\"algorithm_masks\")"
 python3 -c "${cmd}"
 ```
+This will output the appropriate frames of each video from a given CSV that contains the end-systolic and end-diastolic timings. 
 
-This creates two directories named ```frames/``` and ```masks/```, which will contain the raw frames and the masked images from the pipeline, respectively.
+#### Creating Masks
+```
+cmd="import echofunctions; echofunctions.mask.generateMasks(segmentedFramesFolder=\"red_frames\",
+                                                      outputMasksPath=\"algorithm_masks\")"
+python3 -c "${cmd}"
+```
+This will create a visual representation of the volumetric calculation for each segmented image in a given folder. The masks will be outputted to any preferred folder.
 
 #### Calculated Timing against Ground Truth
 ```
