@@ -47,7 +47,8 @@ The pipeline has two main tasks: assessing cardiac function and quantifying vari
 #### Predicting Cardiac Timings
 ```
 cmd="import echofunctions; echofunctions.timing_predictions_CSV.gatherTimingPredictons(inputFolder=\"Videos-Segmented\",
-                                                            outputFolder=\"all_frames\", outputCSVName=\"Frame Timing Predictions.csv\")"
+                                                            outputFolder=\"all_frames\", 
+                                                            outputCSVName=\"Frame Timing Predictions.csv\")"
 python3 -c "${cmd}"
 ```
 We offer a solution to finding the appropriate end-systolic and end-diastolic timings from a given segmented echocardiogram video.
