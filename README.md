@@ -77,3 +77,9 @@ cmd="import echofunctions; echofunctions.ablations.exportCSV(inputFolderName=\"r
 python3 -c "${cmd}"
 ```
 There are various ablations that can be run to systematically mimic and quanity left ventricular ejection fraction in clinical procedures. This script will run ablations on a set of images in a folder and export a CSV with the volumetric data with the ablations. 
+
+#### Generating Plots
+The final analyses can be run with the various scripts provided in the folder named ```scripts```. These scripts will utilize the results from ```ablations.csv``` and create visuals. Different statistics can also be calculated from the standard volume data in ```Base Volume.csv``` to assess the accuracy of the end-to-end pipeline.  
+
+### Mask Sweeps
+The full visuals of the ablations can be outputted by sweeping through segmented images in a given folder. The ```mask_sweeps.py``` script will create generate frames with example images of each of the ablations.
