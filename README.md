@@ -72,8 +72,8 @@ This will create a visual representation of the volumetric calculation for each 
 #### Running Ablations
 ```
 cmd="import echofunctions; echofunctions.ablations.exportCSV(inputFolderName=\"red_frames\", 
-fileName=\"ablations.csv\",
-task=\"Angle Shift\")"
+                                                            fileName=\"ablations.csv\",
+                                                            task=\"Angle Shift\")"
 python3 -c "${cmd}"
 ```
 There are various ablations that can be run to systematically mimic and quanity left ventricular ejection fraction in clinical procedures. This script will run ablations on a set of images in a folder and export a CSV with the volumetric data with the ablations. 
