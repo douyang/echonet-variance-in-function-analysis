@@ -5,8 +5,8 @@ We show examples of our different systematic variation of cardiac function asses
 
 | Normal Tracing | Over/Under Tracing | Angle Rotations | Main Axis Foreshortening |
 |---------------------------------| ----------------------------------   | -------------------------------- | ------------------------------ |
-| ![](docs/media/Normal.png) | ![](docs/media/Overtrace.png) | ![](docs/media/PositiveAngle) | ![](docs/media/Top.png) |
-|                                              | ![](docs/media/Undertrace.png) | ![](docs/media/NegativeAngle ) | ![](docs/media/Bottom.png) |
+| ![](docs/media/Normal.png) | ![](docs/media/Overtrace.png) | ![](docs/media/PositiveAngle.png) | ![](docs/media/Top.png) |
+|                                              | ![](docs/media/Undertrace.png) | ![](docs/media/NegativeAngle.png) | ![](docs/media/Bottom.png) |
 
 
 ## Installation
