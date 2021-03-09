@@ -26,7 +26,7 @@ def getCalculationsFromCSV(sweeps):
   for i in tqdm(range(len(df))): # iterates through each row of data frame
     videoName = df.iloc[i, 1] # name of video
     
-    for x in range((sweeps * 2) + 1):
+    for x in range((10 * 2) + 1):
       sweep = list(literal_eval((df.iloc[i, 2])))[x] # degree change
       ESV_angleshift = float(list(literal_eval((df.iloc[i, 3])))[x]) # ESV shift
       EDV_angleshift = float(list(literal_eval((df.iloc[i, 4])))[x]) # EDV shift
@@ -62,7 +62,6 @@ def createBoxPlot(method="Method of Disks", volumeType="EF", normalized=True, sw
 
   for videoName in results: # iterate through each video from true volumes dictionary
     volumeData = results[videoName] # get volumes from dictionary
-
     normal_ESV = min(volumeData[0][0]) # base ESV
     normal_EDV = max(volumeData[0][0]) # base EDV
     normal_EF = (1 - (normal_ESV/normal_EDV)) * 100 # base EF
@@ -73,8 +72,8 @@ def createBoxPlot(method="Method of Disks", volumeType="EF", normalized=True, sw
       if len(angleChanges) > 1:
         volumes = volumeData[sweep][0] # calculated volumes
        
-        ESV = min(volumes[0]) # given ESV
-        EDV = max(volumes[0]) # given EDV
+        ESV = min(volumes) # given ESV
+        EDV = max(volumes) # given EDV
         EF = (1 - (ESV/normal_EDV)) * 100 # given EF
 
         EDV_anglechange = angleChanges[volumes.index(max(volumes))] # EDV angle change
@@ -156,12 +155,10 @@ def createBoxPlot(method="Method of Disks", volumeType="EF", normalized=True, sw
   
   print("Normalized: " + str(normalized))
   print("Volume Type: " + str(volumeType))
-  print("Comparison with: " + str(fromFile))
   print("Average Error: " + str(averageError))
   print("Sweeps: " + str(sweeps))
 
   # figure related code
-  loader.latexify() # latexify the graphs
   fig = plt.figure(figsize=(12, 8)) # create plt figure
   #plt.title(volumeType + " Volumes with Angle Shift against Volume Tracings' Coordinates") # set title
   plt.xticks(fontsize=8)
@@ -177,7 +174,6 @@ def createBoxPlot(method="Method of Disks", volumeType="EF", normalized=True, sw
   ax.set_xticklabels(labels, Rotation=90)
   
   # show plot
-  plt.savefig("./figures/paperBoxPlots/" + volumeType + ".png", bbox_inches='tight')
   plt.show()
 
 createBoxPlot(method="Method of Disks", volumeType="EF", normalized=True, sweeps=2)
