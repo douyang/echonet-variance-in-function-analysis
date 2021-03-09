@@ -1,5 +1,5 @@
-"""Making ground truth masks from coordinates given 
-in VolumeTracings.csv"""
+"""Making binary masks from 
+coordinates given in VolumeTracings.csv"""
 
 import pathlib
 import os

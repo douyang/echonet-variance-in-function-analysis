@@ -1,3 +1,5 @@
+"""Calculates volumes from human tracings' coordinates"""
+
 def calcParallelAndMaxPoints(x1, y1, x2, y2):
   slopes, lowerInterceptAveragePoints, higherInterceptAveragePoints = [], [], []
   k = 0

@@ -9,30 +9,30 @@ import loader
 import cv2
 from tqdm import tqdm
 
-def exportFrames():
+def exportFrames(segmentedVideosFolder="Videos-Segmented", outputFolder="red_frames"):
+  """Function to create outputs of appropriate frames from a given folder of segmented videos
+  Args:
+      segmentedVideosFolder (str): Folder containing the segmented videos
+  Returns:
+      None
+  """
+
   root, _ = loader.dataModules()
   df = pd.read_csv(os.path.join(root, "Frame Predictions.csv")) # reading in CSV
-
-  count = 0
-  total_vids = 0
   
-  print("Exporting frames")
+  print("\nExporting frames")
   for i in tqdm(range(len(df))):
-    total_vids+=1
     try:
       videoName = df.iloc[i, 1]
       ESV_frame = int(df.iloc[i, 4])
       EDV_frame = int(df.iloc[i, 5])
 
-      videoPath = os.path.join(root, "Videos-Segmented", videoName)
-      ESV_crop = loader.READ_AND_CROP_FRAME(videoPath, ESV_frame)
-      EDV_crop = loader.READ_AND_CROP_FRAME(videoPath, EDV_frame)
-      
-      cv2.imwrite(os.path.join(root, "frames", videoName + "_" + str(ESV_frame) + ".png"), ESV_crop)
-      cv2.imwrite(os.path.join(root, "frames", videoName + "_" + str(EDV_frame) + ".png"), EDV_crop)
-    except:
-     count+=1
-  print(count)
-  print(total_vids)
+      videoPath = os.path.join(root, segmentedVideosFolder, videoName)
 
-exportFrames()
+      ESV_crop = loader.READ_AND_CROP_FRAME(videoPath, ESV_frame) # crop of ESV frame
+      EDV_crop = loader.READ_AND_CROP_FRAME(videoPath, EDV_frame) # crop of EDV frame
+      
+      cv2.imwrite(os.path.join(root, outputFolder, videoName + "_" + str(ESV_frame) + ".png"), ESV_crop)
+      cv2.imwrite(os.path.join(root, outputFolder, videoName + "_" + str(EDV_frame) + ".png"), EDV_crop)
+    except:
+     print("Failed to export " + videoName)

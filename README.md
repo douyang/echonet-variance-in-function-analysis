@@ -56,8 +56,7 @@ We offer a solution to finding the appropriate end-systolic and end-diastolic ti
 
 #### Outputting Frames
 ```
-cmd="import echofunctions; echofunctions.mask.generateMasks(segmentedFramesFolder=\"red_frames\",
-                                                      outputMasksPath=\"algorithm_masks\")"
+cmd="import echofunctions; echofunctions.create_frames.exportFrames(segmentedVideosFolder=\"red_frames\")"
 python3 -c "${cmd}"
 ```
 This will output the appropriate frames of each video from a given CSV that contains the end-systolic and end-diastolic timings. 
@@ -69,19 +68,3 @@ cmd="import echofunctions; echofunctions.mask.generateMasks(segmentedFramesFolde
 python3 -c "${cmd}"
 ```
 This will create a visual representation of the volumetric calculation for each segmented image in a given folder. The masks will be outputted to any preferred folder.
-
-#### Calculated Timing against Ground Truth
-```
-cmd="import echofunctions; echofunctions.timings_against_ground.compareVolumePlot(method=\"Simpson\",
-                                                                                    timing="EF")"
-python3 -c "${cmd}"
-```
-This will open and display a plot that will show a scatter plot comparison of the calculated selected timing against ground truth for a given selected method of choice. One can save the plot to their local directory or experiment with matplotlib's GUI.
-
-#### Calculated Method Against Method
-```
-cmd="import echofunctions; echofunctions.method_against_method.compareVolumePlot(method1=\"Simpson\", method2=\"Biplane Area\",
-                                                                                 timing="EF")"
-python3 -c "${cmd}"
-```
-This will open and display a plot that will show a scatter plot comparison of the calculated selected timing using the first method against the second method for a given selected timing of choice. One can save the plot to their local directory or experiment with matplotlib's GUI.
