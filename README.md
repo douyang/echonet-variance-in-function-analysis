@@ -46,7 +46,7 @@ The pipeline has two main tasks: assessing cardiac function and quantifying vari
 
 #### Predicting Cardiac Timings
 ```
-cmd="import echofunctions; echofunctions.timing_predictions_CSV.gatherTimingPredictons(inputFolder=\"Videos-Segmented\",
+cmd="import echofunctions; echofunctions.timing_predictions.gatherTimingPredictons(inputFolder=\"Videos-Segmented\",
                                                             outputFolder=\"all_frames\", 
                                                             outputCSVName=\"Frame Timing Predictions.csv\",
                                                             createFrames=False)"
