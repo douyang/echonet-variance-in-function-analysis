@@ -42,7 +42,14 @@ pip install --user .
 By default, the pipeline assumes that a copy of the data is saved in a folder named ```EchoData/``` in this directory. This path can be changed by setting an absolute path in the file named ```data.cfg``` (an example is given in the file already).
 
 ### Running Code
-In order to fully utilize the evaluation pipeline, it is essential to create the necessary frames from the segmented videos generated from Echonet. To adequately perform such a task, we have a ```mask.py``` script. The script locates all of the videos from the data repository, and it creates the necessary frames from ```VolumeTracings.csv```.
+The pipeline has two main tasks: assessing cardiac function and quantifying variation on left ventricle ejection fraction calculations. Each of these tasks can be run with the scripts below.
+
+#### Predicting Cardiac Timings
+```
+cmd="import echofunctions; echofunctions.timing_predictions_CSV.gatherTimingPredictons(inputFolder=\"Videos-Segmented\", outputFolder="all_frames", outputCSVName="Frame Timing Predictions.csv")"
+python3 -c "${cmd}"
+```
+We offer a solution to finding the appropriate end-systolic and end-diastolic timings from a given segmented echocardiogram video.
 
 #### Capturing and Creating Frames
 ```
