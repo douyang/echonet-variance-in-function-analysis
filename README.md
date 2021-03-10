@@ -10,7 +10,7 @@ We simulated errors and ran calculations on 3,906 echocardiogram videos from Ech
 ## Examples
 We simulated variation in 3,906 apical-4-chamber echocardiogram videos by automatically generating the equivalent of 976,500 left ventricular tracings with varying degrees of individual tracing errors introduced at end systole. The clinical variation showcased are over/under tracing of the left ventricle, malrotations of main longitudinal axis, foreshortening at the level of the apex and mitral valve. 
 
-| Normal Tracing | Over/Under<br/> Tracing | Angle Rotations | Main Axis<br/> Foreshortening |
+| Normal Tracing<br/> /Segmentation | Over/Under<br/> Tracing | Angle Rotations | Main Axis<br/> Foreshortening |
 |---------------------------------| ----------------------------------   | -------------------------------- | ------------------------------ |
 | ![](docs/media/Normal.png) | ![](docs/media/Overtrace.png) | ![](docs/media/PositiveAngle.png) | ![](docs/media/Top.png) |
 | ![](docs/media/Normal(2).png) | ![](docs/media/Undertrace.png) | ![](docs/media/NegativeAngle.png) | ![](docs/media/Bottom.png) |
