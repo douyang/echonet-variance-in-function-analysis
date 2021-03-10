@@ -11,16 +11,16 @@ def obtainContourPoints(path):
   #rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
 
   # set lower and upper bounds on blue color
-  # lower = (0,0,100)
-  # upper = (50,50,255)
+  lower = (0,0,100)
+  upper = (50,50,255)
 
   # #Red
   # lower = (0, 0, 220)
   # upper = (100, 100, 255)
 
-  # White
-  lower = (200,200,200)
-  upper = (255,255,255)
+  # # White
+  # lower = (200,200,200)
+  # upper = (255,255,255)
   
   # threshold and invert so hexagon is white on black background
   thresh = cv2.inRange(rgb, lower, upper)
