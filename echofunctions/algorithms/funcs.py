@@ -14,7 +14,7 @@ def obtainContourPoints(path):
   # lower = (0,0,100)
   # upper = (50,50,255)
 
-  #Red
+  # #Red
   # lower = (0, 0, 220)
   # upper = (100, 100, 255)
 
@@ -37,7 +37,6 @@ def obtainContourPoints(path):
           points.append(coord.tolist())
   
   return points
-
 
 # Gets all the eroded contours for certain image
 def obtainErodedContourPoints(path, iterations):

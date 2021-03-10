@@ -10,7 +10,7 @@ We simulated errors and ran calculations on 10,032 echocardiogram images which w
 ## Examples
 We show examples of our different systematic variation of cardiac function assessment. The error opportunities showcased are over/under tracing of the left ventricle, rotations of main longitudinal axis, foreshortened apex and mitral valve annulus level foreshortening. No human tracings for these patients were used.
 
-| Normal Tracing | Over/Under Tracing | Angle Rotations | Main Axis Foreshortening |
+| Normal Tracing | Over/Under<br/> Tracing | Angle Rotations | Main Axis<br/> Foreshortening |
 |---------------------------------| ----------------------------------   | -------------------------------- | ------------------------------ |
 | ![](docs/media/Normal.png) | ![](docs/media/Overtrace.png) | ![](docs/media/PositiveAngle.png) | ![](docs/media/Top.png) |
 |                                              | ![](docs/media/Undertrace.png) | ![](docs/media/NegativeAngle.png) | ![](docs/media/Bottom.png) |

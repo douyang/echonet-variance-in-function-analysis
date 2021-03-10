@@ -59,8 +59,6 @@ def initVars(method="Method of Disks"):
 def createTruthMasks(outputFolderName="Masks_From_VolumeTracing", moreLinesFolderName="Tracings_Masks_with_more_than_21_lines", plainLinesFolderName="Blank_Image_Ground_lines_from_Tracings"):
   trace, fnames, frames, root = initVars()
 
-  print(trace)
-
   for index in fnames:
     for frame_index in [0, -1]:
       video = os.path.join(root, "Videos", index)
