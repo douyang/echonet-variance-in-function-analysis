@@ -1,4 +1,4 @@
-## EchoNet Function Evaluation:<br/>Quantifying Model Variation in Assessing Cardiac Function
+## EchoNet Function Evaluation:<br/>Quantifying Variation in Assessing Cardiac Function
 
 An automated end-to-end pipeline for  
 1) assessing cardiac function
