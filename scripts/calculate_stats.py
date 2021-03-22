@@ -52,9 +52,9 @@ def scatterPlot():
   plt.plot(x, m*x + b)
   print("Line of Best Fit: " + str(str(m) + "x" + " + " + str(b)))
 
-  plt.title("Computerized Volumetric Calculations vs. True Volumes")
-  plt.xlabel("Calculated Volume from Algorithms")
-  plt.ylabel("True Volume")
+  plt.title("Snap Counts")
+  plt.xlabel("Predictions")
+  plt.ylabel("Expert Reports")
   
   plt.show()
 

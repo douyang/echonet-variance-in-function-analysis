@@ -9,7 +9,7 @@ from tqdm import tqdm
 from algorithms import funcs as funcs
 import loader
 
-def generateMasks(segmentedFramesFolder="Masks_From_VolumeTracing", outputMasksPath="algorithm_masks"):  
+def generateMasks(segmentedFramesFolder="control_video_frames", outputMasksPath="algorithm_masks"):  
   """Function to draw masks on segmented videos to visualize volumetric
     calculation and save them as separate frames in an output directory.
   Args:
@@ -32,7 +32,7 @@ def generateMasks(segmentedFramesFolder="Masks_From_VolumeTracing", outputMasksP
     OUTPUT_FRAME_PATH = os.path.join(OUTPUT_PATH_TO_MASKS, i) # (data directory)/frames/(file name)
 
     try:
-      ES_volumes, x1, y1, x2, y2 = funcs.calculateVolumeErosionAndDilation(INPUT_FRAME_PATH, 20, iterations=5, method="Method of Disks")
+      ES_volumes, x1, y1, x2, y2 = funcs.calculateVolumeAngleShift(INPUT_FRAME_PATH, 20, iterations=5, method="Method of Disks")
       image = cv2.imread(INPUT_FRAME_PATH) # read in the image from the specified frame path
       for coord in range(len(x1[0])): # iterate through each coordinate
         if coord is 0: # gets the perpendicular/long line

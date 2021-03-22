@@ -7,20 +7,20 @@ import os
 def obtainContourPoints(path):
   # read image
   img = cv2.imread(path)
-  rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-  #rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+  #rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+  rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
 
   # set lower and upper bounds on blue color
   # lower = (0,0,100)
   # upper = (50,50,255)
 
   # #Red
-  # lower = (0, 0, 220)
-  # upper = (100, 100, 255)
+  lower = (0, 0, 220)
+  upper = (100, 100, 255)
 
   # # White
-  lower = (200,200,200)
-  upper = (255,255,255)
+  # lower = (200,200,200)
+  # upper = (255,255,255)
   
   # threshold and invert so hexagon is white on black background
   thresh = cv2.inRange(rgb, lower, upper)
@@ -42,12 +42,11 @@ def obtainContourPoints(path):
 def obtainErodedContourPoints(path, iterations):
   # read image
   img = cv2.imread(path)
-  rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-  #rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+  #rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+  rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
   
-  # set lower and upper bounds on blue color
-  lower = (200,200,200)
-  upper = (255,255,255)
+  lower = (0, 0, 220)
+  upper = (100, 100, 255)
   
   # threshold and invert so hexagon is white on black background
   thresh = cv2.inRange(rgb, lower, upper)
@@ -72,12 +71,12 @@ def obtainErodedContourPoints(path, iterations):
 def obtainDilatedContourPoints(path, iterations):
   # read image
   img = cv2.imread(path)
-  rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-  #rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
+  #rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+  rgb = cv2.cvtColor(img, cv2.COLOR_RGBA2RGB)
 
   # set lower and upper bounds on blue color
-  lower = (200,200,200)
-  upper = (255,255,255)
+  lower = (0, 0, 220)
+  upper = (100, 100, 255)
   
   # threshold and invert so hexagon is white on black background
   thresh = cv2.inRange(rgb, lower, upper)

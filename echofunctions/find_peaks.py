@@ -45,15 +45,15 @@ def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, m
   volumeDict = {}
   failed_frames = 0
 
-  frameIndices = df[df['FileName']==videoName]['Frame'].values
-  frameIndices = [int(i) for i in frameIndices]
+  # frameIndices = df[df['FileName']==videoName]['Frame'].values
+  # frameIndices = [int(i) for i in frameIndices]
 
-  x1 = df[df['FileName']==videoName]['X1'].values
-  x2 = df[df['FileName']==videoName]['X2'].values
-  y1 = df[df['FileName']==videoName]['Y1'].values
-  y2 = df[df['FileName']==videoName]['Y2'].values
+  # x1 = df[df['FileName']==videoName]['X1'].values
+  # x2 = df[df['FileName']==videoName]['X2'].values
+  # y1 = df[df['FileName']==videoName]['Y1'].values
+  # y2 = df[df['FileName']==videoName]['Y2'].values
 
-  true_ED, true_ES = returnTrueFrames(frameIndices, x1, y1, x2, y2) # returns ED and ES frame values
+  # true_ED, true_ES = returnTrueFrames(frameIndices, x1, y1, x2, y2) # returns ED and ES frame values
 
   inputVideoPath = os.path.join(root, inputFolderName, videoName + ".avi")
   outputPath = os.path.join(root, outputFolderName)
@@ -84,19 +84,20 @@ def calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, m
   
   # Calculate Volumes
   for frame in os.listdir(os.path.join(outputPath, videoName)):
-    try:
-      framePath = os.path.join(outputPath, videoName, frame)
-      volumes, *_ = funcs.calculateVolumeMainAxisTopShift(framePath, 20, pointShifts=1, method="Method of Disks") # 0th shift for regular volume
-      volumeDict[os.path.splitext(frame)[0]] = volumes[0]
+    #try:
+    framePath = os.path.join(outputPath, videoName, frame)
+    volumes, *_ = funcs.calculateVolumeMainAxisTopShift(framePath, 20, pointShifts=1, method="Method of Disks") # 0th shift for regular volume
+    volumeDict[os.path.splitext(frame)[0]] = volumes[0]
     
-    except:
-      failed_frames += 1
+    # except:
+    #   failed_frames += 1
   
-  return volumeDict, true_ES, true_ED
+  print(volumeDict)
+  return volumeDict
 
 def returnPeaks(videoName="0X1BDEEC24D5FC570C", inputFolderName="Videos-Segmented", outputFolderName="find_peaks", makeFrames=True):
 
-  volumeDict, true_ES, true_ED = calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, makeFrames)
+  volumeDict = calculateVolumesForEachFrame(videoName, inputFolderName, outputFolderName, makeFrames)
 
   if len(volumeDict) == 0:
     ES_index, ED_index = 0, 0
@@ -107,5 +108,5 @@ def returnPeaks(videoName="0X1BDEEC24D5FC570C", inputFolderName="Videos-Segmente
     ED_index = k[v.index(max(v))]
     ES_index = k[v.index(min(v))]
 
-  return [int(ES_index), int(ED_index)], [true_ES, true_ED]
+  return int(ES_index), int(ED_index)
   

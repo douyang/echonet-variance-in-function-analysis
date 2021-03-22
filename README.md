@@ -12,8 +12,8 @@ We simulated variation in 3,906 apical-4-chamber echocardiogram videos by automa
 
 | Normal Tracing | Over/Under<br/> Tracing | Angle Rotations | Main Axis<br/> Foreshortening |
 |---------------------------------| ----------------------------------   | -------------------------------- | ------------------------------ |
-| ![](docs/media/Normal.png) | ![](docs/media/Overtrace.png) | ![](docs/media/PositiveAngle.png) | ![](docs/media/Top.png) |
-| ![](docs/media/Normal(2).png) | ![](docs/media/Undertrace.png) | ![](docs/media/NegativeAngle.png) | ![](docs/media/Bottom.png) |
+| ![](docs/media/Normal(1).png) | ![](docs/media/Overtrace(1).png) | ![](docs/media/PositiveAngle(1).png) | ![](docs/media/Top(1).png) |
+|  | ![](docs/media/Undertrace(1).png) | ![](docs/media/NegativeAngle(1).png) | ![](docs/media/Bottom(1).png) |
 
 
 ## Installation
